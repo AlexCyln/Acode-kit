@@ -78,7 +78,6 @@ Use Acode-kit to continue the current repository and review PRD, TRACEABILITY_MA
 │   ├── install.mjs
 │   └── install.sh
 ├── README.md
-├── PUBLISH_STEPS.md
 ├── package.json
 └── LICENSE
 ```
