@@ -111,6 +111,7 @@ install_agent() {
   esac
 }
 
+REQUESTED_AGENT="$AGENT"
 if [[ "$AGENT" == "auto" ]]; then
   AGENT="$(detect_agent)"
 fi
@@ -123,6 +124,21 @@ fi
 if [[ ! "$SCOPE" =~ ^(user|project)$ ]]; then
   echo "Unsupported SCOPE=$SCOPE. Use user or project." >&2
   exit 1
+fi
+
+if [[ "$AGENT" == "both" ]]; then
+  RESOLVED_DEST_INFO="codex=$(resolve_dest_root codex) | claude=$(resolve_dest_root claude)"
+else
+  RESOLVED_DEST_INFO="$(resolve_dest_root "$AGENT")"
+fi
+
+echo "Acode-kit installer"
+echo "- requested agent: $REQUESTED_AGENT"
+echo "- resolved agent: $AGENT"
+echo "- scope: $SCOPE"
+echo "- destination: $RESOLVED_DEST_INFO"
+if [[ "$REQUESTED_AGENT" == "auto" ]]; then
+  echo "- note: variables like AGENT=local must be passed to bash, not only to curl"
 fi
 
 TMP_DIR="$(mktemp -d)"
