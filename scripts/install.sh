@@ -4,22 +4,138 @@ set -euo pipefail
 REPO="${REPO:-AlexCyln/Acode-kit}"
 REF="${REF:-main}"
 SKILL_PATH="${SKILL_PATH:-Acode-kit}"
-CODEX_HOME_DIR="${CODEX_HOME:-$HOME/.codex}"
-DEST_ROOT="${DEST_ROOT:-$CODEX_HOME_DIR/skills}"
-SKILL_NAME="${SKILL_NAME:-$(basename "$SKILL_PATH")}"
+AGENT="${AGENT:-auto}"
+SCOPE="${SCOPE:-user}"
+CODEX_ROOT_DEFAULT="${CODEX_HOME:-$HOME/.codex}/skills"
+CLAUDE_ROOT_DEFAULT="${CLAUDE_HOME:-$HOME/.claude}"
+LOCAL_ROOT_DEFAULT="${PWD}/agent-skills"
+DEST_ROOT="${DEST_ROOT:-}"
+
+exists() {
+  [[ -e "$1" ]]
+}
+
+detect_agent() {
+  local has_codex="false"
+  local has_claude="false"
+
+  if exists "${CODEX_HOME:-$HOME/.codex}" || exists "${CODEX_HOME:-$HOME/.codex}/skills"; then
+    has_codex="true"
+  fi
+  if exists "${CLAUDE_HOME:-$HOME/.claude}" || exists "${CLAUDE_HOME:-$HOME/.claude}/agents"; then
+    has_claude="true"
+  fi
+
+  if [[ "$has_codex" == "true" && "$has_claude" == "true" ]]; then
+    echo "both"
+  elif [[ "$has_codex" == "true" ]]; then
+    echo "codex"
+  elif [[ "$has_claude" == "true" ]]; then
+    echo "claude"
+  else
+    echo "local"
+  fi
+}
+
+resolve_dest_root() {
+  local agent="$1"
+  if [[ -n "$DEST_ROOT" ]]; then
+    echo "$DEST_ROOT"
+    return
+  fi
+
+  case "$agent" in
+    codex) echo "$CODEX_ROOT_DEFAULT" ;;
+    claude)
+      if [[ "$SCOPE" == "project" ]]; then
+        echo "${PWD}/.claude"
+      else
+        echo "$CLAUDE_ROOT_DEFAULT"
+      fi
+      ;;
+    local) echo "$LOCAL_ROOT_DEFAULT" ;;
+    *)
+      echo "Unsupported agent: $agent" >&2
+      exit 1
+      ;;
+  esac
+}
+
+copy_claude_adapter() {
+  local source_dir="$1"
+  local dest_root="$2"
+  local adapter_file="$source_dir/integrations/claude/acode-kit.md"
+
+  if [[ ! -f "$adapter_file" ]]; then
+    echo "Claude adapter not found at $adapter_file" >&2
+    exit 1
+  fi
+
+  mkdir -p "$dest_root/agents"
+  cp "$adapter_file" "$dest_root/agents/acode-kit.md"
+}
+
+install_agent() {
+  local source_dir="$1"
+  local agent="$2"
+  local dest_root
+  dest_root="$(resolve_dest_root "$agent")"
+  local skill_name
+  skill_name="$(basename "$source_dir")"
+  local target_dir="$dest_root/$skill_name"
+
+  mkdir -p "$dest_root"
+  rm -rf "$target_dir"
+  cp -R "$source_dir" "$target_dir"
+
+  case "$agent" in
+    codex)
+      echo "Installed Codex skill to $target_dir"
+      ;;
+    claude)
+      copy_claude_adapter "$source_dir" "$dest_root"
+      echo "Installed Claude bundle to $target_dir"
+      echo "Installed Claude subagent to $dest_root/agents/acode-kit.md"
+      ;;
+    local)
+      mkdir -p "$dest_root/claude"
+      if [[ -f "$source_dir/integrations/claude/acode-kit.md" ]]; then
+        cp "$source_dir/integrations/claude/acode-kit.md" "$dest_root/claude/acode-kit.md"
+        echo "Saved portable Claude adapter to $dest_root/claude/acode-kit.md"
+      fi
+      echo "Installed portable bundle to $target_dir"
+      echo "Manual next step:"
+      echo "- Codex: copy the Acode-kit folder into ~/.codex/skills/"
+      echo "- Claude Code: copy the Acode-kit folder into ~/.claude/ and copy claude/acode-kit.md into ~/.claude/agents/"
+      ;;
+  esac
+}
+
+if [[ "$AGENT" == "auto" ]]; then
+  AGENT="$(detect_agent)"
+fi
+
+if [[ ! "$AGENT" =~ ^(codex|claude|local|both)$ ]]; then
+  echo "Unsupported AGENT=$AGENT. Use codex, claude, local, both, or auto." >&2
+  exit 1
+fi
+
+if [[ ! "$SCOPE" =~ ^(user|project)$ ]]; then
+  echo "Unsupported SCOPE=$SCOPE. Use user or project." >&2
+  exit 1
+fi
 
 TMP_DIR="$(mktemp -d)"
 ARCHIVE_URL="https://codeload.github.com/${REPO}/tar.gz/refs/heads/${REF}"
 ARCHIVE_FILE="$TMP_DIR/archive.tar.gz"
 EXTRACT_DIR="$TMP_DIR/extract"
-TARGET_DIR="$DEST_ROOT/$SKILL_NAME"
 
 cleanup() {
   rm -rf "$TMP_DIR"
 }
 trap cleanup EXIT
 
-mkdir -p "$DEST_ROOT" "$EXTRACT_DIR"
+mkdir -p "$EXTRACT_DIR"
 
 echo "Downloading $ARCHIVE_URL"
 curl -fsSL "$ARCHIVE_URL" -o "$ARCHIVE_FILE"
@@ -33,8 +149,11 @@ if [[ ! -f "$SOURCE_DIR/SKILL.md" ]]; then
   exit 1
 fi
 
-rm -rf "$TARGET_DIR"
-cp -R "$SOURCE_DIR" "$TARGET_DIR"
+if [[ "$AGENT" == "both" ]]; then
+  install_agent "$SOURCE_DIR" codex
+  install_agent "$SOURCE_DIR" claude
+else
+  install_agent "$SOURCE_DIR" "$AGENT"
+fi
 
-echo "Installed to $TARGET_DIR"
-echo "Restart Codex to pick up the new skill."
+echo "Restart your target AI agent after installation."

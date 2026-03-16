@@ -1,175 +1,148 @@
 # Publish Steps
 
-这份文档按“第一次发 GitHub”的视角来写，尽量把网页上要点哪里、终端里要执行什么、发布后怎么验证都写清楚。
+这份文档按“成熟 skill 插件发布”的标准来写，不只覆盖 GitHub 上传，还覆盖多 Agent 分发、无 Agent 用户、手动安装、验证和常见问题。
 
-## 1. 发布前先完成本地检查
+## 1. 发布前的目标确认
 
-在仓库根目录执行：
+当前仓库目标：
+
+- GitHub 仓库：`AlexCyln/Acode-kit`
+- GitHub HTTPS：`https://github.com/AlexCyln/Acode-kit.git`
+- 当前支持：`Codex`、`Claude Code`、`local portable install`
+
+发布前先确认一件事：
+
+- 你是只想发布 GitHub 版本，还是还要继续发布 npm 版本。
+
+如果目前只需要 GitHub，npm 可以先不做。
+
+## 2. 作为成熟插件要覆盖的安装场景
+
+发布前要保证下面三类用户都能用：
+
+1. 已安装 Codex 的用户
+2. 已安装 Claude Code 的用户
+3. 还没安装任何 Agent，但想先把插件下载到本地项目目录的用户
+
+本仓库现在已经分别支持：
+
+- Codex 安装
+- Claude 安装
+- 本地目录便携安装
+- 后续手动接入 Agent
+
+## 3. 本地验证
+
+### 3.1 验证便携安装
 
 ```bash
-cd /Users/alex/Documents/AlexFiles/structcode_skill
-node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --dest-dir /tmp/structcode-skills-test
+cd /Users/alex/Documents/AlexFiles/Acode-kit_skill
+node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir /tmp/agent-skills-test
 ```
 
 预期结果：
 
 ```text
-/tmp/structcode-skills-test/Acode-kit
+/tmp/agent-skills-test/Acode-kit
+/tmp/agent-skills-test/claude/acode-kit.md
 ```
 
-如果这个目录出现了，说明本地安装入口是通的。
-
-## 2. 发布前需要替换的占位符
-
-这次已经确定好的 GitHub 仓库信息是：
-
-- GitHub 仓库：`AlexCyln/Acode-kit`
-- HTTPS 地址：`https://github.com/AlexCyln/Acode-kit.git`
-
-如果后面你不再改仓库名，那么下面这些位置已经按当前信息更新好了：
-
-- `README.md`
-- `scripts/install.sh`
-- `scripts/install.mjs`
-
-`package.json` 里的 npm 包名仍然保留为示例形式，因为你目前没有提供 npm scope。以后如果你要发 npm，再把它改成你自己的包名。
-
-## 3. 如果你还没有 GitHub 账号
-
-1. 打开 `https://github.com`
-2. 点击右上角 `Sign up`
-3. 按页面要求填写邮箱、密码、用户名
-4. 完成邮箱验证
-5. 登录 GitHub
-
-建议提前确认两件事：
-
-- 你的 GitHub 用户名是什么，后面会用到
-- 你的邮箱已经验证成功，否则某些 Git 操作会不顺
-
-## 4. 在 GitHub 网页上新建仓库
-
-登录后按下面操作：
-
-1. 点击右上角头像左边的 `+`
-2. 选择 `New repository`
-3. `Repository name` 填你想要的仓库名，例如 `acode-kit`
-4. `Description` 可填：`Codex skill package for Acode-kit`
-5. 选择 `Public`
-6. 不要勾选 `Add a README file`
-7. 不要勾选 `.gitignore`
-8. 不要勾选 `Choose a license`
-9. 点击 `Create repository`
-
-为什么不要勾选这些初始化选项：
-
-- 因为你本地已经有 `README.md` 和 `LICENSE`
-- GitHub 如果先生成一套初始文件，第一次 push 容易多一次冲突处理
-
-创建成功后，GitHub 会展示一个空仓库页面，并给你两种推送方式：
-
-- HTTPS
-- SSH
-
-如果你从没配过 SSH，先用 HTTPS，最省事。
-
-## 5. 配置本地 Git 基本信息
-
-第一次用 Git 提交前，先执行一次：
+### 3.2 验证 Codex 安装
 
 ```bash
-git config --global user.name "你的 GitHub 用户名"
-git config --global user.email "你的 GitHub 注册邮箱"
+node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent codex --dest-dir /tmp/codex-skills
 ```
 
-检查是否生效：
+预期结果：
 
-```bash
-git config --global --get user.name
-git config --global --get user.email
+```text
+/tmp/codex-skills/Acode-kit
 ```
 
-## 6. 在本地初始化仓库并提交
-
-在项目目录执行：
+### 3.3 验证 Claude 安装
 
 ```bash
-cd /Users/alex/Documents/AlexFiles/structcode_skill
+node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent claude --dest-dir /tmp/claude-home
+```
+
+预期结果：
+
+```text
+/tmp/claude-home/Acode-kit
+/tmp/claude-home/agents/acode-kit.md
+```
+
+## 4. 初始化 Git 并提交
+
+如果本地还没建仓库：
+
+```bash
+cd /Users/alex/Documents/AlexFiles/Acode-kit_skill
 git init
-git add .
-git commit -m "feat: rename skill to Acode-kit and prepare release docs"
 ```
 
-如果提交时报错：
+加入文件并提交：
 
-- 提示没有 `user.name` 或 `user.email`：回到上一步设置
-- 提示有换行或权限警告：通常不影响，先看是否真的阻止提交
+```bash
+git add .
+git commit -m "feat: publish Acode-kit skill package"
+```
 
-## 7. 把本地仓库连接到 GitHub
+## 5. 连接 GitHub 仓库
 
-本项目当前使用的 GitHub 地址就是 `https://github.com/AlexCyln/Acode-kit.git`。
-
-### 方式 A：HTTPS，推荐给第一次发布的人
+使用你现在的 HTTPS 远程地址：
 
 ```bash
 git remote add origin https://github.com/AlexCyln/Acode-kit.git
+```
+
+如果远程已存在但地址不对：
+
+```bash
+git remote set-url origin https://github.com/AlexCyln/Acode-kit.git
+```
+
+检查：
+
+```bash
+git remote -v
+```
+
+## 6. 推送到 GitHub
+
+```bash
 git branch -M main
 git push -u origin main
 ```
 
-如果 GitHub 要你登录：
+如果提示登录：
 
-- 浏览器弹窗登录就按提示走
-- 或者终端要求输入账号密码时，GitHub 现在通常不再接受普通密码，需要 Personal Access Token
+- 直接按浏览器登录流程完成
+- 如果终端要求密码，通常需要 GitHub Personal Access Token，而不是普通密码
 
-### 方式 B：SSH，适合后续长期使用
+## 7. 在 GitHub 网页检查内容
 
-如果你已经配置过 SSH key，可以用：
+推送完成后，打开：
 
-```bash
-git remote add origin git@github.com:AlexCyln/Acode-kit.git
-git branch -M main
-git push -u origin main
-```
+- `https://github.com/AlexCyln/Acode-kit`
 
-如果你没配过 SSH，就不要先折腾这个，直接走 HTTPS。
+确认你能看到：
 
-## 8. push 成功后到 GitHub 网页检查
+- `Acode-kit/`
+- `scripts/`
+- `README.md`
+- `PUBLISH_STEPS.md`
+- `package.json`
 
-推送完成后：
+再点开 `README.md`，检查以下几点：
 
-1. 刷新你的 GitHub 仓库页面
-2. 确认这些文件都能看到：
-   - `Acode-kit/`
-   - `README.md`
-   - `PUBLISH_STEPS.md`
-   - `scripts/`
-   - `package.json`
-3. 点开 `README.md`，确认中英文内容显示正常
+- 中英文都正常显示
+- 安装方式包含 Codex / Claude / local
+- 示例命令中的仓库地址都已正确
 
-如果 GitHub 页面没有更新，先确认你 push 的是不是 `main` 分支。
+## 8. 验证 GitHub 分发链路
 
-## 9. 把 README 里的占位符改成真实仓库地址
-
-发布前或发布后，你应该把 README 里的：
-
-```text
-AlexCyln/Acode-kit
-```
-
-替换完成后再提交一次：
-
-```bash
-git add README.md
-git commit -m "docs: replace repository placeholders"
-git push
-```
-
-这一步本仓库已经完成。
-
-## 10. 验证 GitHub 安装方式
-
-### 方式 1：Codex 的 skill-installer
+### 8.1 验证 Codex 官方 skill-installer
 
 ```bash
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
@@ -177,123 +150,94 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
   --path Acode-kit
 ```
 
-### 方式 2：bash 一键安装
+### 8.2 验证 bash 自动安装
 
 ```bash
-REPO=AlexCyln/Acode-kit REF=main SKILL_PATH=Acode-kit \
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
-安装后检查：
+### 8.3 验证安装到 Claude
 
 ```bash
-ls ~/.codex/skills/Acode-kit
+AGENT=claude SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
-如果能看到 `SKILL.md`、`assets/`、`references/`，说明安装成功。
+### 8.4 验证本地便携安装
 
-最后重启 Codex，让它重新加载 skill。
+```bash
+AGENT=local DEST_ROOT="$(pwd)/agent-skills" curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+```
 
-## 11. 可选：发布到 npm，支持 `npx`
+## 9. 给用户的安装说明
 
-如果你只想放到 GitHub，这一步可以先不做。
+### 9.1 用户装了 Codex
 
-如果你想让别人可以直接：
+```bash
+python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo AlexCyln/Acode-kit \
+  --path Acode-kit
+```
+
+### 9.2 用户装了 Claude Code
+
+```bash
+AGENT=claude SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+```
+
+### 9.3 用户暂时没装任何 Agent
+
+```bash
+AGENT=local DEST_ROOT="$(pwd)/agent-skills" curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+```
+
+后续手动安装：
+
+- Codex：复制 `agent-skills/Acode-kit` 到 `~/.codex/skills/Acode-kit`
+- Claude：
+  - 复制 `agent-skills/Acode-kit` 到 `~/.claude/Acode-kit`
+  - 复制 `agent-skills/claude/acode-kit.md` 到 `~/.claude/agents/acode-kit.md`
+
+## 10. 可选：发布 npm 版本
+
+如果后续你想支持：
 
 ```bash
 npx @your-npm-scope/structcode-skill-installer
 ```
 
-那就继续下面的步骤。
+那还需要：
 
-### 11.1 准备 npm 账号
-
-1. 打开 `https://www.npmjs.com/`
-2. 注册账号
-3. 验证邮箱
-4. 记住你的 npm 用户名
-
-### 11.2 修改 `package.json`
-
-你至少要确认：
-
-- `name` 是 npm 上没人占用的包名
-- 如果是 scoped 包名，例如 `@AlexCyln/acode-kit-installer`，这个 scope 必须属于你
-
-### 11.3 登录并发布
+1. 去 `npmjs.com` 注册账号
+2. 把 `package.json` 的 `name` 改成你自己的有效包名
+3. 执行：
 
 ```bash
 npm login
 npm publish --access public
 ```
 
-如果是 scoped 包，公开发布通常要加 `--access public`。
+## 11. 常见问题
 
-## 12. 验证 `npx` 方式
+### 1. 用户目录没有权限怎么办
 
-```bash
-npx @your-npm-scope/structcode-skill-installer \
-  --repo AlexCyln/Acode-kit \
-  --ref main \
-  --skill-path Acode-kit
-```
+让用户使用 `--dest-dir` 或 `DEST_ROOT` 指定到可写目录。
 
-## 13. 最终给用户的安装说明
+### 2. 用户没有装 Codex 或 Claude 怎么办
 
-你可以把下面三种方式给用户：
+直接走 `AGENT=local`，先安装到当前项目目录。
 
-### GitHub skill-installer
+### 3. 已有旧版本怎么办
 
-```bash
-python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
-  --repo AlexCyln/Acode-kit \
-  --path Acode-kit
-```
+当前安装器会覆盖同名目标目录，因此发布新版本前要确认目录名稳定且一致。
 
-### bash 一键安装
+### 4. 安装后为什么看不到
+
+多数 Agent 需要重启或重新加载，安装器也会提示这一点。
+
+### 5. 网络拉取失败怎么办
+
+改用本地源码安装：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir "$(pwd)/agent-skills"
 ```
-
-### npm / npx
-
-```bash
-npx @your-npm-scope/structcode-skill-installer
-```
-
-## 14. 常见问题
-
-### 1. GitHub push 时要求登录怎么办
-
-优先用 HTTPS，并按浏览器弹窗登录。如果终端要求密码但失败，说明需要 GitHub token，不是普通密码。
-
-### 2. GitHub 上仓库是空的怎么办
-
-通常是没有成功 `git push`，或者 push 到了别的分支。执行：
-
-```bash
-git branch
-git remote -v
-git status
-```
-
-确认当前分支是 `main`，远程地址正确，然后重新 push。
-
-### 3. 安装后 Codex 里没出现 skill
-
-先检查：
-
-```bash
-ls ~/.codex/skills/Acode-kit
-```
-
-然后重启 Codex。
-
-### 4. 什么时候适合再做一次提交
-
-每做完一类动作就提交一次最稳妥，例如：
-
-- 改完命名和 README 提交一次
-- 换掉仓库占位符再提交一次
-- npm 发布前再提交一次

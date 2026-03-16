@@ -2,11 +2,11 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const DEFAULT_REPO = "AlexCyln/Acode-kit";
+const DEFAULT_SKILL_PATH = "Acode-kit";
+const DEFAULT_LOCAL_ROOT = path.join(process.cwd(), "agent-skills");
 
 function parseArgs(argv) {
   const args = {};
@@ -25,67 +25,159 @@ function parseArgs(argv) {
   return args;
 }
 
+function exists(targetPath) {
+  return fs.existsSync(targetPath);
+}
+
+function ensureSkill(sourceDir) {
+  const skillFile = path.join(sourceDir, "SKILL.md");
+  if (!exists(skillFile)) {
+    throw new Error(`SKILL.md not found in ${sourceDir}`);
+  }
+}
+
 function copyDir(sourceDir, destDir) {
   fs.rmSync(destDir, { recursive: true, force: true });
   fs.mkdirSync(path.dirname(destDir), { recursive: true });
   fs.cpSync(sourceDir, destDir, { recursive: true });
 }
 
-function installFromSourceDir(sourceDir, destRoot) {
-  const skillName = path.basename(sourceDir);
-  const skillFile = path.join(sourceDir, "SKILL.md");
-  if (!fs.existsSync(skillFile)) {
-    throw new Error(`SKILL.md not found in ${sourceDir}`);
-  }
-  const targetDir = path.join(destRoot, skillName);
-  copyDir(sourceDir, targetDir);
-  return targetDir;
+function copyFile(sourceFile, destFile) {
+  fs.mkdirSync(path.dirname(destFile), { recursive: true });
+  fs.copyFileSync(sourceFile, destFile);
 }
 
-function installFromGitHub({ repo, ref, skillPath, destRoot }) {
-  if (!repo) {
-    throw new Error("Missing --repo owner/repo");
+function detectAgentMode() {
+  const codexBase = process.env.CODEX_HOME || path.join(os.homedir(), ".codex");
+  const claudeBase = process.env.CLAUDE_HOME || path.join(os.homedir(), ".claude");
+  const hasCodex = exists(codexBase) || exists(path.join(codexBase, "skills"));
+  const hasClaude = exists(claudeBase) || exists(path.join(claudeBase, "agents"));
+
+  if (hasCodex && hasClaude) return "both";
+  if (hasCodex) return "codex";
+  if (hasClaude) return "claude";
+  return "local";
+}
+
+function createJobs(args) {
+  const requestedAgent = args.agent || "auto";
+  const scope = args.scope || "user";
+  const resolvedAgent = requestedAgent === "auto" ? detectAgentMode() : requestedAgent;
+
+  if (!["auto", "codex", "claude", "local", "both"].includes(requestedAgent)) {
+    throw new Error(`Unsupported --agent value: ${requestedAgent}`);
   }
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "structcode-skill-"));
+  if (!["user", "project"].includes(scope)) {
+    throw new Error(`Unsupported --scope value: ${scope}`);
+  }
+
+  const codexRoot = path.resolve(args["dest-dir"] || path.join(process.env.CODEX_HOME || path.join(os.homedir(), ".codex"), "skills"));
+  const claudeRoot = path.resolve(args["dest-dir"] || path.join(scope === "project" ? process.cwd() : (process.env.CLAUDE_HOME || path.join(os.homedir(), ".claude"))));
+  const localRoot = path.resolve(args["dest-dir"] || DEFAULT_LOCAL_ROOT);
+
+  if (resolvedAgent === "both") {
+    return [
+      { agent: "codex", destRoot: codexRoot },
+      { agent: "claude", destRoot: claudeRoot }
+    ];
+  }
+  if (resolvedAgent === "codex") return [{ agent: "codex", destRoot: codexRoot }];
+  if (resolvedAgent === "claude") return [{ agent: "claude", destRoot: claudeRoot }];
+  return [{ agent: "local", destRoot: localRoot }];
+}
+
+function prepareSource(args) {
+  if (args["source-dir"]) {
+    return {
+      sourceDir: path.resolve(args["source-dir"]),
+      cleanup: null
+    };
+  }
+
+  const repo = args.repo || DEFAULT_REPO;
+  const ref = args.ref || "main";
+  const skillPath = args["skill-path"] || DEFAULT_SKILL_PATH;
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "acode-kit-"));
   const archiveFile = path.join(tmpDir, "archive.tar.gz");
   const extractDir = path.join(tmpDir, "extract");
   fs.mkdirSync(extractDir, { recursive: true });
 
-  try {
-    const archiveUrl = `https://codeload.github.com/${repo}/tar.gz/refs/heads/${ref}`;
-    execFileSync("curl", ["-fsSL", archiveUrl, "-o", archiveFile], { stdio: "inherit" });
-    execFileSync("tar", ["-xzf", archiveFile, "-C", extractDir], { stdio: "inherit" });
+  const archiveUrl = `https://codeload.github.com/${repo}/tar.gz/refs/heads/${ref}`;
+  execFileSync("curl", ["-fsSL", archiveUrl, "-o", archiveFile], { stdio: "inherit" });
+  execFileSync("tar", ["-xzf", archiveFile, "-C", extractDir], { stdio: "inherit" });
 
-    const [repoDirName] = fs.readdirSync(extractDir);
-    const sourceDir = path.join(extractDir, repoDirName, skillPath);
-    return installFromSourceDir(sourceDir, destRoot);
-  } finally {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+  const [repoDirName] = fs.readdirSync(extractDir);
+  return {
+    sourceDir: path.join(extractDir, repoDirName, skillPath),
+    cleanup: () => fs.rmSync(tmpDir, { recursive: true, force: true })
+  };
+}
+
+function installCodex(sourceDir, destRoot) {
+  ensureSkill(sourceDir);
+  const bundleDir = path.join(destRoot, path.basename(sourceDir));
+  copyDir(sourceDir, bundleDir);
+  return [`Installed Codex skill to ${bundleDir}`];
+}
+
+function installClaude(sourceDir, destRoot) {
+  ensureSkill(sourceDir);
+  const bundleDir = path.join(destRoot, path.basename(sourceDir));
+  const adapterTemplate = path.join(sourceDir, "integrations", "claude", "acode-kit.md");
+  const agentFile = path.join(destRoot, "agents", "acode-kit.md");
+
+  if (!exists(adapterTemplate)) {
+    throw new Error(`Claude adapter not found in ${adapterTemplate}`);
   }
+
+  copyDir(sourceDir, bundleDir);
+  copyFile(adapterTemplate, agentFile);
+
+  return [
+    `Installed Claude bundle to ${bundleDir}`,
+    `Installed Claude subagent to ${agentFile}`
+  ];
+}
+
+function installLocal(sourceDir, destRoot) {
+  ensureSkill(sourceDir);
+  const bundleDir = path.join(destRoot, path.basename(sourceDir));
+  const adapterTemplate = path.join(sourceDir, "integrations", "claude", "acode-kit.md");
+  const portableClaudeFile = path.join(destRoot, "claude", "acode-kit.md");
+
+  copyDir(sourceDir, bundleDir);
+  const lines = [`Installed portable bundle to ${bundleDir}`];
+
+  if (exists(adapterTemplate)) {
+    copyFile(adapterTemplate, portableClaudeFile);
+    lines.push(`Saved portable Claude adapter to ${portableClaudeFile}`);
+  }
+
+  lines.push("Manual next step:");
+  lines.push("- Codex: copy the Acode-kit folder into ~/.codex/skills/");
+  lines.push("- Claude Code: copy the Acode-kit folder into ~/.claude/ and copy claude/acode-kit.md into ~/.claude/agents/");
+  return lines;
 }
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
-  const destRoot = args["dest-dir"] || path.join(process.env.CODEX_HOME || path.join(os.homedir(), ".codex"), "skills");
+  const jobs = createJobs(args);
+  const prepared = prepareSource(args);
 
-  let targetDir;
-
-  if (args["source-dir"]) {
-    targetDir = installFromSourceDir(path.resolve(args["source-dir"]), path.resolve(destRoot));
-  } else {
-    const repo = args.repo || "AlexCyln/Acode-kit";
-    const ref = args.ref || "main";
-    const skillPath = args["skill-path"] || "Acode-kit";
-    targetDir = installFromGitHub({
-      repo,
-      ref,
-      skillPath,
-      destRoot: path.resolve(destRoot)
-    });
+  try {
+    for (const job of jobs) {
+      const lines = job.agent === "codex"
+        ? installCodex(prepared.sourceDir, job.destRoot)
+        : job.agent === "claude"
+          ? installClaude(prepared.sourceDir, job.destRoot)
+          : installLocal(prepared.sourceDir, job.destRoot);
+      for (const line of lines) console.log(line);
+    }
+  } finally {
+    if (prepared.cleanup) prepared.cleanup();
   }
 
-  console.log(`Installed to ${targetDir}`);
-  console.log("Restart Codex to pick up the new skill.");
+  console.log("Restart your target AI agent after installation.");
 }
 
 main();

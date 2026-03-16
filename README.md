@@ -6,42 +6,62 @@
 
 ### 项目简介
 
-`Acode-kit` 是一个面向 Codex 的项目启动与推进 skill，适合个人开发者或小团队在 solo + AI 的协作模式下，从一个想法快速进入规范化执行。它把“需求、文档、实现、测试、交付”串成一条固定工作流，避免一上来就无边界写代码。
+`Acode-kit` 是一个面向 AI 编码代理的成熟项目交付插件，当前支持 `Codex`、`Claude Code`，并兼容“先下载到本地项目目录、后续再手动安装到任意 Agent”的使用方式。它不是单纯的提示词，而是一套从需求、文档、设计、实现、测试到上线的结构化工作流。
 
 ### 实现功能
 
-- 用统一 workflow 启动新项目，或接管继续推进中的项目。
-- 自动要求并维护项目级文档，如 `PRD`、`TRACEABILITY_MATRIX`、`SESSION_HANDOFF`、`DECISION_LOG`。
-- 按阶段推进：需求结构化、页面设计、数据/API 设计、脚手架初始化、小闭环实现、测试、部署。
-- 绑定一套全局工程规范，控制技术栈、范围、代码质量和交付节奏。
-- 支持把每次任务沉淀回文档，保证上下文可持续。
+- 启动新项目，或接管并继续推进现有项目。
+- 自动建立并维护项目级文档，如 `PRD`、`TRACEABILITY_MATRIX`、`SESSION_HANDOFF`、`DECISION_LOG`。
+- 按阶段驱动项目：需求结构化、UI/页面设计、数据与 API 设计、脚手架初始化、小闭环实现、测试、部署上线。
+- 绑定全局工程规范，控制技术栈、范围、质量、评审与交付节奏。
+- 适配多 Agent 分发：Codex、Claude Code、以及本地目录离线安装包。
 
 ### 特色亮点
 
-- 不是“只会生成代码”的 skill，而是“先定边界，再做实现”的项目执行器。
-- 内置大量工程规范和项目模板，能把模糊想法收敛成可执行项目。
-- 强调 traceability，需求、实现、测试、上线记录可以互相对齐。
-- 强调小步快跑和持续 handoff，适合长期连续开发，不容易失控。
-- 打包后可直接通过 GitHub、bash 一键脚本、npm `npx` 分发。
+- 强调“先定边界，再做实现”，避免 AI 无边界写代码。
+- 内置模板和规范，不要求用户每次重新描述完整流程。
+- 要求需求、实现、测试、上线记录可追踪、可回溯、可 handoff。
+- 支持自动安装和手动安装两条路径，适合不同用户环境。
+- 在未安装 Codex 或 Claude 时，也能先安装到当前打开的文件夹中，之后再人工接入目标 Agent。
+
+### 支持矩阵
+
+| 目标 | 安装结果 |
+| --- | --- |
+| `Codex` | 安装到 `~/.codex/skills/Acode-kit` |
+| `Claude Code` | 安装 bundle 到 `~/.claude/Acode-kit`，并安装 subagent 到 `~/.claude/agents/acode-kit.md` |
+| `本地目录 / 未安装 Agent` | 安装到当前目录下的 `./agent-skills/Acode-kit`，并附带 Claude 适配文件 |
+
+### 安装模式
+
+新安装器支持以下模式：
+
+- `--agent auto`：自动检测本机已有 Agent。若同时存在 Codex 和 Claude，则同时安装；若都不存在，则安装到当前目录下的 `agent-skills/`。
+- `--agent codex`：只安装到 Codex。
+- `--agent claude`：只安装到 Claude。
+- `--agent local`：安装到当前目录，作为便携包。
+- `--agent both`：同时安装到 Codex 和 Claude。
+- `--scope user|project`：针对 Claude，支持用户级安装和项目级安装。`project` 会安装到当前项目的 `.claude/` 目录。
+- `--dest-dir PATH`：强制指定安装目标根目录。
 
 ### 使用方法
 
-当你希望 Codex：
+当你希望 Agent：
 
-- 从一个项目点子开始搭建完整项目框架；
-- 在已有项目中继续工作，并保持文档、需求、实现同步；
-- 用固定流程推进需求、设计、开发、测试、上线；
+- 从一个项目点子开始搭建结构化项目；
+- 在已有项目中继续推进，并保持文档、需求、代码同步；
+- 用固定流程完成规划、实现、测试和发布；
 
 就可以调用 `Acode-kit`。
 
-典型触发方式：
+示例：
 
 ```text
 使用 Acode-kit skill，帮我从 0 开始规划并启动一个 SaaS 项目。
 ```
 
 ```text
-使用 Acode-kit skill，继续推进当前项目，并先检查 PRD、TRACEABILITY_MATRIX、SESSION_HANDOFF。
+Use Acode-kit to continue the current repository and review PRD, TRACEABILITY_MATRIX, and SESSION_HANDOFF first.
 ```
 
 ### 仓库结构
@@ -51,6 +71,8 @@
 ├── Acode-kit/
 │   ├── SKILL.md
 │   ├── assets/
+│   ├── integrations/
+│   │   └── claude/acode-kit.md
 │   └── references/
 ├── scripts/
 │   ├── install.mjs
@@ -63,7 +85,7 @@
 
 ### 安装方式
 
-#### 1. 用 Codex 内置 skill-installer 从 GitHub 安装
+#### 1. Codex 内置 skill-installer
 
 ```bash
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
@@ -71,114 +93,152 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
   --path Acode-kit
 ```
 
-#### 2. 用 bash 一键安装
+#### 2. bash 一键安装
+
+自动检测已有 Agent，没有检测到时安装到当前目录的 `agent-skills/`：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
-如需显式传参：
+显式安装到 Codex：
 
 ```bash
-REPO=AlexCyln/Acode-kit REF=main SKILL_PATH=Acode-kit \
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+AGENT=codex curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
-#### 3. 用 `npx` 安装
-
-发布到 npm 后可使用：
+显式安装到 Claude 用户目录：
 
 ```bash
-npx @your-npm-scope/structcode-skill-installer
+AGENT=claude SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
-指定参数版本：
+显式安装到当前项目的 `.claude/`：
 
 ```bash
-npx @your-npm-scope/structcode-skill-installer \
-  --repo AlexCyln/Acode-kit \
-  --ref main \
-  --skill-path Acode-kit
+AGENT=claude SCOPE=project curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
+
+显式安装为本地便携包：
+
+```bash
+AGENT=local DEST_ROOT="$(pwd)/agent-skills" curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+```
+
+#### 3. Node 安装器
+
+本地验证或在你自己的自动化流程中使用：
+
+```bash
+node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir /tmp/agent-skills
+```
+
+从 GitHub 安装到 Claude：
+
+```bash
+node ./scripts/install.mjs --repo AlexCyln/Acode-kit --agent claude --scope user
+```
+
+#### 4. npx 安装
+
+如果未来发布到 npm：
+
+```bash
+npx @your-npm-scope/structcode-skill-installer --agent auto --repo AlexCyln/Acode-kit
+```
+
+### 手动安装
+
+如果用户没有安装 Codex 或 Claude，或者你只是想先把插件放到当前项目目录：
+
+1. 先安装到本地目录：
+
+```bash
+node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir "$(pwd)/agent-skills"
+```
+
+2. 后续手动接入：
+
+- Codex：把 `agent-skills/Acode-kit` 复制到 `~/.codex/skills/Acode-kit`
+- Claude Code：
+  - 把 `agent-skills/Acode-kit` 复制到 `~/.claude/Acode-kit`
+  - 把 `agent-skills/claude/acode-kit.md` 复制到 `~/.claude/agents/acode-kit.md`
+
+### 作为成熟插件需要考虑的问题
+
+- 安装目标不能只假设用户装了 Codex，也要支持 Claude 和无 Agent 场景。
+- 需要同时提供自动安装和手动安装路径。
+- 安装脚本应允许覆盖旧版本，并给出明确目标目录。
+- 需要考虑权限问题，尤其是用户目录不可写时应允许 `--dest-dir` 改装到别处。
+- 需要考虑网络失败时的本地 `--source-dir` 安装方案。
+- 需要考虑 Agent 重启或重新加载后才能看到新插件。
+- 需要保持 skill 名称、目录名称、仓库路径、文档名称一致，避免用户混淆。
+- 需要把 Claude 的适配层单独交付，而不是只把 Codex 的 SKILL.md 生硬复用。
 
 ### 本地验证
 
 ```bash
-node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --dest-dir /tmp/structcode-skills
+node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir /tmp/agent-skills
 ```
 
-预期生成：
+预期结果：
 
 ```text
-/tmp/structcode-skills/Acode-kit
+/tmp/agent-skills/Acode-kit
+/tmp/agent-skills/claude/acode-kit.md
 ```
 
-### GitHub 发布说明
+### 发布说明
 
-首次发布 GitHub，建议直接按 [PUBLISH_STEPS.md](./PUBLISH_STEPS.md) 操作。该文件已经补充了从注册准备、网页创建仓库、上传代码、验证安装，到可选 npm 发布的详细步骤。
+详细发布流程见 [PUBLISH_STEPS.md](./PUBLISH_STEPS.md)。
 
 ---
 
 ## English
 
-### Project Overview
+### Overview
 
-`Acode-kit` is a Codex skill for starting, structuring, and continuing software projects in a solo + AI workflow. It turns a rough idea into a controlled execution flow across requirements, documentation, implementation, testing, and delivery instead of jumping straight into code generation.
+`Acode-kit` is a mature project-delivery plugin for AI coding agents. It supports `Codex`, `Claude Code`, and a portable local-folder installation flow for users who want to stage the package before manually installing it into their target agent.
 
 ### Core Capabilities
 
-- Starts new projects or takes over existing ones with a consistent workflow.
-- Creates and maintains project-level documents such as `PRD`, `TRACEABILITY_MATRIX`, `SESSION_HANDOFF`, and `DECISION_LOG`.
-- Drives work stage by stage: requirements, UI/page structure, data/API design, scaffolding, vertical-slice implementation, testing, and deployment.
-- Applies bundled engineering standards to keep stack, scope, quality, and delivery aligned.
-- Writes progress back into project documents so work remains traceable and resumable.
+- Starts new projects or takes over existing ones with a structured workflow.
+- Creates and maintains project documents such as `PRD`, `TRACEABILITY_MATRIX`, `SESSION_HANDOFF`, and `DECISION_LOG`.
+- Drives work across requirements, UI/page planning, data/API design, scaffolding, implementation, testing, and release.
+- Applies bundled engineering standards to keep scope, quality, and delivery aligned.
+- Supports multi-agent distribution for Codex, Claude Code, and portable local installs.
 
 ### Highlights
 
-- It is a project execution skill, not just a code generation prompt.
-- It ships with reusable templates and engineering standards that reduce project chaos.
-- It emphasizes traceability between requirements, implementation, testing, and go-live records.
-- It favors small, controlled slices and persistent handoff notes for long-running projects.
-- It can be distributed through GitHub, a one-line bash installer, or npm `npx`.
+- It is a delivery workflow, not just a prompt snippet.
+- It favors scope control, traceability, and document-driven implementation.
+- It ships with reusable templates, references, and a Claude adapter.
+- It supports both automatic installation and manual fallback installation.
+- If the user has neither Codex nor Claude installed yet, the package can still be installed into the current folder and connected later.
 
-### How To Use
+### Support Matrix
 
-Use `Acode-kit` when you want Codex to:
+| Target | Installation result |
+| --- | --- |
+| `Codex` | `~/.codex/skills/Acode-kit` |
+| `Claude Code` | `~/.claude/Acode-kit` plus `~/.claude/agents/acode-kit.md` |
+| `Local / no agent yet` | `./agent-skills/Acode-kit` plus a portable Claude adapter |
 
-- bootstrap a project from a high-level idea;
-- continue an in-progress project while keeping docs and implementation aligned;
-- follow a fixed stage-based workflow from planning to release.
+### Install Modes
 
-Example prompts:
+The installers now support:
 
-```text
-Use the Acode-kit skill to bootstrap a SaaS project from scratch.
-```
-
-```text
-Use the Acode-kit skill to continue the current repository and review PRD, TRACEABILITY_MATRIX, and SESSION_HANDOFF first.
-```
-
-### Repository Layout
-
-```text
-.
-├── Acode-kit/
-│   ├── SKILL.md
-│   ├── assets/
-│   └── references/
-├── scripts/
-│   ├── install.mjs
-│   └── install.sh
-├── README.md
-├── PUBLISH_STEPS.md
-├── package.json
-└── LICENSE
-```
+- `--agent auto`: detect installed agents; install to both if Codex and Claude are present; otherwise fall back to `./agent-skills/`
+- `--agent codex`: install only to Codex
+- `--agent claude`: install only to Claude
+- `--agent local`: install only to the current folder as a portable package
+- `--agent both`: install to both Codex and Claude
+- `--scope user|project`: for Claude user-level or project-level install
+- `--dest-dir PATH`: force a custom destination root
 
 ### Install Options
 
-#### 1. Install from GitHub with Codex's built-in skill installer
+#### Codex built-in installer
 
 ```bash
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
@@ -186,48 +246,67 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
   --path Acode-kit
 ```
 
-#### 2. Install with one bash command
+#### One-line bash installer
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
-With explicit variables:
+Examples:
 
 ```bash
-REPO=AlexCyln/Acode-kit REF=main SKILL_PATH=Acode-kit \
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+AGENT=codex curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
-
-#### 3. Install with `npx`
-
-After publishing to npm:
 
 ```bash
-npx @your-npm-scope/structcode-skill-installer
+AGENT=claude SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
-
-With explicit flags:
 
 ```bash
-npx @your-npm-scope/structcode-skill-installer \
-  --repo AlexCyln/Acode-kit \
-  --ref main \
-  --skill-path Acode-kit
+AGENT=claude SCOPE=project curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
-
-### Local Verification
 
 ```bash
-node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --dest-dir /tmp/structcode-skills
+AGENT=local DEST_ROOT="$(pwd)/agent-skills" curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
-Expected output:
+#### Node installer
 
-```text
-/tmp/structcode-skills/Acode-kit
+```bash
+node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir /tmp/agent-skills
 ```
+
+#### npm / npx
+
+```bash
+npx @your-npm-scope/structcode-skill-installer --agent auto --repo AlexCyln/Acode-kit
+```
+
+### Manual Installation
+
+1. Stage the portable package locally:
+
+```bash
+node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir "$(pwd)/agent-skills"
+```
+
+2. Install it into your agent later:
+
+- Codex: copy `agent-skills/Acode-kit` into `~/.codex/skills/Acode-kit`
+- Claude Code:
+  - copy `agent-skills/Acode-kit` into `~/.claude/Acode-kit`
+  - copy `agent-skills/claude/acode-kit.md` into `~/.claude/agents/acode-kit.md`
+
+### Maturity Checklist
+
+- Supports more than one target agent.
+- Supports users who have no agent installed yet.
+- Supports auto install, explicit install, and manual fallback.
+- Handles overwrites deterministically.
+- Supports custom destination directories.
+- Supports offline or pre-downloaded installs through `--source-dir`.
+- Documents restart/reload requirements after installation.
 
 ### Publishing
 
-For a first-time GitHub release, follow the detailed step-by-step guide in [PUBLISH_STEPS.md](./PUBLISH_STEPS.md). It now covers account preparation, repository creation in the GitHub web UI, code upload, installer verification, and optional npm publishing.
+See [PUBLISH_STEPS.md](./PUBLISH_STEPS.md) for the release workflow.
