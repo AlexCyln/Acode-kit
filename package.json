@@ -1,0 +1,24 @@
+{
+  "name": "@your-scope/structcode-skill-installer",
+  "version": "0.1.0",
+  "description": "Installer for the Acode-kit Codex skill.",
+  "type": "module",
+  "bin": {
+    "structcode-skill-install": "./scripts/install.mjs"
+  },
+  "files": [
+    "scripts",
+    "Acode-kit",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "codex",
+    "skill",
+    "installer"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}
