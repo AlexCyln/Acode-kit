@@ -141,7 +141,7 @@ node ./scripts/install.mjs --repo AlexCyln/Acode-kit --agent claude --scope user
 
 ### 手动安装
 
-如果用户没有安装 Codex 或 Claude，或者只是想先把插件放到当前项目目录：
+如果没有安装 Codex 或 Claude，或者只是想先把插件放到当前项目目录：
 
 1. 先安装到本地目录：
 
@@ -156,33 +156,7 @@ node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-
   - 把 `agent-skills/Acode-kit` 复制到 `~/.claude/Acode-kit`
   - 把 `agent-skills/claude/acode-kit.md` 复制到 `~/.claude/agents/acode-kit.md`
 
-### 作为成熟插件需要考虑的问题
 
-- 安装目标不能只假设用户装了 Codex，也要支持 Claude 和无 Agent 场景。
-- 需要同时提供自动安装和手动安装路径。
-- 安装脚本应允许覆盖旧版本，并给出明确目标目录。
-- 需要考虑权限问题，尤其是用户目录不可写时应允许 `--dest-dir` 改装到别处。
-- 需要考虑网络失败时的本地 `--source-dir` 安装方案。
-- 需要考虑 Agent 重启或重新加载后才能看到新插件。
-- 需要保持 skill 名称、目录名称、仓库路径、文档名称一致，避免用户混淆。
-- 需要把 Claude 的适配层单独交付，而不是只把 Codex 的 SKILL.md 生硬复用。
-
-### 本地验证
-
-```bash
-node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir /tmp/agent-skills
-```
-
-预期结果：
-
-```text
-/tmp/agent-skills/Acode-kit
-/tmp/agent-skills/claude/acode-kit.md
-```
-
-### 发布说明
-
-详细发布流程见 [PUBLISH_STEPS.md](./PUBLISH_STEPS.md)。
 
 ---
 
@@ -283,16 +257,4 @@ node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-
   - copy `agent-skills/Acode-kit` into `~/.claude/Acode-kit`
   - copy `agent-skills/claude/acode-kit.md` into `~/.claude/agents/acode-kit.md`
 
-### Maturity Checklist
 
-- Supports more than one target agent.
-- Supports users who have no agent installed yet.
-- Supports auto install, explicit install, and manual fallback.
-- Handles overwrites deterministically.
-- Supports custom destination directories.
-- Supports offline or pre-downloaded installs through `--source-dir`.
-- Documents restart/reload requirements after installation.
-
-### Publishing
-
-See [PUBLISH_STEPS.md](./PUBLISH_STEPS.md) for the release workflow.
