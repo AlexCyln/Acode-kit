@@ -6,7 +6,7 @@
 
 ### 项目简介
 
-`Acode-kit` 是一个面向 AI 编码代理的成熟项目交付插件，当前支持 `Codex`、`Claude Code`，并兼容“先下载到本地项目目录、后续再手动安装到任意 Agent”的使用方式。它不是单纯的提示词，而是一套从需求、文档、设计、实现、测试到上线的结构化工作流。
+`Acode-kit` 是一个面向 AI 编码代理的成熟项目交付插件，支持 `Codex`、`Claude Code`，并兼容“先下载到本地项目目录、后续再手动安装到任意 Agent”的使用方式。它不是单纯的提示词，而是一套从需求、文档、设计、实现、测试到上线的结构化工作流。
 
 ### 实现功能
 
@@ -14,7 +14,7 @@
 - 自动建立并维护项目级文档，如 `PRD`、`TRACEABILITY_MATRIX`、`SESSION_HANDOFF`、`DECISION_LOG`。
 - 按阶段驱动项目：需求结构化、UI/页面设计、数据与 API 设计、脚手架初始化、小闭环实现、测试、部署上线。
 - 绑定全局工程规范，控制技术栈、范围、质量、评审与交付节奏。
-- 适配多 Agent 分发：Codex、Claude Code、以及本地目录离线安装包。
+- 适配多 Agent 分发：Codex、Claude Code，以及本地目录离线安装包。
 
 ### 特色亮点
 
@@ -46,7 +46,7 @@
 
 ### 使用方法
 
-当你希望 Agent：
+当目标 Agent 需要：
 
 - 从一个项目点子开始搭建结构化项目；
 - 在已有项目中继续推进，并保持文档、需求、代码同步；
@@ -127,7 +127,7 @@ AGENT=local DEST_ROOT="$(pwd)/agent-skills" curl -fsSL https://raw.githubusercon
 
 #### 3. Node 安装器
 
-本地验证或在你自己的自动化流程中使用：
+本地验证或自动化流程中可使用：
 
 ```bash
 node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir /tmp/agent-skills
@@ -139,17 +139,9 @@ node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-
 node ./scripts/install.mjs --repo AlexCyln/Acode-kit --agent claude --scope user
 ```
 
-#### 4. npx 安装
-
-如果未来发布到 npm：
-
-```bash
-npx @your-npm-scope/structcode-skill-installer --agent auto --repo AlexCyln/Acode-kit
-```
-
 ### 手动安装
 
-如果用户没有安装 Codex 或 Claude，或者你只是想先把插件放到当前项目目录：
+如果用户没有安装 Codex 或 Claude，或者只是想先把插件放到当前项目目录：
 
 1. 先安装到本地目录：
 
@@ -276,12 +268,6 @@ AGENT=local DEST_ROOT="$(pwd)/agent-skills" curl -fsSL https://raw.githubusercon
 node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir /tmp/agent-skills
 ```
 
-#### npm / npx
-
-```bash
-npx @your-npm-scope/structcode-skill-installer --agent auto --repo AlexCyln/Acode-kit
-```
-
 ### Manual Installation
 
 1. Stage the portable package locally:
@@ -290,7 +276,7 @@ npx @your-npm-scope/structcode-skill-installer --agent auto --repo AlexCyln/Acod
 node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir "$(pwd)/agent-skills"
 ```
 
-2. Install it into your agent later:
+2. Install it into the target agent later:
 
 - Codex: copy `agent-skills/Acode-kit` into `~/.codex/skills/Acode-kit`
 - Claude Code:

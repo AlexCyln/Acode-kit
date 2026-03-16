@@ -1,7 +1,7 @@
 {
-  "name": "@your-npm-scope/structcode-skill-installer",
+  "name": "acode-kit-installer",
   "version": "0.1.0",
-  "description": "Installer for the Acode-kit Codex and Claude skill package.",
+  "description": "Installer metadata for the Acode-kit multi-agent skill package.",
   "type": "module",
   "bin": {
     "structcode-skill-install": "./scripts/install.mjs"
@@ -23,5 +23,6 @@
   "license": "MIT",
   "engines": {
     "node": ">=18"
-  }
+  },
+  "private": true
 }

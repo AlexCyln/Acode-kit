@@ -1,132 +1,124 @@
 # Publish Steps
 
-这份文档按“成熟 skill 插件发布”的标准来写，不只覆盖 GitHub 上传，还覆盖多 Agent 分发、无 Agent 用户、手动安装、验证和常见问题。
+This document describes the public release workflow for the Acode-kit GitHub repository, including validation, GitHub publishing, distribution verification, and common operational concerns for a mature multi-agent skill package.
 
-## 1. 发布前的目标确认
+## 1. Release Targets
 
-当前仓库目标：
+Current public release targets:
 
-- GitHub 仓库：`AlexCyln/Acode-kit`
-- GitHub HTTPS：`https://github.com/AlexCyln/Acode-kit.git`
-- 当前支持：`Codex`、`Claude Code`、`local portable install`
+- GitHub repository: `AlexCyln/Acode-kit`
+- GitHub HTTPS: `https://github.com/AlexCyln/Acode-kit.git`
+- Supported environments: `Codex`, `Claude Code`, and `local portable install`
 
-发布前先确认一件事：
+## 2. Installation Scenarios Covered
 
-- 你是只想发布 GitHub 版本，还是还要继续发布 npm 版本。
+A public skill package should support all of these scenarios:
 
-如果目前只需要 GitHub，npm 可以先不做。
+1. Users who already have Codex installed
+2. Users who already have Claude Code installed
+3. Users who have no agent installed yet and want to stage the package locally first
 
-## 2. 作为成熟插件要覆盖的安装场景
+This repository now supports:
 
-发布前要保证下面三类用户都能用：
+- Codex installation
+- Claude installation
+- Local portable installation
+- Manual post-install integration into a target agent
 
-1. 已安装 Codex 的用户
-2. 已安装 Claude Code 的用户
-3. 还没安装任何 Agent，但想先把插件下载到本地项目目录的用户
+## 3. Local Validation
 
-本仓库现在已经分别支持：
-
-- Codex 安装
-- Claude 安装
-- 本地目录便携安装
-- 后续手动接入 Agent
-
-## 3. 本地验证
-
-### 3.1 验证便携安装
+### 3.1 Validate portable installation
 
 ```bash
 cd /Users/alex/Documents/AlexFiles/Acode-kit_skill
 node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir /tmp/agent-skills-test
 ```
 
-预期结果：
+Expected output:
 
 ```text
 /tmp/agent-skills-test/Acode-kit
 /tmp/agent-skills-test/claude/acode-kit.md
 ```
 
-### 3.2 验证 Codex 安装
+### 3.2 Validate Codex installation
 
 ```bash
 node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent codex --dest-dir /tmp/codex-skills
 ```
 
-预期结果：
+Expected output:
 
 ```text
 /tmp/codex-skills/Acode-kit
 ```
 
-### 3.3 验证 Claude 安装
+### 3.3 Validate Claude installation
 
 ```bash
 node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent claude --dest-dir /tmp/claude-home
 ```
 
-预期结果：
+Expected output:
 
 ```text
 /tmp/claude-home/Acode-kit
 /tmp/claude-home/agents/acode-kit.md
 ```
 
-## 4. 初始化 Git 并提交
+## 4. Git Initialization and Commit
 
-如果本地还没建仓库：
+If the local repository is not initialized yet:
 
 ```bash
 cd /Users/alex/Documents/AlexFiles/Acode-kit_skill
 git init
 ```
 
-加入文件并提交：
+Stage and commit the files:
 
 ```bash
 git add .
 git commit -m "feat: publish Acode-kit skill package"
 ```
 
-## 5. 连接 GitHub 仓库
-
-使用你现在的 HTTPS 远程地址：
+## 5. Connect the GitHub Remote
 
 ```bash
 git remote add origin https://github.com/AlexCyln/Acode-kit.git
 ```
 
-如果远程已存在但地址不对：
+If a remote already exists and needs updating:
 
 ```bash
 git remote set-url origin https://github.com/AlexCyln/Acode-kit.git
 ```
 
-检查：
+Verify:
 
 ```bash
 git remote -v
 ```
 
-## 6. 推送到 GitHub
+## 6. Push to GitHub
 
 ```bash
 git branch -M main
 git push -u origin main
 ```
 
-如果提示登录：
+If authentication is requested:
 
-- 直接按浏览器登录流程完成
-- 如果终端要求密码，通常需要 GitHub Personal Access Token，而不是普通密码
+- complete the browser sign-in flow if prompted
+- if terminal password auth fails, use a GitHub Personal Access Token instead of a standard password
 
-## 7. 在 GitHub 网页检查内容
+## 7. Verify the GitHub Repository
 
-推送完成后，打开：
+Open:
 
 - `https://github.com/AlexCyln/Acode-kit`
 
-确认你能看到：
+Confirm the repository contains:
 
 - `Acode-kit/`
 - `scripts/`
@@ -134,15 +126,15 @@ git push -u origin main
 - `PUBLISH_STEPS.md`
 - `package.json`
 
-再点开 `README.md`，检查以下几点：
+Open `README.md` and confirm:
 
-- 中英文都正常显示
-- 安装方式包含 Codex / Claude / local
-- 示例命令中的仓库地址都已正确
+- both Chinese and English sections render correctly
+- installation instructions include Codex, Claude, and local portable install
+- repository URLs are correct
 
-## 8. 验证 GitHub 分发链路
+## 8. Verify Distribution Flows
 
-### 8.1 验证 Codex 官方 skill-installer
+### 8.1 Codex built-in skill installer
 
 ```bash
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
@@ -150,27 +142,27 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
   --path Acode-kit
 ```
 
-### 8.2 验证 bash 自动安装
+### 8.2 Bash auto installer
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
-### 8.3 验证安装到 Claude
+### 8.3 Claude install
 
 ```bash
 AGENT=claude SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
-### 8.4 验证本地便携安装
+### 8.4 Local portable install
 
 ```bash
 AGENT=local DEST_ROOT="$(pwd)/agent-skills" curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
-## 9. 给用户的安装说明
+## 9. Public Installation Instructions
 
-### 9.1 用户装了 Codex
+### 9.1 Codex users
 
 ```bash
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
@@ -178,65 +170,46 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
   --path Acode-kit
 ```
 
-### 9.2 用户装了 Claude Code
+### 9.2 Claude Code users
 
 ```bash
 AGENT=claude SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
-### 9.3 用户暂时没装任何 Agent
+### 9.3 Users without an installed agent yet
 
 ```bash
 AGENT=local DEST_ROOT="$(pwd)/agent-skills" curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
-后续手动安装：
+Manual follow-up:
 
-- Codex：复制 `agent-skills/Acode-kit` 到 `~/.codex/skills/Acode-kit`
-- Claude：
-  - 复制 `agent-skills/Acode-kit` 到 `~/.claude/Acode-kit`
-  - 复制 `agent-skills/claude/acode-kit.md` 到 `~/.claude/agents/acode-kit.md`
+- Codex: copy `agent-skills/Acode-kit` into `~/.codex/skills/Acode-kit`
+- Claude:
+  - copy `agent-skills/Acode-kit` into `~/.claude/Acode-kit`
+  - copy `agent-skills/claude/acode-kit.md` into `~/.claude/agents/acode-kit.md`
 
-## 10. 可选：发布 npm 版本
+## 10. Common Issues
 
-如果后续你想支持：
+### 1. Destination directory is not writable
 
-```bash
-npx @your-npm-scope/structcode-skill-installer
-```
+Use `--dest-dir` or `DEST_ROOT` to install into a writable location.
 
-那还需要：
+### 2. No Codex or Claude installation exists yet
 
-1. 去 `npmjs.com` 注册账号
-2. 把 `package.json` 的 `name` 改成你自己的有效包名
-3. 执行：
+Use `AGENT=local` to stage the package in the current project directory.
 
-```bash
-npm login
-npm publish --access public
-```
+### 3. An older version already exists
 
-## 11. 常见问题
+The installers overwrite the existing target directory. Stable naming and predictable paths are therefore important for each release.
 
-### 1. 用户目录没有权限怎么办
+### 4. The skill does not appear after install
 
-让用户使用 `--dest-dir` 或 `DEST_ROOT` 指定到可写目录。
+Many agents require a restart or reload after installation.
 
-### 2. 用户没有装 Codex 或 Claude 怎么办
+### 5. GitHub download fails
 
-直接走 `AGENT=local`，先安装到当前项目目录。
-
-### 3. 已有旧版本怎么办
-
-当前安装器会覆盖同名目标目录，因此发布新版本前要确认目录名稳定且一致。
-
-### 4. 安装后为什么看不到
-
-多数 Agent 需要重启或重新加载，安装器也会提示这一点。
-
-### 5. 网络拉取失败怎么办
-
-改用本地源码安装：
+Use a local source install instead:
 
 ```bash
 node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir "$(pwd)/agent-skills"
