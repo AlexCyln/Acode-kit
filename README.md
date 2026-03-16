@@ -101,28 +101,30 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
+注意：如果需要传递 `AGENT`、`SCOPE`、`DEST_ROOT` 等变量，必须把变量写在 `bash` 这一侧，而不是写在 `curl` 前面。
+
 显式安装到 Codex：
 
 ```bash
-AGENT=codex curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=codex bash
 ```
 
 显式安装到 Claude 用户目录：
 
 ```bash
-AGENT=claude SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=user bash
 ```
 
 显式安装到当前项目的 `.claude/`：
 
 ```bash
-AGENT=claude SCOPE=project curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=project bash
 ```
 
 显式安装为本地便携包：
 
 ```bash
-AGENT=local DEST_ROOT="$(pwd)/agent-skills" curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=local DEST_ROOT="$(pwd)/agent-skills" bash
 ```
 
 #### 3. Node 安装器
@@ -218,22 +220,24 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
+Important: when passing `AGENT`, `SCOPE`, or `DEST_ROOT`, pass them to `bash`, not to `curl`.
+
 Examples:
 
 ```bash
-AGENT=codex curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=codex bash
 ```
 
 ```bash
-AGENT=claude SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=user bash
 ```
 
 ```bash
-AGENT=claude SCOPE=project curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=project bash
 ```
 
 ```bash
-AGENT=local DEST_ROOT="$(pwd)/agent-skills" curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=local DEST_ROOT="$(pwd)/agent-skills" bash
 ```
 
 #### Node installer

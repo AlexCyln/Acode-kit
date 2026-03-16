@@ -148,16 +148,18 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
+Important: if environment variables such as `AGENT`, `SCOPE`, or `DEST_ROOT` are needed, pass them to `bash`, not to `curl`.
+
 ### 8.3 Claude install
 
 ```bash
-AGENT=claude SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=user bash
 ```
 
 ### 8.4 Local portable install
 
 ```bash
-AGENT=local DEST_ROOT="$(pwd)/agent-skills" curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=local DEST_ROOT="$(pwd)/agent-skills" bash
 ```
 
 ## 9. Public Installation Instructions
@@ -173,13 +175,13 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
 ### 9.2 Claude Code users
 
 ```bash
-AGENT=claude SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=user bash
 ```
 
 ### 9.3 Users without an installed agent yet
 
 ```bash
-AGENT=local DEST_ROOT="$(pwd)/agent-skills" curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=local DEST_ROOT="$(pwd)/agent-skills" bash
 ```
 
 Manual follow-up:
