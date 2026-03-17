@@ -35,6 +35,9 @@ Within project documents, apply this order:
 Do not jump straight into code if project-level facts are missing.
 
 ## Startup workflow
+
+**CRITICAL: Steps must execute in strict sequential order. Each step has a GATE that must be passed before the next step begins. DO NOT batch multiple steps. DO NOT create project directories, files, or code until Step 4. DO NOT draft a PRD until Step 3. DO NOT skip any step.**
+
 When a project starts or the user provides a fresh project brief:
 
 ### Step 1: Environment Scan
@@ -44,6 +47,9 @@ When a project starts or the user provides a fresh project brief:
 2. Scan available MCP tools per `references/global-engineering-standards/31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
 3. For missing tools: suggest installation → await user authorization → execute → verify → record status.
 4. Record tool availability status for the session.
+5. Present the environment scan results to the user (folder state + tool status).
+
+**GATE 1: Report scan results to the user. Wait for the user to acknowledge before proceeding to Step 2. DO NOT silently continue.**
 
 ### Step 2: Requirements Analysis
 1. Read `references/global-engineering-standards/README.md`
@@ -60,15 +66,21 @@ When a project starts or the user provides a fresh project brief:
    - UI/UX style direction
    - Scope boundaries and constraints
 9. If NotebookLM MCP is unavailable: AI agent performs the same analysis directly.
-10. Present the project skeleton to the user for confirmation.
+10. Present the project skeleton to the user.
+
+**GATE 2: STOP. Present the project skeleton and explicitly ask the user to confirm or revise. DO NOT proceed to PRD, directory creation, or any file generation until the user explicitly approves the project skeleton. If the user requests changes, revise the skeleton and re-present it.**
 
 ### Step 3: First-iteration PRD + Progress Plan
+Only begin this step after the user has explicitly approved the project skeleton from Step 2.
 1. Based on the confirmed project skeleton, determine the project tech stack and record it in `PROJECT_OVERRIDES.md`.
 2. Solidify into a structured PRD.
 3. Generate a progress plan and requirements traceability matrix.
-4. Present to the user for confirmation.
+4. Present the PRD and progress plan to the user.
+
+**GATE 3: STOP. Present the PRD and progress plan, and explicitly ask the user to confirm or revise. DO NOT create project directories, install dependencies, or write any code until the user explicitly approves the PRD. If the user requests changes, revise and re-present.**
 
 ### Step 4: Project Environment Setup
+Only begin this step after the user has explicitly approved the PRD from Step 3.
 1. On first project bootstrap, create the project root structure and the project-level `AGENTS.md`.
 2. Create or update the minimum project-level documents.
 3. Set up directories, dependencies, environment, and packages per the declared tech stack.
@@ -76,6 +88,13 @@ When a project starts or the user provides a fresh project brief:
 
 ### Step 5: Continuous Implementation
 Follow the stage-driven execution flow (see below).
+
+### Startup workflow violations (NEVER do these)
+1. NEVER create project directories or files before Step 4.
+2. NEVER draft a PRD before completing Step 2 and receiving user confirmation of the project skeleton.
+3. NEVER batch Steps 1-4 into a single response. Each gate requires a separate user interaction.
+4. NEVER assume user confirmation. Silence is not approval — always ask explicitly.
+5. NEVER skip the environment scan (Step 1) even if the user provides a detailed brief.
 
 ## Minimum project-level documents
 Use the templates in `assets/project-doc-templates/` to create these when missing:
@@ -229,3 +248,7 @@ When the task is complex, structure the work as:
 4. Generate a full system in one pass when the project facts are still incomplete.
 5. Ask the user to restate workflow rules that are already embedded in this skill and the generated project `AGENTS.md`.
 6. Write production code without a corresponding failing test (TDD gate).
+7. Skip or merge startup workflow gates — each GATE requires a separate user interaction and explicit approval.
+8. Create project directories, install dependencies, or generate files before the user approves the PRD (GATE 3).
+9. Draft a PRD before the user approves the project skeleton (GATE 2).
+10. Assume the user has approved when they have not explicitly said so.
