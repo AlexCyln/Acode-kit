@@ -22,11 +22,20 @@ This skill is the single public entry point for the whole workflow.
 
 ---
 
+## INITIALIZATION CHECK (before anything else)
+
+**Before executing any project workflow, check whether `.acode-kit-initialized.json` exists in the working directory.**
+
+- **If NOT found**: Tell the user: "Acode-kit has not been initialized. Please run `acode-kit init` first to set up MCP tools and NotebookLM authentication." Then STOP. Do NOT proceed with any startup gates or project work.
+- **If found**: Read the file to load saved tool status and NotebookLM configuration. Use this data instead of re-scanning tools. Proceed to the startup sequence below.
+
+---
+
 ## MANDATORY FIRST ACTION
 
 **When this skill is loaded for a new project or a fresh project brief, you MUST execute the gate-driven startup sequence below. This is NOT optional. Do NOT skip to "Stage-driven execution". Do NOT create any files, directories, or task plans until you have passed GATE 3.**
 
-**Your first response to the user MUST be the output of Step 1 (environment scan results). Nothing else.**
+**Your first response to the user MUST be the output of Step 1 (workspace status report). Nothing else.**
 
 ---
 
@@ -34,21 +43,20 @@ This skill is the single public entry point for the whole workflow.
 
 This sequence has 4 steps and 3 mandatory gates. Each gate requires you to STOP, present output to the user, and WAIT for explicit user approval before continuing. You may NOT combine multiple steps into one response.
 
-### Step 1: Environment Scan
+### Step 1: Workspace Status Report
 
 Do this FIRST. Do not read reference docs, do not analyze requirements, do not plan stages.
 
 1. Scan the current workspace folder:
    - Empty folder → new project
    - Existing project → continuation or iteration
-2. Scan available MCP tools per `references/global-engineering-standards/31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
-3. For missing tools: list them and suggest installation commands.
-4. Present to the user:
+2. Read tool status from `.acode-kit-initialized.json` (already loaded in Initialization Check above). Do NOT re-scan or re-install tools — that was handled during `acode-kit init`.
+3. Present to the user:
    - Workspace state (empty / existing project)
-   - MCP tool status table (each tool: installed / missing)
-   - If tools are missing: ask whether to install them now
+   - MCP tool status summary (from saved initialization data)
+   - NotebookLM authentication status
 
-**>>> GATE 1: STOP HERE. Output the scan results. Ask the user to confirm tool installation decisions and acknowledge the scan. Wait for the user's reply. DO NOT continue to Step 2 in this same response. <<<**
+**>>> GATE 1: STOP HERE. Output the workspace status report. Explicitly ask: "Please confirm the workspace status, or tell me if anything needs adjustment." Wait for the user's reply. DO NOT continue to Step 2 in this same response. <<<**
 
 ### Step 2: Requirements Analysis + Project Skeleton
 
@@ -57,7 +65,7 @@ Only begin after the user has replied to GATE 1.
 1. Read ONLY `references/global-engineering-standards/00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2 (tech stack decision framework). Do NOT read other reference documents at this stage — they are loaded later per stage as needed.
 2. Read the user's project prompt/brief.
 3. Analyze the project brief and produce a **project skeleton**:
-   - If NotebookLM MCP is available: invoke NotebookLM to deepen the analysis.
+   - If NotebookLM MCP is available: invoke NotebookLM to deepen the analysis. When calling NotebookLM, append the notebook URL to the prompt: `"Here's my NotebookLM: [notebookLM.notebookUrl from .acode-kit-initialized.json]"`.
    - If NotebookLM MCP is unavailable: perform the analysis directly.
 4. The project skeleton MUST contain:
    - Recommended tech stack (frontend, backend, database, deployment, design tool)
@@ -89,9 +97,8 @@ Only begin after the user has explicitly approved the PRD from GATE 3. This is t
    - `references/global-engineering-standards/28_PROJECT_DIRECTORY_AND_REPOSITORY_STRUCTURE_SPEC.md`
    - `references/global-engineering-standards/22_SOLO_AI_PROJECT_OPERATING_MANUAL.md`
    - `references/global-engineering-standards/15_AI_COLLABORATION_PLAYBOOK.md`
-2. Create the project root structure and `AGENTS.md`.
-2. Create the minimum project-level documents from templates in `assets/project-doc-templates/`:
-   - `AGENTS.md`
+2. Create the project root structure and root-level `AGENTS.md`.
+3. Create the minimum project-level documents from templates in `assets/project-doc-templates/`:
    - `docs/project/PROJECT_OVERVIEW.md`
    - `docs/project/PROJECT_OVERRIDES.md`
    - `docs/project/PRD.md`
@@ -99,8 +106,8 @@ Only begin after the user has explicitly approved the PRD from GATE 3. This is t
    - `docs/project/TRACEABILITY_MATRIX.md`
    - `docs/project/SESSION_HANDOFF.md`
    - `docs/project/GO_LIVE_RECORD.md`
-3. Set up directories, dependencies, environment, and packages per the declared tech stack.
-4. Extract pending confirmations instead of silently inventing core business rules.
+4. Set up directories, dependencies, environment, and packages per the declared tech stack.
+5. Extract pending confirmations instead of silently inventing core business rules.
 
 After Step 4 is complete, proceed to the stage-driven execution below.
 
@@ -267,3 +274,4 @@ When the task is complex, structure the work as:
 10. Assume the user has approved when they have not explicitly said so.
 11. Create a task plan or stage list as your first response — your first response MUST be the environment scan results (Step 1 output only).
 12. Jump from receiving a project brief directly to "Stage-driven execution" — the startup sequence is mandatory first.
+13. Execute the startup sequence when `.acode-kit-initialized.json` does not exist — tell the user to run `acode-kit init` first.

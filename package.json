@@ -7,14 +7,17 @@
     "test:router": "node ./scripts/test-router.mjs",
     "test:entry": "node ./scripts/test-acode-run.mjs",
     "test:mcp": "node ./scripts/test-mcp-tool-scan.mjs",
+    "test:init": "node ./scripts/test-acode-kit-init.mjs",
     "install:win": "powershell -ExecutionPolicy Bypass -File ./scripts/install.ps1"
   },
   "bin": {
+    "acode-kit": "./scripts/acode-kit.mjs",
     "acode-kit-install": "./scripts/install.mjs",
     "acode-agent-execute": "./scripts/agent-execute.mjs",
     "acode-router-exec": "./scripts/router-exec.mjs",
     "acode-run": "./scripts/acode-run.mjs",
-    "acode-mcp-scan": "./scripts/mcp-tool-scan.mjs"
+    "acode-mcp-scan": "./scripts/mcp-tool-scan.mjs",
+    "acode-kit-init": "./scripts/acode-kit-init.mjs"
   },
   "files": [
     "scripts",

@@ -66,6 +66,7 @@ copy_claude_adapter() {
   local dest_root="$2"
   local adapter_file="$source_dir/integrations/claude/acode-kit.md"
   local router_adapter_file="$source_dir/integrations/claude/acode-run.md"
+  local init_adapter_file="$source_dir/integrations/claude/acode-init.md"
 
   if [[ ! -f "$adapter_file" ]]; then
     echo "Claude adapter not found at $adapter_file" >&2
@@ -76,6 +77,9 @@ copy_claude_adapter() {
   cp "$adapter_file" "$dest_root/agents/acode-kit.md"
   if [[ -f "$router_adapter_file" ]]; then
     cp "$router_adapter_file" "$dest_root/agents/acode-run.md"
+  fi
+  if [[ -f "$init_adapter_file" ]]; then
+    cp "$init_adapter_file" "$dest_root/agents/acode-init.md"
   fi
 }
 
@@ -108,6 +112,9 @@ install_agent() {
       echo "Installed Claude subagent to $dest_root/agents/acode-kit.md"
       if [[ -f "$source_dir/integrations/claude/acode-run.md" ]]; then
         echo "Installed Claude unified entry to $dest_root/agents/acode-run.md"
+      fi
+      if [[ -f "$source_dir/integrations/claude/acode-init.md" ]]; then
+        echo "Installed Claude init adapter to $dest_root/agents/acode-init.md"
       fi
       ;;
     local)
@@ -190,3 +197,4 @@ else
 fi
 
 echo "Restart your target AI agent after installation."
+echo "After restarting, run 'acode-kit init' to complete first-time setup."

@@ -5,10 +5,15 @@ description: Gate-driven, tech-stack-agnostic, TDD-driven software project deliv
 
 You are the Claude adapter for `Acode-kit`.
 
+## Initialization requirement
+Before starting any project workflow, check whether `.acode-kit-initialized.json` exists in the working directory.
+- If NOT found: tell the user "Acode-kit has not been initialized. Please run `acode-kit init` first." Then STOP — do not proceed with any gates or project work.
+- If found: read the file to load saved tool status and NotebookLM configuration. Use this data throughout the workflow.
+
 ## MANDATORY FIRST ACTION
-When activated for a new project:
+When activated for a new project (and initialization file exists):
 1. Read `../Acode-kit/SKILL.md` and follow its gate-driven startup sequence.
-2. Your FIRST response MUST be the Step 1 environment scan results ONLY.
+2. Your FIRST response MUST be the Step 1 workspace status report ONLY.
 3. Do NOT create task lists, stage plans, directories, or files in your first response.
 4. Do NOT proceed past any GATE until the user explicitly replies with approval.
 
@@ -19,6 +24,14 @@ When activated for a new project:
 - You may NOT create any file or directory before GATE 3 is passed.
 - You may NOT combine multiple gates into one response.
 - You may NOT treat lack of reply as approval.
+
+## NotebookLM prompt injection
+When calling NotebookLM MCP (for requirements analysis, change impact assessment, etc.), always append the notebook URL from `.acode-kit-initialized.json` to the prompt:
+```
+[user's original prompt/requirements]
+
+Here's my NotebookLM: [notebookLM.notebookUrl from .acode-kit-initialized.json]
+```
 
 ## Working rules
 - Treat `../Acode-kit/references/` as the reference library; load only what is needed for the current stage.

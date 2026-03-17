@@ -70,6 +70,31 @@ const TOOL_REGISTRY = [
 ];
 
 // ---------------------------------------------------------------------------
+// Platform helpers
+// ---------------------------------------------------------------------------
+
+const IS_WIN = os.platform() === "win32";
+
+/** Cross-platform check for whether a CLI command exists on PATH. */
+function hasCommand(cmd) {
+  const probe = spawnSync(IS_WIN ? "where" : "which", [cmd], {
+    encoding: "utf8",
+    shell: IS_WIN,
+    windowsHide: true
+  });
+  return probe.status === 0;
+}
+
+/** Cross-platform spawnSync — on Windows, uses shell mode so .cmd/.bat wrappers resolve. */
+function spawnCrossPlatform(cmd, args, opts = {}) {
+  return spawnSync(cmd, args, {
+    ...opts,
+    shell: IS_WIN,
+    windowsHide: true
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Detection functions
 // ---------------------------------------------------------------------------
 
@@ -79,9 +104,11 @@ function detectPencil() {
     return fs.existsSync("/Applications/Pencil.app");
   }
   if (platform === "win32") {
+    const localAppData = process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local");
     const programFiles = process.env.ProgramFiles || "C:\\Program Files";
     const programFilesX86 = process.env["ProgramFiles(x86)"] || "C:\\Program Files (x86)";
     return (
+      fs.existsSync(path.join(localAppData, "Programs", "Pencil")) ||
       fs.existsSync(path.join(programFiles, "Pencil")) ||
       fs.existsSync(path.join(programFilesX86, "Pencil"))
     );
@@ -161,8 +188,8 @@ function detectChromeDevTools(provider) {
 // ---------------------------------------------------------------------------
 
 function detectProvider() {
-  const hasCodex = spawnSync("which", ["codex"], { encoding: "utf8" }).status === 0;
-  const hasClaude = spawnSync("which", ["claude"], { encoding: "utf8" }).status === 0;
+  const hasCodex = hasCommand("codex");
+  const hasClaude = hasCommand("claude");
   if (hasCodex && hasClaude) return "both";
   if (hasCodex) return "codex";
   if (hasClaude) return "claude";
@@ -245,7 +272,7 @@ async function installTool(suggestion, provider, tmpDir) {
   }
 
   const cmd = suggestion.command;
-  const result = spawnSync(cmd[0], cmd.slice(1), {
+  const result = spawnCrossPlatform(cmd[0], cmd.slice(1), {
     encoding: "utf8",
     cwd: tmpDir,
     timeout: 120_000,

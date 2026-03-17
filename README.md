@@ -178,6 +178,37 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
 | `--scope user\|project` | Claude 用户级 / 项目级 |
 | `--dest-dir PATH` | 自定义目标目录 |
 
+### 初始化（安装后必须执行）
+
+安装完成后，**必须先运行初始化命令**，完成 MCP 工具扫描、安装和 NotebookLM 认证配置：
+
+```bash
+# 在项目目录中运行
+acode-kit init
+
+# 或指定工作目录和 provider
+acode-kit init --cwd /path/to/project --provider claude
+```
+
+> 如果 `acode-kit` 命令不可用，可直接使用 `node ./scripts/acode-kit.mjs init`。
+
+初始化流程：
+1. 检查项目文件夹状态（空 / 已有项目）
+2. 扫描 4 个 MCP 工具的安装状态
+3. 询问是否安装缺失工具（可跳过）
+4. 验证安装结果
+5. 配置 NotebookLM 认证（触发浏览器登录）
+6. 写入 `.acode-kit-initialized.json` 状态文件
+
+| 参数 | 说明 |
+|------|------|
+| `--cwd PATH` | 指定工作目录（默认当前目录） |
+| `--provider codex\|claude` | 指定 provider（默认自动检测） |
+| `--yes` | 跳过确认提示，自动安装 |
+| `--force` | 强制重新初始化 |
+
+> **重要**：初始化完成后才能调用 Acode-kit 执行项目任务。未初始化时 AI 会提示先运行 init。
+
 ### 使用方法
 
 #### 统一入口（推荐）
@@ -244,18 +275,21 @@ Use Acode-kit to continue the current project, review PRD and traceability matri
 │   ├── integrations/
 │   │   └── claude/                       # Claude 子代理适配
 │   │       ├── acode-kit.md
-│   │       └── acode-run.md
+│   │       ├── acode-run.md
+│   │       └── acode-init.md
 │   ├── assets/
 │   │   └── project-doc-templates/        # 8 份项目文档模板
 │   └── references/
 │       └── global-engineering-standards/  # 31 份全局工程规范
 ├── scripts/
-│   ├── acode-run.mjs                     # 统一入口
+│   ├── acode-kit.mjs                     # 统一 CLI 分发器 (acode-kit init/scan/run)
+│   ├── acode-kit-init.mjs                # 初始化命令
+│   ├── acode-run.mjs                     # 模型路由入口
 │   ├── router-exec.mjs                   # 路由执行引擎
 │   ├── agent-execute.mjs                 # Provider 适配层
 │   ├── mcp-tool-scan.mjs                 # MCP 工具扫描与安装
 │   ├── install.sh / install.mjs / install.ps1  # 三平台安装器
-│   └── test-router.mjs / test-acode-run.mjs    # 测试脚本
+│   └── test-*.mjs                        # 测试脚本
 ├── package.json
 ├── README.md
 └── LICENSE
@@ -282,6 +316,8 @@ Use Acode-kit to continue the current project, review PRD and traceability matri
 ```bash
 npm run test:router    # 路由映射与降级测试
 npm run test:entry     # 统一入口分类与路由测试
+npm run test:mcp       # MCP 工具扫描测试
+npm run test:init      # 初始化命令测试
 ```
 
 ### 分发说明
@@ -431,6 +467,37 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
 | Claude Code (project) | `./.claude/Acode-kit` + subagent adapters |
 | Local / no agent | `./agent-skills/Acode-kit` + portable Claude adapters |
 
+### Initialization (Required After Install)
+
+After installation, **you must run the init command first** to scan/install MCP tools and configure NotebookLM authentication:
+
+```bash
+# Run in your project directory
+acode-kit init
+
+# Or specify working directory and provider
+acode-kit init --cwd /path/to/project --provider claude
+```
+
+> If `acode-kit` is not on your PATH, use `node ./scripts/acode-kit.mjs init` instead.
+
+Initialization flow:
+1. Check project folder state (empty / existing)
+2. Scan 4 MCP tools for installation status
+3. Prompt to install missing tools (skippable)
+4. Verify installation results
+5. Configure NotebookLM authentication (triggers browser login)
+6. Write `.acode-kit-initialized.json` status file
+
+| Flag | Description |
+|------|-------------|
+| `--cwd PATH` | Working directory (defaults to cwd) |
+| `--provider codex\|claude` | Target provider (auto-detected if omitted) |
+| `--yes` | Skip confirmation prompts, auto-install |
+| `--force` | Force re-initialization |
+
+> **Important**: You must complete initialization before using Acode-kit for project tasks. The AI will prompt you to run init if not initialized.
+
 ### Usage
 
 #### Unified Entry (Recommended)
@@ -488,6 +555,8 @@ Use Acode-kit to continue the current project. Review PRD and traceability matri
 ```bash
 npm run test:router    # Router mapping and fallback tests
 npm run test:entry     # Entry point classification and routing tests
+npm run test:mcp       # MCP tool scan tests
+npm run test:init      # Initialization command tests
 ```
 
 ### License
