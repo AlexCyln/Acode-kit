@@ -1,0 +1,58 @@
+{
+  "defaults": {
+    "phase": "实现",
+    "task_type": "前后端编码开发",
+    "difficulty": "medium",
+    "provider": "codex"
+  },
+  "rules": [
+    {
+      "keywords": ["需求", "requirement", "分析", "评审"],
+      "phase": "需求",
+      "task_type": "需求分析",
+      "difficulty": "medium"
+    },
+    {
+      "keywords": ["文档", "报告", "总结", "handoff", "prd"],
+      "phase": "文档",
+      "task_type": "文档撰写",
+      "difficulty": "low"
+    },
+    {
+      "keywords": ["ui", "界面", "交互", "原型", "设计稿"],
+      "phase": "设计",
+      "task_type": "ui设计",
+      "difficulty": "medium"
+    },
+    {
+      "keywords": ["数据库", "sql", "schema", "表结构"],
+      "phase": "实现",
+      "task_type": "数据库",
+      "difficulty": "medium"
+    },
+    {
+      "keywords": ["实现", "开发", "编码", "api", "接口", "frontend", "backend"],
+      "phase": "实现",
+      "task_type": "前后端编码开发",
+      "difficulty": "high"
+    },
+    {
+      "keywords": ["审查", "review", "测试编写", "test case"],
+      "phase": "测试",
+      "task_type": "编码审查",
+      "difficulty": "medium"
+    },
+    {
+      "keywords": ["单测", "单元测试", "自动化验证", "unittest"],
+      "phase": "测试",
+      "task_type": "单元测试自动化与验证",
+      "difficulty": "low"
+    },
+    {
+      "keywords": ["上线", "发布", "go live", "release"],
+      "phase": "上线",
+      "task_type": "发布总结",
+      "difficulty": "low"
+    }
+  ]
+}

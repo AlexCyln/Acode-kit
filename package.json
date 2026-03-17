@@ -3,8 +3,16 @@
   "version": "0.1.0",
   "description": "Installer metadata for the Acode-kit multi-agent skill package.",
   "type": "module",
+  "scripts": {
+    "test:router": "node ./scripts/test-router.mjs",
+    "test:entry": "node ./scripts/test-acode-run.mjs",
+    "install:win": "powershell -ExecutionPolicy Bypass -File ./scripts/install.ps1"
+  },
   "bin": {
-    "structcode-skill-install": "./scripts/install.mjs"
+    "acode-kit-install": "./scripts/install.mjs",
+    "acode-agent-execute": "./scripts/agent-execute.mjs",
+    "acode-router-exec": "./scripts/router-exec.mjs",
+    "acode-run": "./scripts/acode-run.mjs"
   },
   "files": [
     "scripts",

@@ -1,0 +1,181 @@
+{
+  "phase_to_task_model": {
+    "需求": [
+      {
+        "task_type": "需求分析",
+        "difficulty": "medium",
+        "weight": 0.8,
+        "providers": {
+          "claude": {
+            "primary_model": "claude-sonnet-4-6",
+            "fallback_model": "claude-haiku-4-5"
+          },
+          "codex": {
+            "primary_model": "gpt-5.3-codex",
+            "fallback_model": "gpt-5.2-codex"
+          }
+        }
+      }
+    ],
+    "文档": [
+      {
+        "task_type": "文档撰写",
+        "difficulty": "low",
+        "weight": 1,
+        "providers": {
+          "claude": {
+            "primary_model": "claude-haiku-4-5",
+            "fallback_model": "claude-sonnet-4-6"
+          },
+          "codex": {
+            "primary_model": "gpt-5.2-codex",
+            "fallback_model": "gpt-5.3-codex"
+          }
+        }
+      },
+      {
+        "task_type": "总结报告",
+        "difficulty": "low",
+        "weight": 1,
+        "providers": {
+          "claude": {
+            "primary_model": "claude-haiku-4-5",
+            "fallback_model": "claude-sonnet-4-6"
+          },
+          "codex": {
+            "primary_model": "gpt-5.2-codex",
+            "fallback_model": "gpt-5.3-codex"
+          }
+        }
+      }
+    ],
+    "设计": [
+      {
+        "task_type": "设计评审",
+        "difficulty": "medium",
+        "weight": 0.8,
+        "providers": {
+          "claude": {
+            "primary_model": "claude-sonnet-4-6",
+            "fallback_model": "claude-haiku-4-5"
+          },
+          "codex": {
+            "primary_model": "gpt-5.3-codex",
+            "fallback_model": "gpt-5.2-codex"
+          }
+        }
+      },
+      {
+        "task_type": "ui设计",
+        "difficulty": "medium",
+        "weight": 0.8,
+        "providers": {
+          "claude": {
+            "primary_model": "claude-sonnet-4-6",
+            "fallback_model": "claude-haiku-4-5"
+          },
+          "codex": {
+            "primary_model": "gpt-5.3-codex",
+            "fallback_model": "gpt-5.2-codex"
+          }
+        }
+      }
+    ],
+    "实现": [
+      {
+        "task_type": "前后端编码开发",
+        "difficulty": "high",
+        "weight": 0.8,
+        "providers": {
+          "claude": {
+            "primary_model": "claude-opus-4-6",
+            "fallback_model": "claude-sonnet-4-6"
+          },
+          "codex": {
+            "primary_model": "gpt-5.4-codex",
+            "fallback_model": "gpt-5.3-codex"
+          }
+        }
+      },
+      {
+        "task_type": "数据库",
+        "difficulty": "medium",
+        "weight": 0.8,
+        "providers": {
+          "claude": {
+            "primary_model": "claude-sonnet-4-6",
+            "fallback_model": "claude-haiku-4-5"
+          },
+          "codex": {
+            "primary_model": "gpt-5.3-codex",
+            "fallback_model": "gpt-5.2-codex"
+          }
+        }
+      }
+    ],
+    "测试": [
+      {
+        "task_type": "编码审查",
+        "difficulty": "medium",
+        "weight": 0.8,
+        "providers": {
+          "claude": {
+            "primary_model": "claude-sonnet-4-6",
+            "fallback_model": "claude-haiku-4-5"
+          },
+          "codex": {
+            "primary_model": "gpt-5.3-codex",
+            "fallback_model": "gpt-5.2-codex"
+          }
+        }
+      },
+      {
+        "task_type": "测试编写",
+        "difficulty": "medium",
+        "weight": 0.8,
+        "providers": {
+          "claude": {
+            "primary_model": "claude-sonnet-4-6",
+            "fallback_model": "claude-haiku-4-5"
+          },
+          "codex": {
+            "primary_model": "gpt-5.3-codex",
+            "fallback_model": "gpt-5.2-codex"
+          }
+        }
+      },
+      {
+        "task_type": "单元测试自动化与验证",
+        "difficulty": "low",
+        "weight": 1,
+        "providers": {
+          "claude": {
+            "primary_model": "claude-haiku-4-5",
+            "fallback_model": "claude-sonnet-4-6"
+          },
+          "codex": {
+            "primary_model": "gpt-5.2-codex",
+            "fallback_model": "gpt-5.3-codex"
+          }
+        }
+      }
+    ],
+    "上线": [
+      {
+        "task_type": "发布总结",
+        "difficulty": "low",
+        "weight": 1,
+        "providers": {
+          "claude": {
+            "primary_model": "claude-haiku-4-5",
+            "fallback_model": "claude-sonnet-4-6"
+          },
+          "codex": {
+            "primary_model": "gpt-5.2-codex",
+            "fallback_model": "gpt-5.3-codex"
+          }
+        }
+      }
+    ]
+  }
+}

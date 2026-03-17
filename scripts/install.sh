@@ -65,6 +65,7 @@ copy_claude_adapter() {
   local source_dir="$1"
   local dest_root="$2"
   local adapter_file="$source_dir/integrations/claude/acode-kit.md"
+  local router_adapter_file="$source_dir/integrations/claude/acode-run.md"
 
   if [[ ! -f "$adapter_file" ]]; then
     echo "Claude adapter not found at $adapter_file" >&2
@@ -73,6 +74,9 @@ copy_claude_adapter() {
 
   mkdir -p "$dest_root/agents"
   cp "$adapter_file" "$dest_root/agents/acode-kit.md"
+  if [[ -f "$router_adapter_file" ]]; then
+    cp "$router_adapter_file" "$dest_root/agents/acode-run.md"
+  fi
 }
 
 install_agent() {
@@ -83,10 +87,16 @@ install_agent() {
   local skill_name
   skill_name="$(basename "$source_dir")"
   local target_dir="$dest_root/$skill_name"
+  local repo_root
+  repo_root="$(cd "$(dirname "$source_dir")" && pwd)"
 
   mkdir -p "$dest_root"
   rm -rf "$target_dir"
   cp -R "$source_dir" "$target_dir"
+  if [[ -d "$repo_root/scripts" ]]; then
+    rm -rf "$target_dir/scripts"
+    cp -R "$repo_root/scripts" "$target_dir/scripts"
+  fi
 
   case "$agent" in
     codex)
@@ -96,6 +106,9 @@ install_agent() {
       copy_claude_adapter "$source_dir" "$dest_root"
       echo "Installed Claude bundle to $target_dir"
       echo "Installed Claude subagent to $dest_root/agents/acode-kit.md"
+      if [[ -f "$source_dir/integrations/claude/acode-run.md" ]]; then
+        echo "Installed Claude unified entry to $dest_root/agents/acode-run.md"
+      fi
       ;;
     local)
       mkdir -p "$dest_root/claude"
@@ -103,10 +116,14 @@ install_agent() {
         cp "$source_dir/integrations/claude/acode-kit.md" "$dest_root/claude/acode-kit.md"
         echo "Saved portable Claude adapter to $dest_root/claude/acode-kit.md"
       fi
+      if [[ -f "$source_dir/integrations/claude/acode-run.md" ]]; then
+        cp "$source_dir/integrations/claude/acode-run.md" "$dest_root/claude/acode-run.md"
+        echo "Saved portable Claude unified entry to $dest_root/claude/acode-run.md"
+      fi
       echo "Installed portable bundle to $target_dir"
       echo "Manual next step:"
       echo "- Codex: copy the Acode-kit folder into ~/.codex/skills/"
-      echo "- Claude Code: copy the Acode-kit folder into ~/.claude/ and copy claude/acode-kit.md into ~/.claude/agents/"
+      echo "- Claude Code: copy the Acode-kit folder into ~/.claude/ and copy claude/acode-kit.md and claude/acode-run.md into ~/.claude/agents/"
       ;;
   esac
 }

@@ -47,6 +47,14 @@ function copyFile(sourceFile, destFile) {
   fs.copyFileSync(sourceFile, destFile);
 }
 
+function copyBundleScripts(sourceDir, bundleDir) {
+  const repoRoot = path.dirname(sourceDir);
+  const scriptsDir = path.join(repoRoot, "scripts");
+  if (!exists(scriptsDir)) return;
+  const targetScriptsDir = path.join(bundleDir, "scripts");
+  copyDir(scriptsDir, targetScriptsDir);
+}
+
 function detectAgentMode() {
   const codexBase = process.env.CODEX_HOME || path.join(os.homedir(), ".codex");
   const claudeBase = process.env.CLAUDE_HOME || path.join(os.homedir(), ".claude");
@@ -117,6 +125,7 @@ function installCodex(sourceDir, destRoot) {
   ensureSkill(sourceDir);
   const bundleDir = path.join(destRoot, path.basename(sourceDir));
   copyDir(sourceDir, bundleDir);
+  copyBundleScripts(sourceDir, bundleDir);
   return [`Installed Codex skill to ${bundleDir}`];
 }
 
@@ -124,18 +133,27 @@ function installClaude(sourceDir, destRoot) {
   ensureSkill(sourceDir);
   const bundleDir = path.join(destRoot, path.basename(sourceDir));
   const adapterTemplate = path.join(sourceDir, "integrations", "claude", "acode-kit.md");
+  const routerAdapterTemplate = path.join(sourceDir, "integrations", "claude", "acode-run.md");
   const agentFile = path.join(destRoot, "agents", "acode-kit.md");
+  const routerAgentFile = path.join(destRoot, "agents", "acode-run.md");
 
   if (!exists(adapterTemplate)) {
     throw new Error(`Claude adapter not found in ${adapterTemplate}`);
   }
 
   copyDir(sourceDir, bundleDir);
+  copyBundleScripts(sourceDir, bundleDir);
   copyFile(adapterTemplate, agentFile);
+  if (exists(routerAdapterTemplate)) {
+    copyFile(routerAdapterTemplate, routerAgentFile);
+  }
 
   return [
     `Installed Claude bundle to ${bundleDir}`,
-    `Installed Claude subagent to ${agentFile}`
+    `Installed Claude subagent to ${agentFile}`,
+    exists(routerAdapterTemplate)
+      ? `Installed Claude unified entry to ${routerAgentFile}`
+      : "Claude unified entry adapter not found; skipping acode-run adapter."
   ];
 }
 
@@ -143,19 +161,26 @@ function installLocal(sourceDir, destRoot) {
   ensureSkill(sourceDir);
   const bundleDir = path.join(destRoot, path.basename(sourceDir));
   const adapterTemplate = path.join(sourceDir, "integrations", "claude", "acode-kit.md");
+  const routerAdapterTemplate = path.join(sourceDir, "integrations", "claude", "acode-run.md");
   const portableClaudeFile = path.join(destRoot, "claude", "acode-kit.md");
+  const portableRouterFile = path.join(destRoot, "claude", "acode-run.md");
 
   copyDir(sourceDir, bundleDir);
+  copyBundleScripts(sourceDir, bundleDir);
   const lines = [`Installed portable bundle to ${bundleDir}`];
 
   if (exists(adapterTemplate)) {
     copyFile(adapterTemplate, portableClaudeFile);
     lines.push(`Saved portable Claude adapter to ${portableClaudeFile}`);
   }
+  if (exists(routerAdapterTemplate)) {
+    copyFile(routerAdapterTemplate, portableRouterFile);
+    lines.push(`Saved portable Claude unified entry to ${portableRouterFile}`);
+  }
 
   lines.push("Manual next step:");
   lines.push("- Codex: copy the Acode-kit folder into ~/.codex/skills/");
-  lines.push("- Claude Code: copy the Acode-kit folder into ~/.claude/ and copy claude/acode-kit.md into ~/.claude/agents/");
+  lines.push("- Claude Code: copy the Acode-kit folder into ~/.claude/ and copy claude/acode-kit.md and claude/acode-run.md into ~/.claude/agents/");
   return lines;
 }
 

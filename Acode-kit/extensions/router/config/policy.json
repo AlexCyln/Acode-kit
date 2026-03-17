@@ -1,0 +1,33 @@
+{
+  "token_policy": {
+    "total_token_cap": 120000,
+    "phase_ratio": {
+      "需求": 0.12,
+      "文档": 0.08,
+      "设计": 0.2,
+      "实现": 0.4,
+      "测试": 0.15,
+      "上线": 0.05
+    },
+    "phase_warning_threshold": 0.8,
+    "soft_task_cap": {
+      "low": 1800,
+      "medium": 4200,
+      "high": 9000
+    }
+  },
+  "fallback_policy": {
+    "ordered_triggers": [
+      "error",
+      "timeout",
+      "quality_low",
+      "budget_exceeded"
+    ],
+    "max_retry_per_trigger": 1,
+    "quality_threshold": 0.75
+  },
+  "execution_policy": {
+    "default_timeout_ms": 180000,
+    "allow_randomized_weight": false
+  }
+}

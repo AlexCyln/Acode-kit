@@ -77,6 +77,21 @@ Minimal stage order:
 
 Never skip a stage if its missing outputs would make the next stage unstable.
 
+## Router integration
+Use `extensions/router` as the model-routing execution layer when the task needs model-version selection.
+
+Rules:
+1. Acode-kit remains the stage orchestrator and is responsible for phase transitions.
+2. Use unified entry `acode-run` for task execution so users only interact with Acode-kit as a single entry point.
+3. Router is called at phase entry, phase-exit cross-trigger tasks, and explicit high-difficulty subtasks.
+4. Route input must include `project_id`, `phase`, `task_type`, `difficulty`, `provider`, `prompt`, and `context_summary`.
+5. Always treat `logical_session_id` and `native_session_id` as different keys:
+   - `logical_session_id`: routing state key, default `project_id:phase`
+   - `native_session_id`: provider continuation key from runtime execution
+6. Fallback order is fixed: `error -> timeout -> quality_low -> budget_exceeded`.
+7. Phase token budget is hard cap; task budget is soft cap.
+8. For simple low-risk tasks, default to no multi-model routing and ask user confirmation before bypassing router.
+
 ## Stage-specific references
 Load only what is needed for the current stage.
 

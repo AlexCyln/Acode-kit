@@ -5,3 +5,4 @@ dist/
 agent-skills*/
 tmp/
 *.tmp
+.acode-router/
