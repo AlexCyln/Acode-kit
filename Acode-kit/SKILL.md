@@ -1,6 +1,6 @@
 ---
 name: Acode-kit
-description: Use this skill when the user wants to start, structure, or continue a concrete software project in a solo + AI vibe coding workflow. It initializes project-level documents, applies the bundled global engineering standards, drives the project stage by stage from requirements to deployment, and keeps scope, traceability, testing, and handoff records updated.
+description: Gate-driven project delivery workflow for AI coding agents. Every new project MUST pass through 3 mandatory user-approval gates before any file or directory is created. Read the MANDATORY FIRST ACTION section immediately.
 ---
 
 # Acode-kit
@@ -11,7 +11,7 @@ Use this skill when:
 3. The user wants to continue an in-progress project while keeping requirements, scope, coding, testing, and deployment aligned.
 4. The user explicitly mentions `Acode-kit`.
 
-This skill is intended to be the single public entry point for the whole workflow. Do not require the user to remember multiple skills for normal project delivery.
+This skill is the single public entry point for the whole workflow.
 
 ## What this skill does
 1. Applies the bundled global engineering standards as the top-level constraints.
@@ -19,6 +19,109 @@ This skill is intended to be the single public entry point for the whole workflo
 3. Pushes work in small vertical slices instead of unbounded bulk generation.
 4. Keeps requirements, decisions, traceability, testing, and go-live status in sync.
 5. Enforces TDD as the standard development methodology.
+
+---
+
+## MANDATORY FIRST ACTION
+
+**When this skill is loaded for a new project or a fresh project brief, you MUST execute the gate-driven startup sequence below. This is NOT optional. Do NOT skip to "Stage-driven execution". Do NOT create any files, directories, or task plans until you have passed GATE 3.**
+
+**Your first response to the user MUST be the output of Step 1 (environment scan results). Nothing else.**
+
+---
+
+## Gate-driven startup sequence
+
+This sequence has 4 steps and 3 mandatory gates. Each gate requires you to STOP, present output to the user, and WAIT for explicit user approval before continuing. You may NOT combine multiple steps into one response.
+
+### Step 1: Environment Scan
+
+Do this FIRST. Do not read reference docs, do not analyze requirements, do not plan stages.
+
+1. Scan the current workspace folder:
+   - Empty folder → new project
+   - Existing project → continuation or iteration
+2. Scan available MCP tools per `references/global-engineering-standards/31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
+3. For missing tools: list them and suggest installation commands.
+4. Present to the user:
+   - Workspace state (empty / existing project)
+   - MCP tool status table (each tool: installed / missing)
+   - If tools are missing: ask whether to install them now
+
+**>>> GATE 1: STOP HERE. Output the scan results. Ask the user to confirm tool installation decisions and acknowledge the scan. Wait for the user's reply. DO NOT continue to Step 2 in this same response. <<<**
+
+### Step 2: Requirements Analysis + Project Skeleton
+
+Only begin after the user has replied to GATE 1.
+
+1. Read ONLY `references/global-engineering-standards/00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2 (tech stack decision framework). Do NOT read other reference documents at this stage — they are loaded later per stage as needed.
+2. Read the user's project prompt/brief.
+3. Analyze the project brief and produce a **project skeleton**:
+   - If NotebookLM MCP is available: invoke NotebookLM to deepen the analysis.
+   - If NotebookLM MCP is unavailable: perform the analysis directly.
+4. The project skeleton MUST contain:
+   - Recommended tech stack (frontend, backend, database, deployment, design tool)
+   - Core business logic summary
+   - System modules / partitions
+   - UI/UX style direction
+   - Scope boundaries and constraints
+5. Present the project skeleton to the user.
+
+**>>> GATE 2: STOP HERE. Present the project skeleton. Explicitly ask: "Please confirm this project skeleton, or tell me what to revise." Wait for the user's reply. DO NOT draft a PRD, create any files, or plan any stages until the user explicitly approves. If the user requests changes, revise and re-present until approved. <<<**
+
+### Step 3: PRD + Progress Plan
+
+Only begin after the user has explicitly approved the project skeleton from GATE 2.
+
+1. Read `references/global-engineering-standards/01_PRODUCT_REQUIREMENTS_STANDARD.md` (PRD structure reference). Do NOT load other specs yet.
+2. Based on the approved skeleton, determine the tech stack and prepare `PROJECT_OVERRIDES.md` content.
+3. Draft a structured PRD.
+4. Generate a progress plan and requirements traceability matrix.
+5. Present the PRD and progress plan to the user.
+
+**>>> GATE 3: STOP HERE. Present the PRD and progress plan. Explicitly ask: "Please confirm this PRD and plan, or tell me what to revise." Wait for the user's reply. DO NOT create project directories, files, dependencies, or any code until the user explicitly approves. If the user requests changes, revise and re-present until approved. <<<**
+
+### Step 4: Project Environment Setup
+
+Only begin after the user has explicitly approved the PRD from GATE 3. This is the FIRST point where you may create files and directories.
+
+1. Now read the setup-related references:
+   - `references/global-engineering-standards/28_PROJECT_DIRECTORY_AND_REPOSITORY_STRUCTURE_SPEC.md`
+   - `references/global-engineering-standards/22_SOLO_AI_PROJECT_OPERATING_MANUAL.md`
+   - `references/global-engineering-standards/15_AI_COLLABORATION_PLAYBOOK.md`
+2. Create the project root structure and `AGENTS.md`.
+2. Create the minimum project-level documents from templates in `assets/project-doc-templates/`:
+   - `AGENTS.md`
+   - `docs/project/PROJECT_OVERVIEW.md`
+   - `docs/project/PROJECT_OVERRIDES.md`
+   - `docs/project/PRD.md`
+   - `docs/project/DECISION_LOG.md`
+   - `docs/project/TRACEABILITY_MATRIX.md`
+   - `docs/project/SESSION_HANDOFF.md`
+   - `docs/project/GO_LIVE_RECORD.md`
+3. Set up directories, dependencies, environment, and packages per the declared tech stack.
+4. Extract pending confirmations instead of silently inventing core business rules.
+
+After Step 4 is complete, proceed to the stage-driven execution below.
+
+---
+
+## Stage-driven execution
+
+**This section ONLY applies after the gate-driven startup sequence is fully complete (all 3 gates passed).** If you have not passed GATE 3, go back to the startup sequence.
+
+Follow the bundled execution flow in `references/global-engineering-standards/27_PROJECT_EXECUTION_FLOW_SPEC.md`.
+
+Stage order (starting from where the startup sequence left off):
+1. Requirements structuring (deepen PRD into detailed specs)
+2. UI / page structuring
+3. Data and API design
+4. Project scaffold initialization
+5. TDD-driven small-slice implementation
+6. Review, testing, debug
+7. Deployment and go-live
+
+Never skip a stage if its missing outputs would make the next stage unstable.
 
 ## Required working model
 Always treat the project as:
@@ -33,96 +136,6 @@ Within project documents, apply this order:
 4. detailed API / database / function / testing docs = implementation detail records
 
 Do not jump straight into code if project-level facts are missing.
-
-## Startup workflow
-
-**CRITICAL: Steps must execute in strict sequential order. Each step has a GATE that must be passed before the next step begins. DO NOT batch multiple steps. DO NOT create project directories, files, or code until Step 4. DO NOT draft a PRD until Step 3. DO NOT skip any step.**
-
-When a project starts or the user provides a fresh project brief:
-
-### Step 1: Environment Scan
-1. Scan the current workspace folder to determine:
-   - Empty folder → new project
-   - Existing project → continuation or iteration
-2. Scan available MCP tools per `references/global-engineering-standards/31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
-3. For missing tools: suggest installation → await user authorization → execute → verify → record status.
-4. Record tool availability status for the session.
-5. Present the environment scan results to the user (folder state + tool status).
-
-**GATE 1: Report scan results to the user. Wait for the user to acknowledge before proceeding to Step 2. DO NOT silently continue.**
-
-### Step 2: Requirements Analysis
-1. Read `references/global-engineering-standards/README.md`
-2. Read `references/global-engineering-standards/00_GLOBAL_ENGINEERING_PRINCIPLES.md`
-3. Read `references/global-engineering-standards/15_AI_COLLABORATION_PLAYBOOK.md`
-4. Read `references/global-engineering-standards/22_SOLO_AI_PROJECT_OPERATING_MANUAL.md`
-5. Read `references/global-engineering-standards/27_PROJECT_EXECUTION_FLOW_SPEC.md`
-6. Read `references/global-engineering-standards/28_PROJECT_DIRECTORY_AND_REPOSITORY_STRUCTURE_SPEC.md`
-7. Read the user's project prompt/brief.
-8. If NotebookLM MCP is available: invoke NotebookLM to analyze the project brief and output a project skeleton containing:
-   - Recommended tech stack
-   - Core business logic summary
-   - System modules/partitions
-   - UI/UX style direction
-   - Scope boundaries and constraints
-9. If NotebookLM MCP is unavailable: AI agent performs the same analysis directly.
-10. Present the project skeleton to the user.
-
-**GATE 2: STOP. Present the project skeleton and explicitly ask the user to confirm or revise. DO NOT proceed to PRD, directory creation, or any file generation until the user explicitly approves the project skeleton. If the user requests changes, revise the skeleton and re-present it.**
-
-### Step 3: First-iteration PRD + Progress Plan
-Only begin this step after the user has explicitly approved the project skeleton from Step 2.
-1. Based on the confirmed project skeleton, determine the project tech stack and record it in `PROJECT_OVERRIDES.md`.
-2. Solidify into a structured PRD.
-3. Generate a progress plan and requirements traceability matrix.
-4. Present the PRD and progress plan to the user.
-
-**GATE 3: STOP. Present the PRD and progress plan, and explicitly ask the user to confirm or revise. DO NOT create project directories, install dependencies, or write any code until the user explicitly approves the PRD. If the user requests changes, revise and re-present.**
-
-### Step 4: Project Environment Setup
-Only begin this step after the user has explicitly approved the PRD from Step 3.
-1. On first project bootstrap, create the project root structure and the project-level `AGENTS.md`.
-2. Create or update the minimum project-level documents.
-3. Set up directories, dependencies, environment, and packages per the declared tech stack.
-4. Extract pending confirmations instead of silently inventing core business rules.
-
-### Step 5: Continuous Implementation
-Follow the stage-driven execution flow (see below).
-
-### Startup workflow violations (NEVER do these)
-1. NEVER create project directories or files before Step 4.
-2. NEVER draft a PRD before completing Step 2 and receiving user confirmation of the project skeleton.
-3. NEVER batch Steps 1-4 into a single response. Each gate requires a separate user interaction.
-4. NEVER assume user confirmation. Silence is not approval — always ask explicitly.
-5. NEVER skip the environment scan (Step 1) even if the user provides a detailed brief.
-
-## Minimum project-level documents
-Use the templates in `assets/project-doc-templates/` to create these when missing:
-1. `AGENTS.md`
-2. `docs/project/PROJECT_OVERVIEW.md`
-3. `docs/project/PROJECT_OVERRIDES.md`
-4. `docs/project/PRD.md`
-5. `docs/project/DECISION_LOG.md`
-6. `docs/project/TRACEABILITY_MATRIX.md`
-7. `docs/project/SESSION_HANDOFF.md`
-8. `docs/project/GO_LIVE_RECORD.md`
-
-The user should only need to provide the project need or project brief. The workflow requirements are already embedded in this skill and the bundled standards.
-
-## Stage-driven execution
-Follow the bundled execution flow in `references/global-engineering-standards/27_PROJECT_EXECUTION_FLOW_SPEC.md`.
-
-Minimal stage order:
-1. Project initialization
-2. Requirements structuring
-3. UI / page structuring
-4. Data and API design
-5. Project scaffold initialization
-6. TDD-driven small-slice implementation
-7. Review, testing, debug
-8. Deployment and go-live
-
-Never skip a stage if its missing outputs would make the next stage unstable.
 
 ## Workflow rules
 
@@ -241,14 +254,16 @@ When the task is complex, structure the work as:
 4. implementation
 5. document updates
 
-## Do not
+## NEVER do these
 1. Replace the declared technology stack on your own.
 2. Skip project docs and jump straight to large-scale coding.
 3. Expand scope silently.
 4. Generate a full system in one pass when the project facts are still incomplete.
 5. Ask the user to restate workflow rules that are already embedded in this skill and the generated project `AGENTS.md`.
 6. Write production code without a corresponding failing test (TDD gate).
-7. Skip or merge startup workflow gates — each GATE requires a separate user interaction and explicit approval.
-8. Create project directories, install dependencies, or generate files before the user approves the PRD (GATE 3).
-9. Draft a PRD before the user approves the project skeleton (GATE 2).
+7. Skip or merge startup gates — each GATE requires a separate user interaction round.
+8. Create ANY file or directory before the user approves the PRD at GATE 3.
+9. Draft a PRD before the user approves the project skeleton at GATE 2.
 10. Assume the user has approved when they have not explicitly said so.
+11. Create a task plan or stage list as your first response — your first response MUST be the environment scan results (Step 1 output only).
+12. Jump from receiving a project brief directly to "Stage-driven execution" — the startup sequence is mandatory first.
