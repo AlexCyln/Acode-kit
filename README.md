@@ -1,131 +1,164 @@
 # Acode-kit
 
+**Tech-stack-agnostic, TDD-driven project delivery framework for AI coding agents.**
+
 中文 | [English](#english)
+
+---
 
 ## 中文
 
 ### 项目简介
 
-`Acode-kit` 是一个面向 AI 编码代理的项目交付插件，支持 `Codex`、`Claude Code`，并兼容“先下载到本地项目目录、后续再手动安装到任意 Agent”的使用方式。它不是单纯的提示词，而是一套从需求、文档、设计、实现、测试到上线的结构化工作流，并提供统一入口自动完成模型版本路由、会话承接和执行闭环。
+`Acode-kit` 是一个面向 AI 编码代理（Codex、Claude Code）的**技术栈无关**项目交付框架。它不是一个提示词模板，而是一套完整的工程方法论 + 工作流引擎 + 工具链集成：
 
-### 实现功能
+- **技术栈无关**：不绑定任何固定框架。iOS、Android、小程序、Web、桌面——项目初始化时声明技术栈，框架自动适配。
+- **TDD 驱动**：红-绿-重构循环作为宪法级开发方法论，贯穿每个实现切片。
+- **MCP 工具集成**：自动扫描和管理 Pencil（设计稿）、NotebookLM（需求分析）、shadcn（UI 组件）、Chrome DevTools（调试）四大工具。
+- **智能模型路由**：按任务阶段、类型、难度自动选择最优模型版本，内置降级策略与 token 预算控制。
+- **结构化交付**：从需求到上线的 8 阶段闭环，文档驱动、可追踪、可交接。
 
-- 启动新项目，或接管并继续推进现有项目。
-- 自动建立并维护项目级文档，如 `PRD`、`TRACEABILITY_MATRIX`、`SESSION_HANDOFF`、`DECISION_LOG`。
-- 按阶段驱动项目：需求结构化、UI/页面设计、数据与 API 设计、脚手架初始化、小闭环实现、测试、部署上线。
-- 绑定全局工程规范，控制技术栈、范围、质量、评审与交付节奏。
-- 适配多 Agent 分发：Codex、Claude Code，以及本地目录离线安装包。
-- 统一入口 `acode-run`：按任务阶段与类型自动路由模型版本，自动承接会话上下文。
-- 路由策略内置降级与预算控制，避免无边界 token 消耗。
+### 核心创新
 
-### 特色亮点
+#### 1. 技术栈决策框架
 
-- 强调“先定边界，再做实现”，避免 AI 无边界写代码。
-- 内置模板和规范，不要求用户每次重新描述完整流程。
-- 要求需求、实现、测试、上线记录可追踪、可回溯、可 handoff。
-- 支持自动安装和手动安装两条路径，适合不同用户环境。
-- 在未安装 Codex 或 Claude 时，也能先安装到当前打开的文件夹中，之后再人工接入目标 Agent。
-- 单入口使用方式，对用户无感完成模型路由与会话连续性维护。
-- 支持同一 provider 内多版本自动切换，内置 fallback 规则与 token 预算门禁。
+告别硬编码技术栈。Acode-kit 定义了一个分类决策框架：
+
+| 分类 | 说明 | 示例 |
+|------|------|------|
+| 项目类型 | Web / 移动 / 小程序 / 桌面 | iOS App、SaaS Web |
+| 前端框架 | 按项目类型选择 | React、Vue、SwiftUI、Flutter |
+| UI 组件库 | 按前端框架生态选择 | shadcn/ui、Element Plus、Ant Design |
+| 后端运行时 | 按团队能力和业务需求选择 | Node.js、Spring Boot、Go |
+| ORM/数据访问 | 按后端运行时选择 | Prisma、MyBatis、GORM |
+| 数据库 | 按数据模型选择 | PostgreSQL、MySQL、MongoDB |
+| 缓存 | 按性能需求选择（可选） | Redis、Memcached |
+| 认证方案 | 按安全需求选择 | JWT、OAuth 2.0、Session |
+| 部署平台 | 按运维能力选择 | Docker、Vercel、AWS |
+| 设计工具 | 按团队偏好选择 | Pencil、Figma |
+
+每个项目通过 `PROJECT_OVERRIDES.md` 声明技术栈，全部 31 份工程规范自动适配。
+
+#### 2. TDD 宪法条款
+
+每个垂直切片必须遵循：
+
+```
+红（Red）    → 写一个描述预期行为的失败测试
+绿（Green）  → 写最小量实现使测试通过
+重构（Refactor） → 在测试保护下优化代码结构
+```
+
+TDD 不是建议，是门禁——不写失败测试就不允许写生产代码。
+
+#### 3. MCP 工具自动化
+
+项目启动时自动扫描并管理四大 MCP 工具：
+
+| 工具 | 用途 | 缺位降级 |
+|------|------|----------|
+| **Pencil MCP** | UI/UX 设计稿 | AI 生成文字布局描述 |
+| **NotebookLM MCP** | 需求分析与项目骨架 | AI 直接分析 |
+| **shadcn MCP** | UI 组件库集成 | 手动组件搭建 |
+| **Chrome DevTools MCP** | 前端调试 | 传统日志调试 |
+
+工具状态三态管理：`installed` → `missing` → `degraded`，每个工具都有完整的降级方案。
+
+#### 4. 智能模型路由
+
+```
+用户下达任务
+    ↓
+关键词分类 → 阶段(需求/设计/实现/测试/上线) + 难度(low/medium/high)
+    ↓
+模型映射 → 按 provider(Codex/Claude) + 难度 选择模型版本
+    ↓
+预算检查 → 阶段 token 硬上限 + 任务软上限
+    ↓
+执行 → 成功返回 | 触发降级(error → timeout → quality_low → budget_exceeded)
+    ↓
+输出 → selectedModel / finalModel / fallbackTriggered / token usage
+```
+
+单入口 `acode-run`，用户无感完成模型选择、降级、会话承接。
+
+#### 5. 五步启动工作流
+
+```
+Step 1: 环境扫描     → 文件夹状态 + MCP 工具检测 + 自动安装
+Step 2: 需求分析     → NotebookLM 分析 → 输出项目骨架 → 用户确认
+Step 3: 首期 PRD     → 技术栈固化 → PRD + 进度计划 + 需求矩阵
+Step 4: 环境搭建     → 目录 / 依赖 / 包 / 配置
+Step 5: 持续实施     → 8 阶段闭环 × TDD × 小垂直切片
+```
+
+### 工作流规则
+
+**前端页面**（Pencil + shadcn 可用时）：
+1. Pencil 设计稿 → 用户确认
+2. shadcn 组件库构建
+3. 按设计稿 1:1 还原
+
+**大规模需求变更**（影响 > 30% 模块）：
+1. 重走 NotebookLM 分析 → 输出变更骨架 → 用户确认
+2. 更新 PRD、需求矩阵、决策日志后再实施
 
 ### 支持矩阵
 
 | 目标 | 安装结果 |
-| --- | --- |
-| `Codex` | 安装到 `~/.codex/skills/Acode-kit` |
-| `Claude Code` | 安装 bundle 到 `~/.claude/Acode-kit`，并安装 subagents 到 `~/.claude/agents/acode-kit.md` 与 `~/.claude/agents/acode-run.md` |
-| `本地目录 / 未安装 Agent` | 安装到当前目录下的 `./agent-skills/Acode-kit`，并附带 Claude 适配文件 |
+|------|----------|
+| Codex | `~/.codex/skills/Acode-kit` |
+| Claude Code（用户级） | `~/.claude/Acode-kit` + `~/.claude/agents/acode-kit.md` + `acode-run.md` |
+| Claude Code（项目级） | `./.claude/Acode-kit` + `./.claude/agents/acode-kit.md` + `acode-run.md` |
+| 本地便携包 | `./agent-skills/Acode-kit` + Claude 适配文件 |
 
-### 安装模式
+### 快速安装
 
-新安装器支持以下模式：
-
-- `--agent auto`：自动检测本机已有 Agent。若同时存在 Codex 和 Claude，则同时安装；若都不存在，则安装到当前目录下的 `agent-skills/`。
-- `--agent codex`：只安装到 Codex。
-- `--agent claude`：只安装到 Claude。
-- `--agent local`：安装到当前目录，作为便携包。
-- `--agent both`：同时安装到 Codex 和 Claude。
-- `--scope user|project`：针对 Claude，支持用户级安装和项目级安装。`project` 会安装到当前项目的 `.claude/` 目录。
-- `--dest-dir PATH`：强制指定安装目标根目录。
-
-### 使用方法
-
-当目标 Agent 需要：
-
-- 从一个项目点子开始搭建结构化项目；
-- 在已有项目中继续推进，并保持文档、需求、代码同步；
-- 用固定流程完成规划、实现、测试和发布；
-
-就可以调用 `Acode-kit`。
-
-推荐统一入口（自动路由与执行）：
+#### macOS / Linux
 
 ```bash
-node ./scripts/acode-run.mjs \
-  --project-id demo-project \
-  --prompt "继续当前项目，完成订单审核前后端联调并补测试用例" \
-  --context-summary "当前阶段:实现; REQ-ORDER-003 未完成" \
-  --provider codex
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
-安装到 Agent 后可直接从已安装路径调用入口：
-- Codex: `~/.codex/skills/Acode-kit/scripts/acode-run.mjs`
-- Claude: `~/.claude/Acode-kit/scripts/acode-run.mjs`
-- Local: `./agent-skills/Acode-kit/scripts/acode-run.mjs`
+自动检测已安装的 Agent，未检测到时安装为本地便携包。
 
-在 Claude 中也可直接调用 `acode-run` 子代理（由安装器自动复制到 `~/.claude/agents/acode-run.md`）。
-
-如果只想验证路由不执行模型调用：
+指定目标：
 
 ```bash
-node ./scripts/acode-run.mjs \
-  --project-id demo-project \
-  --prompt "输出本轮总结报告并更新handoff" \
-  --provider codex \
-  --dry-run true
+# Codex
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=codex bash
+
+# Claude 用户级
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=user bash
+
+# Claude 项目级
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=project bash
+
+# 本地便携包
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=local bash
 ```
 
-示例：
+> 注意：环境变量必须写在 `bash` 一侧，而非 `curl` 前面。
 
-```text
-使用 Acode-kit skill，帮我从 0 开始规划并启动一个 SaaS 项目。
+#### Windows PowerShell
+
+```powershell
+irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
 ```
 
-```text
-Use Acode-kit to continue the current repository and review PRD, TRACEABILITY_MATRIX, and SESSION_HANDOFF first.
+```powershell
+$env:AGENT = "codex"
+irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
 ```
 
-### 仓库结构
+#### Node 安装器
 
-```text
-.
-├── Acode-kit/
-│   ├── SKILL.md
-│   ├── extensions/
-│   │   └── router/
-│   ├── assets/
-│   ├── integrations/
-│   │   └── claude/
-│   │       ├── acode-kit.md
-│   │       └── acode-run.md
-│   └── references/
-├── scripts/
-│   ├── acode-run.mjs
-│   ├── agent-execute.mjs
-│   ├── install.mjs
-│   ├── install.sh
-│   ├── install.ps1
-│   ├── router-exec.mjs
-│   ├── test-acode-run.mjs
-│   └── test-router.mjs
-├── README.md
-├── package.json
-└── LICENSE
+```bash
+node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir /tmp/agent-skills
+node ./scripts/install.mjs --repo AlexCyln/Acode-kit --agent claude --scope user
 ```
 
-### 安装方式
-
-#### 1. Codex 内置 skill-installer
+#### Codex 内置安装器
 
 ```bash
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
@@ -133,167 +166,129 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
   --path Acode-kit
 ```
 
-#### 2. bash 一键安装
+### 安装模式
 
-自动检测已有 Agent，没有检测到时安装到当前目录的 `agent-skills/`：
+| 参数 | 说明 |
+|------|------|
+| `--agent auto` | 自动检测，同时安装到已有 Agent |
+| `--agent codex` | 仅 Codex |
+| `--agent claude` | 仅 Claude |
+| `--agent local` | 本地便携包 |
+| `--agent both` | Codex + Claude |
+| `--scope user\|project` | Claude 用户级 / 项目级 |
+| `--dest-dir PATH` | 自定义目标目录 |
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
-```
+### 使用方法
 
-注意：如果需要传递 `AGENT`、`SCOPE`、`DEST_ROOT` 等变量，必须把变量写在 `bash` 这一侧，而不是写在 `curl` 前面。
-
-显式安装到 Codex：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=codex bash
-```
-
-显式安装到 Claude 用户目录：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=user bash
-```
-
-显式安装到当前项目的 `.claude/`：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=project bash
-```
-
-显式安装为本地便携包：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=local DEST_ROOT="$(pwd)/agent-skills" bash
-```
-
-#### 2.1 Windows PowerShell 一键安装
-
-Windows 下可直接使用 PowerShell：
-
-```powershell
-irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
-```
-
-传参示例（先设置环境变量，再执行）：
-
-```powershell
-$env:AGENT = "codex"
-irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
-```
-
-```powershell
-$env:AGENT = "claude"
-$env:SCOPE = "project"
-irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
-```
-
-也可以在仓库本地执行：
-
-```powershell
-npm run install:win
-```
-
-#### 3. Node 安装器
-
-本地验证或自动化流程中可使用：
-
-```bash
-node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir /tmp/agent-skills
-```
-
-从 GitHub 安装到 Claude：
-
-```bash
-node ./scripts/install.mjs --repo AlexCyln/Acode-kit --agent claude --scope user
-```
-
-#### 4. Router 执行（实验）
-
-基于 `Acode-kit/extensions/router` 的映射和策略，执行单 provider（Codex 或 Claude）模型版本路由：
-
-```bash
-node ./scripts/router-exec.mjs \
-  --provider codex \
-  --project-id demo-project \
-  --phase 实现 \
-  --task-type 前后端编码开发 \
-  --difficulty high \
-  --dry-run true \
-  --context-summary "REQ-12, implement API + page integration" \
-  --prompt "Implement next slice following PRD and traceability matrix." \
-  --cwd "$(pwd)"
-```
-
-#### 5. Router 测试脚本
-
-```bash
-npm run test:router
-```
-
-作用：
-- 校验任务类型与阶段到模型版本的映射是否符合预期。
-- 校验预算压力下是否触发降级选模。
-- 校验 `logical_session_id` 状态写入是否正常。
-
-说明：
-- 测试默认使用 `--dry-run true`，不调用真实模型。
-- 运行时状态和日志写入系统临时目录，不污染仓库。
-
-#### 6. 统一入口执行（推荐）
-
-用户只需给项目和任务描述，入口会自动完成：
-1. 任务分类（阶段/任务类型/难度）
-2. 模型路由（按 Router 策略）
-3. 会话状态承接（logical/native session）
+#### 统一入口（推荐）
 
 ```bash
 node ./scripts/acode-run.mjs \
-  --project-id demo-project \
-  --prompt "请继续当前项目，完成订单审核前后端联调并补测试用例" \
-  --context-summary "当前阶段:实现; REQ-ORDER-003 未完成" \
+  --project-id my-project \
+  --prompt "从零开始构建一个 SaaS 订单管理系统" \
   --provider codex
 ```
 
-如果只想验证路由不执行模型调用：
+输出包含完整路由信息：
+
+```json
+{
+  "success": true,
+  "route": {
+    "provider": "codex",
+    "phase": "实现",
+    "taskType": "前后端编码开发",
+    "difficulty": "high",
+    "selectedModel": "gpt-5.4-codex",
+    "finalModel": "gpt-5.4-codex",
+    "fallbackTriggered": false
+  }
+}
+```
+
+#### 验证路由（不执行模型调用）
 
 ```bash
 node ./scripts/acode-run.mjs \
-  --project-id demo-project \
-  --prompt "输出本轮总结报告并更新handoff" \
-  --provider codex \
+  --project-id my-project \
+  --prompt "扫描工具并安装缺失的 MCP 工具" \
   --dry-run true
 ```
 
-入口层测试：
+#### 在 Agent 中使用
 
-```bash
-npm run test:entry
+安装后直接告诉 AI：
+
+```text
+使用 Acode-kit，帮我从 0 开始规划并启动一个移动端 App 项目。
 ```
 
-### 分发与安装覆盖
--  `scripts/install.mjs` / `scripts/install.sh` / `scripts/install.ps1` 会拷贝 `Acode-kit/` 目录并同步 `scripts/` 到目标 bundle，统一入口与路由执行脚本会随包一并复制到 Codex/Claude/local 目录。
--  `package.json` 的 `files` 字段列出 `scripts`、`Acode-kit`、`README.md`、`LICENSE`，保证 npm / GitHub release 包包含 Router 配置、入口脚本和测试脚本。
--  只要 GitHub 分发/Release 升级使用当前 repo 内容，安装脚本就会抓取最新版；更新后重新运行安装命令即可把 Router、入口、测试等全部同步到目标 Agent。
-
-### 手动安装
-
-如果没有安装 Codex 或 Claude，或者只是想先把插件放到当前项目目录：
-
-1. 先安装到本地目录：
-
-```bash
-node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir "$(pwd)/agent-skills"
+```text
+Use Acode-kit to continue the current project, review PRD and traceability matrix first.
 ```
 
-2. 后续手动接入：
+### 项目结构
 
-- Codex：把 `agent-skills/Acode-kit` 复制到 `~/.codex/skills/Acode-kit`
-- Claude Code：
-  - 把 `agent-skills/Acode-kit` 复制到 `~/.claude/Acode-kit`
-  - 把 `agent-skills/claude/acode-kit.md` 与 `agent-skills/claude/acode-run.md` 复制到 `~/.claude/agents/`
+```text
+.
+├── Acode-kit/
+│   ├── SKILL.md                          # 核心工作流定义
+│   ├── extensions/
+│   │   └── router/                       # 模型路由引擎
+│   │       ├── config/
+│   │       │   ├── model-map.json        # 阶段→模型映射
+│   │       │   ├── task-classifier.json   # 关键词分类规则
+│   │       │   └── policy.json           # token 预算与降级策略
+│   │       ├── SKILL.md
+│   │       └── README.md
+│   ├── integrations/
+│   │   └── claude/                       # Claude 子代理适配
+│   │       ├── acode-kit.md
+│   │       └── acode-run.md
+│   ├── assets/
+│   │   └── project-doc-templates/        # 8 份项目文档模板
+│   └── references/
+│       └── global-engineering-standards/  # 31 份全局工程规范
+├── scripts/
+│   ├── acode-run.mjs                     # 统一入口
+│   ├── router-exec.mjs                   # 路由执行引擎
+│   ├── agent-execute.mjs                 # Provider 适配层
+│   ├── mcp-tool-scan.mjs                 # MCP 工具扫描与安装
+│   ├── install.sh / install.mjs / install.ps1  # 三平台安装器
+│   └── test-router.mjs / test-acode-run.mjs    # 测试脚本
+├── package.json
+├── README.md
+└── LICENSE
+```
 
+### 工程规范体系
 
+31 份全局规范覆盖完整开发生命周期：
+
+| 编号 | 领域 | 说明 |
+|------|------|------|
+| 00 | 工程宪法 | 技术栈决策框架 + TDD 宪法条款 |
+| 01 | 需求 | PRD 结构、需求分级、验收口径 |
+| 02 | 设计 | 信息架构、设计交付、页面还原 |
+| 03-07 | 架构 | 前端、后端、API、数据库、缓存（全部技术栈无关） |
+| 08-12 | 协作 | 代码风格、Git 工作流、Review、测试、排障 |
+| 13-14 | 交付 | 部署、CI/CD |
+| 15-18 | 运维 | AI 协作、安全、可观测性、环境配置 |
+| 19-30 | 复用 | 多项目目录、数据建模、Prompt 指南、单人项目运行等 |
+| 31 | 工具 | 第三方 MCP 工具注册、安装、追踪与降级 |
+
+### 测试
+
+```bash
+npm run test:router    # 路由映射与降级测试
+npm run test:entry     # 统一入口分类与路由测试
+```
+
+### 分发说明
+
+- 安装脚本会同步拷贝 `Acode-kit/` + `scripts/` 到目标目录
+- `package.json` 的 `files` 字段保证 GitHub Release / npm 包含所有必要文件
+- 重新运行安装命令即可升级到最新版本
 
 ---
 
@@ -301,160 +296,200 @@ node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-
 
 ### Overview
 
-`Acode-kit` is a project-delivery plugin for AI coding agents. It supports `Codex`, `Claude Code`, and a portable local-folder installation flow for users who want to stage the package before manually installing it into their target agent. It provides a unified entry that handles model-version routing, session continuity, and execution closure under a structured workflow.
+`Acode-kit` is a **tech-stack-agnostic, TDD-driven** project delivery framework for AI coding agents (Codex, Claude Code). It is not a prompt template — it is a complete engineering methodology + workflow engine + toolchain integration:
 
-### Core Capabilities
+- **Tech-stack agnostic**: No hardcoded frameworks. iOS, Android, mini-programs, Web, desktop — declare your stack at project init, the framework adapts.
+- **TDD-driven**: Red-Green-Refactor cycle as a constitutional development methodology, enforced across every implementation slice.
+- **MCP tool integration**: Auto-scan and manage Pencil (design), NotebookLM (requirements analysis), shadcn (UI components), Chrome DevTools (debugging).
+- **Smart model routing**: Automatic model version selection by task phase, type, and difficulty, with built-in fallback and token budget control.
+- **Structured delivery**: 8-stage closed-loop from requirements to go-live, document-driven, traceable, handoff-ready.
 
-- Starts new projects or takes over existing ones with a structured workflow.
-- Creates and maintains project documents such as `PRD`, `TRACEABILITY_MATRIX`, `SESSION_HANDOFF`, and `DECISION_LOG`.
-- Drives work across requirements, UI/page planning, data/API design, scaffolding, implementation, testing, and release.
-- Applies bundled engineering standards to keep scope, quality, and delivery aligned.
-- Supports multi-agent distribution for Codex, Claude Code, and portable local installs.
-- Unified entry `acode-run` that routes to the right model version and keeps session continuity.
-- Built-in fallback rules and token budget guards.
+### Key Innovations
 
-### Highlights
+#### 1. Tech Stack Decision Framework
 
-- It is a delivery workflow, not just a prompt snippet.
-- It favors scope control, traceability, and document-driven implementation.
-- It ships with reusable templates, references, and a Claude adapter.
-- It supports both automatic installation and manual fallback installation.
-- If the user has neither Codex nor Claude installed yet, the package can still be installed into the current folder and connected later.
-- Single entry for users; routing and model switching are automatic.
-- Multi-version routing within the same provider with fallback and budget policies.
+No more hardcoded tech stacks. Acode-kit defines a category-based decision framework:
 
-### Unified Entry (Recommended)
+| Category | Description | Examples |
+|----------|-------------|----------|
+| Project type | Web / Mobile / Mini-program / Desktop | iOS App, SaaS Web |
+| Frontend framework | Per project type | React, Vue, SwiftUI, Flutter |
+| UI component library | Per frontend ecosystem | shadcn/ui, Element Plus, Ant Design |
+| Backend runtime | Per team capability | Node.js, Spring Boot, Go |
+| ORM / data access | Per backend runtime | Prisma, MyBatis, GORM |
+| Database | Per data model | PostgreSQL, MySQL, MongoDB |
+| Cache | Per performance needs (optional) | Redis, Memcached |
+| Auth scheme | Per security requirements | JWT, OAuth 2.0, Session |
+| Deployment | Per ops capability | Docker, Vercel, AWS |
+| Design tool | Per team preference | Pencil, Figma |
 
-```bash
-node ./scripts/acode-run.mjs \
-  --project-id demo-project \
-  --prompt "Continue the project and finish the next integration slice" \
-  --context-summary "Phase: Implementation; REQ-ORDER-003 pending" \
-  --provider codex
+Each project declares its stack in `PROJECT_OVERRIDES.md`. All 31 engineering specs adapt automatically.
+
+#### 2. TDD Constitutional Clause
+
+Every vertical slice must follow:
+
+```
+Red     → Write a failing test describing expected behavior
+Green   → Write minimal implementation to make it pass
+Refactor → Optimize under test protection
 ```
 
-After installation, you can call the entry from the installed bundle:
-- Codex: `~/.codex/skills/Acode-kit/scripts/acode-run.mjs`
-- Claude: `~/.claude/Acode-kit/scripts/acode-run.mjs`
-- Local: `./agent-skills/Acode-kit/scripts/acode-run.mjs`
+TDD is a gate, not a suggestion — no failing test, no production code.
 
-In Claude, you can also call the `acode-run` subagent (installer copies it to `~/.claude/agents/acode-run.md`).
+#### 3. MCP Tool Automation
 
-Dry-run (routing only):
+Four MCP tools are auto-scanned and managed at project startup:
 
-```bash
-node ./scripts/acode-run.mjs \
-  --project-id demo-project \
-  --prompt "Write the session handoff summary" \
-  --provider codex \
-  --dry-run true
+| Tool | Purpose | Degradation |
+|------|---------|-------------|
+| **Pencil MCP** | UI/UX design drafts | AI-generated text layout descriptions |
+| **NotebookLM MCP** | Requirements analysis & project skeleton | Direct AI analysis |
+| **shadcn MCP** | UI component library integration | Manual component building |
+| **Chrome DevTools MCP** | Frontend debugging | Traditional log debugging |
+
+Three-state tracking: `installed` → `missing` → `degraded`. Every tool has a complete fallback strategy.
+
+#### 4. Smart Model Routing
+
+```
+User submits task
+    ↓
+Keyword classification → Phase (requirements/design/implementation/testing/go-live) + Difficulty
+    ↓
+Model mapping → Select model version by provider (Codex/Claude) + difficulty
+    ↓
+Budget check → Phase token hard cap + task soft cap
+    ↓
+Execute → Success | Trigger fallback (error → timeout → quality_low → budget_exceeded)
+    ↓
+Output → selectedModel / finalModel / fallbackTriggered / token usage
 ```
 
-### Support Matrix
+Single entry `acode-run` — model selection, fallback, and session continuity are transparent to the user.
 
-| Target | Installation result |
-| --- | --- |
-| `Codex` | `~/.codex/skills/Acode-kit` |
-| `Claude Code` | `~/.claude/Acode-kit` plus `~/.claude/agents/acode-kit.md` and `~/.claude/agents/acode-run.md` |
-| `Local / no agent yet` | `./agent-skills/Acode-kit` plus a portable Claude adapter |
+#### 5. Five-Step Startup Workflow
 
-### Install Modes
-
-The installers now support:
-
-- `--agent auto`: detect installed agents; install to both if Codex and Claude are present; otherwise fall back to `./agent-skills/`
-- `--agent codex`: install only to Codex
-- `--agent claude`: install only to Claude
-- `--agent local`: install only to the current folder as a portable package
-- `--agent both`: install to both Codex and Claude
-- `--scope user|project`: for Claude user-level or project-level install
-- `--dest-dir PATH`: force a custom destination root
-
-### Install Options
-
-#### Codex built-in installer
-
-```bash
-python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
-  --repo AlexCyln/Acode-kit \
-  --path Acode-kit
+```
+Step 1: Environment Scan    → Folder state + MCP tool detection + auto-install
+Step 2: Requirements Analysis → NotebookLM analysis → project skeleton → user confirms
+Step 3: First-iteration PRD  → Lock tech stack → PRD + progress plan + traceability matrix
+Step 4: Environment Setup    → Directories / dependencies / packages / config
+Step 5: Continuous Delivery   → 8-stage loop × TDD × small vertical slices
 ```
 
-#### One-line bash installer
+### Quick Install
+
+#### macOS / Linux
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
-Important: when passing `AGENT`, `SCOPE`, or `DEST_ROOT`, pass them to `bash`, not to `curl`.
+Auto-detects installed agents. Falls back to local portable install if none found.
 
-Examples:
+Specify target:
 
 ```bash
+# Codex only
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=codex bash
-```
 
-```bash
+# Claude user-level
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=user bash
-```
 
-```bash
+# Claude project-level
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=project bash
 ```
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=local DEST_ROOT="$(pwd)/agent-skills" bash
-```
+> Note: Environment variables must be passed to `bash`, not before `curl`.
 
-#### Windows PowerShell installer
-
-For Windows, use PowerShell directly:
+#### Windows PowerShell
 
 ```powershell
 irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
-```
-
-Example with options (set env vars before running):
-
-```powershell
-$env:AGENT = "codex"
-irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
-```
-
-```powershell
-$env:AGENT = "claude"
-$env:SCOPE = "project"
-irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
-```
-
-You can also run the local script entry in this repo:
-
-```powershell
-npm run install:win
 ```
 
 #### Node installer
 
 ```bash
-node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir /tmp/agent-skills
+node ./scripts/install.mjs --repo AlexCyln/Acode-kit --agent claude --scope user
 ```
 
-### Distribution Coverage
-- `scripts/install.mjs`, `scripts/install.sh`, and `scripts/install.ps1` copy `Acode-kit/` and sync `scripts/` into the installed bundle, so router configs and unified entry assets are included automatically.
-- `package.json` `files` lists `scripts`, `Acode-kit`, `README.md`, `LICENSE`, which ensures npm/GitHub release packages include router configs, `acode-run.mjs`, and tests.
-- Re-running the install command after an update will sync router, entry, and test assets to the target agent directory.
-
-### Manual Installation
-
-1. Stage the portable package locally:
+#### Codex built-in installer
 
 ```bash
-node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir "$(pwd)/agent-skills"
+python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo AlexCyln/Acode-kit --path Acode-kit
 ```
 
-2. Install it into the target agent later:
+### Support Matrix
 
-- Codex: copy `agent-skills/Acode-kit` into `~/.codex/skills/Acode-kit`
-- Claude Code:
-  - copy `agent-skills/Acode-kit` into `~/.claude/Acode-kit`
-  - copy `agent-skills/claude/acode-kit.md` and `agent-skills/claude/acode-run.md` into `~/.claude/agents/`
+| Target | Installation result |
+|--------|-------------------|
+| Codex | `~/.codex/skills/Acode-kit` |
+| Claude Code (user) | `~/.claude/Acode-kit` + subagent adapters |
+| Claude Code (project) | `./.claude/Acode-kit` + subagent adapters |
+| Local / no agent | `./agent-skills/Acode-kit` + portable Claude adapters |
+
+### Usage
+
+#### Unified Entry (Recommended)
+
+```bash
+node ./scripts/acode-run.mjs \
+  --project-id my-project \
+  --prompt "Build a SaaS order management system from scratch" \
+  --provider codex
+```
+
+Output includes full routing info:
+
+```json
+{
+  "success": true,
+  "route": {
+    "provider": "codex",
+    "phase": "implementation",
+    "taskType": "full-stack development",
+    "difficulty": "high",
+    "selectedModel": "gpt-5.4-codex",
+    "finalModel": "gpt-5.4-codex",
+    "fallbackTriggered": false
+  }
+}
+```
+
+#### In your AI agent
+
+After installation, simply tell the AI:
+
+```text
+Use Acode-kit to plan and start a mobile app project from scratch.
+```
+
+```text
+Use Acode-kit to continue the current project. Review PRD and traceability matrix first.
+```
+
+### Install Modes
+
+| Flag | Description |
+|------|-------------|
+| `--agent auto` | Auto-detect, install to all found agents |
+| `--agent codex` | Codex only |
+| `--agent claude` | Claude only |
+| `--agent local` | Local portable package |
+| `--agent both` | Both Codex and Claude |
+| `--scope user\|project` | Claude user-level or project-level |
+| `--dest-dir PATH` | Custom destination directory |
+
+### Testing
+
+```bash
+npm run test:router    # Router mapping and fallback tests
+npm run test:entry     # Entry point classification and routing tests
+```
+
+### License
+
+MIT

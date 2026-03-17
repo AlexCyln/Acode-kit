@@ -6,13 +6,15 @@
   "scripts": {
     "test:router": "node ./scripts/test-router.mjs",
     "test:entry": "node ./scripts/test-acode-run.mjs",
+    "test:mcp": "node ./scripts/test-mcp-tool-scan.mjs",
     "install:win": "powershell -ExecutionPolicy Bypass -File ./scripts/install.ps1"
   },
   "bin": {
     "acode-kit-install": "./scripts/install.mjs",
     "acode-agent-execute": "./scripts/agent-execute.mjs",
     "acode-router-exec": "./scripts/router-exec.mjs",
-    "acode-run": "./scripts/acode-run.mjs"
+    "acode-run": "./scripts/acode-run.mjs",
+    "acode-mcp-scan": "./scripts/mcp-tool-scan.mjs"
   },
   "files": [
     "scripts",

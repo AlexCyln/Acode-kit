@@ -6,8 +6,8 @@ description: Use this skill when the user wants to start, structure, or continue
 # Acode-kit
 
 Use this skill when:
-1. The user gives a high-level project idea and wants Codex to turn it into a structured project.
-2. The user wants to build a new project from zero under the fixed stack and the bundled global standards.
+1. The user gives a high-level project idea and wants the AI agent to turn it into a structured project.
+2. The user wants to build a new project from zero under the declared stack and the bundled global standards.
 3. The user wants to continue an in-progress project while keeping requirements, scope, coding, testing, and deployment aligned.
 4. The user explicitly mentions `Acode-kit`.
 
@@ -18,6 +18,7 @@ This skill is intended to be the single public entry point for the whole workflo
 2. Creates and maintains project-level documents before and during implementation.
 3. Pushes work in small vertical slices instead of unbounded bulk generation.
 4. Keeps requirements, decisions, traceability, testing, and go-live status in sync.
+5. Enforces TDD as the standard development methodology.
 
 ## Required working model
 Always treat the project as:
@@ -35,19 +36,46 @@ Do not jump straight into code if project-level facts are missing.
 
 ## Startup workflow
 When a project starts or the user provides a fresh project brief:
+
+### Step 1: Environment Scan
+1. Scan the current workspace folder to determine:
+   - Empty folder → new project
+   - Existing project → continuation or iteration
+2. Scan available MCP tools per `references/global-engineering-standards/31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
+3. For missing tools: suggest installation → await user authorization → execute → verify → record status.
+4. Record tool availability status for the session.
+
+### Step 2: Requirements Analysis
 1. Read `references/global-engineering-standards/README.md`
 2. Read `references/global-engineering-standards/00_GLOBAL_ENGINEERING_PRINCIPLES.md`
 3. Read `references/global-engineering-standards/15_AI_COLLABORATION_PLAYBOOK.md`
 4. Read `references/global-engineering-standards/22_SOLO_AI_PROJECT_OPERATING_MANUAL.md`
 5. Read `references/global-engineering-standards/27_PROJECT_EXECUTION_FLOW_SPEC.md`
 6. Read `references/global-engineering-standards/28_PROJECT_DIRECTORY_AND_REPOSITORY_STRUCTURE_SPEC.md`
-7. Inspect the current workspace and determine whether this is:
-   - a new project
-   - an existing project to continue
-   - a partial module iteration
-8. On first project bootstrap, create the project root structure and the project-level `AGENTS.md`.
-9. Create or update the minimum project-level documents.
-10. Extract pending confirmations instead of silently inventing core business rules.
+7. Read the user's project prompt/brief.
+8. If NotebookLM MCP is available: invoke NotebookLM to analyze the project brief and output a project skeleton containing:
+   - Recommended tech stack
+   - Core business logic summary
+   - System modules/partitions
+   - UI/UX style direction
+   - Scope boundaries and constraints
+9. If NotebookLM MCP is unavailable: AI agent performs the same analysis directly.
+10. Present the project skeleton to the user for confirmation.
+
+### Step 3: First-iteration PRD + Progress Plan
+1. Based on the confirmed project skeleton, determine the project tech stack and record it in `PROJECT_OVERRIDES.md`.
+2. Solidify into a structured PRD.
+3. Generate a progress plan and requirements traceability matrix.
+4. Present to the user for confirmation.
+
+### Step 4: Project Environment Setup
+1. On first project bootstrap, create the project root structure and the project-level `AGENTS.md`.
+2. Create or update the minimum project-level documents.
+3. Set up directories, dependencies, environment, and packages per the declared tech stack.
+4. Extract pending confirmations instead of silently inventing core business rules.
+
+### Step 5: Continuous Implementation
+Follow the stage-driven execution flow (see below).
 
 ## Minimum project-level documents
 Use the templates in `assets/project-doc-templates/` to create these when missing:
@@ -71,11 +99,33 @@ Minimal stage order:
 3. UI / page structuring
 4. Data and API design
 5. Project scaffold initialization
-6. Small-slice implementation
+6. TDD-driven small-slice implementation
 7. Review, testing, debug
 8. Deployment and go-live
 
 Never skip a stage if its missing outputs would make the next stage unstable.
+
+## Workflow rules
+
+### Frontend page workflow
+When implementing frontend pages (if Pencil MCP and shadcn MCP are available):
+1. Create design draft in Pencil → user confirms design.
+2. Build UI components via shadcn component library (if declared as UI component library).
+3. Proceed to frontend implementation matching the approved design one-to-one.
+
+If design tools are unavailable, follow the degradation strategy in `31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
+
+### Large-scale requirement change
+When a requirement change affects > 30% of modules:
+1. If NotebookLM MCP is available: re-run NotebookLM analysis → output change skeleton → user confirms.
+2. If NotebookLM MCP is unavailable: AI agent performs change impact analysis → output change skeleton → user confirms.
+3. Update PRD, traceability matrix, and decision log before implementation.
+
+### TDD enforcement
+Every implementation slice must follow the Red-Green-Refactor cycle defined in `00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2A:
+1. Write a failing test describing expected behavior.
+2. Write minimal implementation to make the test pass.
+3. Refactor under test protection.
 
 ## Router integration
 Use `extensions/router` as the model-routing execution layer when the task needs model-version selection.
@@ -110,7 +160,7 @@ For backend implementation:
 1. `references/global-engineering-standards/04_BACKEND_ARCHITECTURE_SPEC.md`
 2. `references/global-engineering-standards/05_API_DESIGN_SPEC.md`
 3. `references/global-engineering-standards/06_DATABASE_DESIGN_SPEC.md`
-4. `references/global-engineering-standards/07_REDIS_CACHE_SPEC.md`
+4. `references/global-engineering-standards/07_REDIS_CACHE_SPEC.md` (conditional: load only if project declares a caching layer)
 5. `references/global-engineering-standards/16_SECURITY_SPEC.md`
 
 For data modeling:
@@ -132,21 +182,25 @@ For deployment:
 For external systems:
 1. `references/global-engineering-standards/26_EXTERNAL_INTEGRATION_SPEC.md`
 
+For tool management:
+1. `references/global-engineering-standards/31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`
+
 ## Implementation rules
-1. Keep the fixed stack unchanged unless the user explicitly overrides it at the project level.
+1. Keep the declared tech stack unchanged unless the user explicitly overrides it at the project level.
 2. Work in small vertical slices mapped to concrete requirement IDs.
-3. Update project documents as you go; do not leave documentation until the end.
-4. Before implementing a new subtask, check whether detailed development documents already exist for API, database, function/module, and testing. If a required document is missing, create the project-level `md` entry first, then continue implementation.
-5. Keep project documents layered as: current control docs, active review drafts, approved reference materials, detailed implementation docs, and archived history. Do not mix current execution docs with long historical records.
-6. `SESSION_HANDOFF.md` should stay concise and current-facing. Move long historical progress, superseded handoffs, and closed review drafts into an archive area instead of letting active control docs grow indefinitely.
-7. If the user input is fuzzy, structure it into project docs first.
-8. If a new request conflicts with the current PRD, explicitly surface the conflict and let the user decide whether to replace, keep, or defer; do not silently merge conflicting scope.
-9. Treat `TRACEABILITY_MATRIX.md` as the higher-level project roadmap document. Do not reduce it to a short task log or session checklist.
-10. For each main-task next node, default to `main task -> node -> submodule review draft -> user confirmation -> implementation`; do not jump from a broad node description straight into code.
-11. If a node needs UI, first gather the user’s design style / interaction / detail requirements, then design the page in Pencil (or the project’s confirmed design tool) strictly from the approved review draft plus real API / database outputs.
-12. After the user approves the Pencil page, reconstruct it in the frontend one-to-one; do not silently add or remove modules, fields, buttons, states, tags, headings, or interactions.
-13. If a major decision changes scope, write it into the decision log before implementing.
-14. After first bootstrap, treat the generated project root `AGENTS.md` as the persistent in-repo continuation entry so future work inside the same repository keeps following the same workflow without the user re-stating it.
+3. Every vertical slice must follow the TDD Red-Green-Refactor cycle; do not write production code without a failing test first.
+4. Update project documents as you go; do not leave documentation until the end.
+5. Before implementing a new subtask, check whether detailed development documents already exist for API, database, function/module, and testing. If a required document is missing, create the project-level `md` entry first, then continue implementation.
+6. Keep project documents layered as: current control docs, active review drafts, approved reference materials, detailed implementation docs, and archived history. Do not mix current execution docs with long historical records.
+7. `SESSION_HANDOFF.md` should stay concise and current-facing. Move long historical progress, superseded handoffs, and closed review drafts into an archive area instead of letting active control docs grow indefinitely.
+8. If the user input is fuzzy, structure it into project docs first.
+9. If a new request conflicts with the current PRD, explicitly surface the conflict and let the user decide whether to replace, keep, or defer; do not silently merge conflicting scope.
+10. Treat `TRACEABILITY_MATRIX.md` as the higher-level project roadmap document. Do not reduce it to a short task log or session checklist.
+11. For each main-task next node, default to `main task -> node -> submodule review draft -> user confirmation -> implementation`; do not jump from a broad node description straight into code.
+12. If a node needs UI, first gather the user's design style / interaction / detail requirements, then design the page in the declared design tool strictly from the approved review draft plus real API / database outputs.
+13. After the user approves the design, reconstruct it in the frontend one-to-one; do not silently add or remove modules, fields, buttons, states, tags, headings, or interactions.
+14. If a major decision changes scope, write it into the decision log before implementing.
+15. After first bootstrap, treat the generated project root `AGENTS.md` as the persistent in-repo continuation entry so future work inside the same repository keeps following the same workflow without the user re-stating it.
 
 ## Mandatory end-of-task updates
 At the end of substantial work:
@@ -169,8 +223,9 @@ When the task is complex, structure the work as:
 5. document updates
 
 ## Do not
-1. Replace the fixed technology stack on your own.
+1. Replace the declared technology stack on your own.
 2. Skip project docs and jump straight to large-scale coding.
 3. Expand scope silently.
 4. Generate a full system in one pass when the project facts are still incomplete.
 5. Ask the user to restate workflow rules that are already embedded in this skill and the generated project `AGENTS.md`.
+6. Write production code without a corresponding failing test (TDD gate).

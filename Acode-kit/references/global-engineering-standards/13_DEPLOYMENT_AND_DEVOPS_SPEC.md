@@ -2,16 +2,16 @@
 `13_DEPLOYMENT_AND_DEVOPS_SPEC.md`
 
 # 文件定位
-Docker 化交付、环境部署、发布回滚与运维交接规范。
+容器化交付、环境部署、发布回滚与运维交接规范。
 
 # 适用范围
-适用于前端、Java 后端、Python 辅助服务、MySQL、Redis 的容器化部署与运维协作场景。
+适用于基于已声明部署平台的所有服务容器化部署与运维协作场景。具体部署方式由 `PROJECT_OVERRIDES.md` 确定。
 
 # 与其他文件的关系
 本文件依赖 `18_ENVIRONMENT_CONFIG_SPEC.md` 与 `14_CICD_SPEC.md`，并为 `17_OBSERVABILITY_SPEC.md` 提供部署基础。
 
 # 编写目的
-统一 Docker 化交付、环境部署、发布回滚与运维交接方式，确保不同项目都能按同一工程标准稳定上线。
+统一容器化/平台化交付、环境部署、发布回滚与运维交接方式，确保不同项目都能按同一工程标准稳定上线。
 
 ## 1. 部署总原则
 1. 所有服务默认容器化。
@@ -26,33 +26,21 @@ Docker 化交付、环境部署、发布回滚与运维交接规范。
 4. 不将密钥、证书、生产配置打入镜像。
 5. 容器启动命令应单一、可观测、可健康检查。
 
-前端示例骨架：
+容器构建示例（按已声明技术栈调整基础镜像和构建命令）：
 ```dockerfile
-FROM node:20-alpine AS builder
+# 示例：多阶段构建模式
+FROM <build-image> AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+COPY <dependency-files> ./
+RUN <install-dependencies>
 COPY . .
-RUN npm run build
+RUN <build-command>
 
-FROM nginx:1.27-alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY deploy/nginx/default.conf /etc/nginx/conf.d/default.conf
-HEALTHCHECK CMD wget -qO- http://127.0.0.1/health || exit 1
-```
-
-Java 示例骨架：
-```dockerfile
-FROM maven:3.9-eclipse-temurin-17 AS builder
+FROM <runtime-image>
 WORKDIR /app
-COPY pom.xml .
-COPY src ./src
-RUN mvn -B -DskipTests clean package
-
-FROM eclipse-temurin:17-jre
-WORKDIR /app
-COPY --from=builder /app/target/app.jar app.jar
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+COPY --from=builder /app/<build-output> .
+HEALTHCHECK CMD <health-check-command>
+ENTRYPOINT [<start-command>]
 ```
 
 ## 3. docker compose 组织规范
@@ -60,11 +48,11 @@ ENTRYPOINT ["java","-jar","/app/app.jar"]
 2. 服务命名统一、网络清晰、卷挂载明确。
 3. 将环境变量从 `.env` 或外部配置注入。
 
-示例骨架：
+示例骨架（按已声明技术栈调整服务清单）：
 ```yaml
 services:
   web:
-    image: registry.example.com/saas-web:${APP_VERSION}
+    image: registry.example.com/app-web:${APP_VERSION}
     ports:
       - "8080:80"
     env_file:
@@ -73,38 +61,35 @@ services:
       - backend
 
   backend:
-    image: registry.example.com/saas-backend:${APP_VERSION}
+    image: registry.example.com/app-backend:${APP_VERSION}
     env_file:
       - .env
     depends_on:
-      - mysql
-      - redis
+      - database
 
-  python-worker:
-    image: registry.example.com/saas-python:${APP_VERSION}
-    env_file:
-      - .env
+  # 辅助服务（按需添加）
+  # auxiliary:
+  #   image: registry.example.com/app-auxiliary:${APP_VERSION}
 
-  mysql:
-    image: mysql:8.4
+  database:
+    image: <database-image>  # 按已声明数据库选择
     volumes:
-      - ./volumes/mysql:/var/lib/mysql
+      - ./volumes/database:/var/lib/data
 
-  redis:
-    image: redis:7-alpine
-    volumes:
-      - ./volumes/redis:/data
+  # 缓存服务（按需添加，仅当项目声明缓存层时）
+  # cache:
+  #   image: <cache-image>
 ```
 
 ## 4. 环境变量规范
 1. 变量名使用 `UPPER_SNAKE_CASE`。
-2. 前端暴露变量必须有统一前缀，如 `VITE_`。
-3. Java、Python、容器编排统一引用同名环境变量，减少漂移。
+2. 前端暴露变量必须有已声明前端框架的公共变量前缀。
+3. 各服务与容器编排统一引用同名环境变量，减少漂移。
 4. 所有环境变量需有说明、默认值策略、敏感级别。
 
 ## 5. 密钥与敏感配置规范
 1. 密钥只通过环境变量、Secret 管理系统或部署平台注入。
-2. 数据库密码、JWT 密钥、第三方 Access Key 严禁入库。
+2. 数据库密码、认证密钥、第三方 Access Key 严禁入库。
 3. 敏感配置变更需记录审批与生效时间。
 
 ## 6. 日志目录与挂载规范
@@ -115,7 +100,7 @@ services:
 ## 7. 健康检查规范
 1. 前端提供静态服务健康探针。
 2. 后端提供 `/health` 或兼容 Actuator 的健康检查接口。
-3. 健康检查应覆盖应用进程、数据库连通、Redis 连通等核心依赖。
+3. 健康检查应覆盖应用进程、数据库连通、缓存连通（若使用）等核心依赖。
 
 ## 8. 发布策略
 1. 发布前确认镜像版本、配置版本、数据库变更版本一致。
@@ -129,7 +114,7 @@ services:
 2. 备份关键配置与数据库。
 3. 执行数据库迁移。
 4. 发布后端服务。
-5. 发布 Python 辅助服务。
+5. 发布辅助服务（若有）。
 6. 发布前端静态资源。
 7. 执行健康检查。
 8. 执行最小冒烟路径。
@@ -157,7 +142,7 @@ services:
 1. 应用健康检查是否持续通过。
 2. 核心接口错误率是否上升。
 3. 数据库连接、慢查询是否异常。
-4. Redis 命中率、会话、锁是否异常。
+4. 缓存命中率、会话、锁是否异常（若使用缓存）。
 5. 日志中是否出现连续异常堆栈。
 6. 第三方回调、异步任务是否正常消费。
 
@@ -168,8 +153,8 @@ services:
 4. `prod`：生产环境，严格控制变更。
 
 ## 12. 备份建议
-1. MySQL 定期备份并验证可恢复性。
-2. Redis 若承载重要会话或任务状态，应根据场景配置持久化或外部恢复策略。
+1. 数据库定期备份并验证可恢复性。
+2. 缓存层若承载重要会话或任务状态，应根据场景配置持久化或外部恢复策略。
 3. 发布前对关键数据做快照或逻辑备份。
 
 ## 13. 运维交接要求

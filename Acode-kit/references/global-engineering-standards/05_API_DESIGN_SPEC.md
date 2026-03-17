@@ -5,7 +5,7 @@
 RESTful API 设计与接口契约标准。
 
 # 适用范围
-适用于所有前后端内部接口、前端直连接口、Java 与 Python 协作接口，以及未来对外开放接口的设计。
+适用于所有前后端内部接口、前端直连接口、主服务与辅助服务协作接口，以及未来对外开放接口的设计。
 
 # 与其他文件的关系
 本文件衔接 `01_PRODUCT_REQUIREMENTS_STANDARD.md` 与 `04_BACKEND_ARCHITECTURE_SPEC.md`，并为 `03_FRONTEND_ARCHITECTURE_SPEC.md` 提供接口契约基线。
@@ -128,7 +128,7 @@ RESTful API 设计与接口契约标准。
 
 ## 12. 幂等性规范
 1. 创建支付、提交流程、导入任务、批量任务等需具备幂等控制。
-2. 前端可传 `Idempotency-Key`，后端结合 Redis 或数据库去重。
+2. 前端可传 `Idempotency-Key`，后端结合缓存存储或数据库去重。
 3. 幂等冲突需返回明确错误码和提示。
 
 ## 13. 版本管理规范

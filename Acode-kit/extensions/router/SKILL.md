@@ -9,6 +9,7 @@ Use this skill when:
 1. Acode-kit needs to run a concrete subtask in a model-routed way.
 2. The user requests model-version routing by phase/task/difficulty.
 3. The workflow requires fallback, token budget control, and execution logs.
+4. A tool management task (MCP tool scan, install, verify) needs model routing.
 
 ## Scope
 1. Router only handles model selection and execution dispatch.

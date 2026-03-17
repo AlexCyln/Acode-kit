@@ -79,6 +79,21 @@
             "fallback_model": "gpt-5.2-codex"
           }
         }
+      },
+      {
+        "task_type": "工具管理",
+        "difficulty": "low",
+        "weight": 1,
+        "providers": {
+          "claude": {
+            "primary_model": "claude-haiku-4-5",
+            "fallback_model": "claude-sonnet-4-6"
+          },
+          "codex": {
+            "primary_model": "gpt-5.2-codex",
+            "fallback_model": "gpt-5.3-codex"
+          }
+        }
       }
     ],
     "实现": [

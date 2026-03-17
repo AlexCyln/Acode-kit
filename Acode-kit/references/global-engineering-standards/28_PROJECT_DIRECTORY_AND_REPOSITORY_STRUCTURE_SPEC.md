@@ -8,7 +8,7 @@
 适用于基于本母规范体系启动的单项目或单仓库工程，覆盖从项目初始化到上线运维的完整目录布局。多项目、多仓协作的目录约定见 `19_MULTI_PROJECT_DIRECTORY_CONVENTION.md`。
 
 # 与其他文件的关系
-- 以 `00_GLOBAL_ENGINEERING_PRINCIPLES.md` 的默认技术栈和文档驱动原则为总纲。
+- 以 `00_GLOBAL_ENGINEERING_PRINCIPLES.md` 的技术栈决策框架和文档驱动原则为总纲。
 - 与 `19_MULTI_PROJECT_DIRECTORY_CONVENTION.md` 互补：19 号定义多项目/多仓布局，本文件定义单项目内部结构。
 - 与 `27_PROJECT_EXECUTION_FLOW_SPEC.md` 联动：项目启动阶段（阶段五）按本文件初始化目录骨架。
 - 与 `30_DEVELOPMENT_DOCUMENTATION_GOVERNANCE_SPEC.md` 联动：开发过程文档的存放位置遵循本文件定义的 `docs/` 层级。
@@ -45,14 +45,14 @@ project-root/
       DEVELOPMENT_DOCUMENTATION_INDEX.md
     archive/
   design/
-    pencil/
+    design-files/
     assets/
   frontend/
   backend/
-  python-services/
+  auxiliary-services/
   deploy/
     docker/
-    nginx/
+    config/
     env/
   sql/
     migrations/
@@ -83,7 +83,7 @@ project-root/
 - 当 `SESSION_HANDOFF.md`、`DECISION_LOG.md` 或审阅稿累积过长时，历史内容迁入此处。
 
 ### 3.5 `design/`
-- `pencil/`：Pencil 原始设计文件。
+- `design-files/`：使用已声明设计工具的原始设计文件。
 - `assets/`：设计切图、交付说明、标注图。
 - 设计版本应与发布里程碑关联。
 
@@ -93,16 +93,16 @@ project-root/
 - 若有多个前端应用，按 `frontend/admin-web/`、`frontend/portal-web/` 拆分。
 
 ### 3.7 `backend/`
-- Java Spring Boot 后端源码目录。
+- 已声明后端运行时的后端源码目录。
 - 遵循 `04_BACKEND_ARCHITECTURE_SPEC.md` 的分层与命名约定。
 
-### 3.8 `python-services/`
-- Python 辅助服务源码目录。
-- 仅用于 AI、数据处理、异步任务、脚本任务、算法能力。
+### 3.8 `auxiliary-services/`
+- 辅助服务源码目录。
+- 仅用于 AI、数据处理、异步任务、脚本任务、算法能力等辅助场景。
 
 ### 3.9 `deploy/`
-- `docker/`：Dockerfile、docker compose 文件。
-- `nginx/`：Nginx 配置。
+- `docker/`：Dockerfile、容器编排文件。
+- `config/`：服务配置文件（如反向代理配置等）。
 - `env/`：环境变量模板（`.env.example`），不存放真实密钥。
 - 遵循 `13_DEPLOYMENT_AND_DEVOPS_SPEC.md` 和 `18_ENVIRONMENT_CONFIG_SPEC.md`。
 

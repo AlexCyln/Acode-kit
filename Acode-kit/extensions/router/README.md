@@ -5,9 +5,17 @@ This extension adds model-version routing for Acode-kit.
 ## Components
 1. `SKILL.md`: Router skill contract and boundaries.
 2. `config/model-map.json`: task-to-model mapping per phase/provider.
-3. `config/policy.json`: token/fallback/timeout policy.
-4. `scripts/router-exec.mjs`: routing entrypoint.
-5. `scripts/agent-execute.mjs`: provider execution adapter.
+3. `config/task-classifier.json`: keyword-based task classification rules.
+4. `config/policy.json`: token/fallback/timeout policy.
+5. `scripts/router-exec.mjs`: routing entrypoint.
+6. `scripts/agent-execute.mjs`: provider execution adapter.
+
+## Model route display
+Task execution output includes model routing information:
+- `selectedModel`: the model chosen by the router
+- `finalModel`: the model that actually executed the task
+- `fallbackTriggered`: whether a fallback was triggered
+- `fallbackTriggeredBy`: reason for fallback (if applicable)
 
 ## Quick run
 ```bash

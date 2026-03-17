@@ -4,15 +4,19 @@
 
 ## 固定要求
 1. 严格遵守项目内 `docs/project/` 文档与全局母规范。
-2. 不得擅自更换固定技术栈。
+2. 不得擅自更换已声明技术栈（见 `docs/project/PROJECT_OVERRIDES.md`）。
 3. 任何任务都先判断当前项目阶段，再读取最小必要规范。
 4. 未完成项目级文档初始化前，不得直接大规模编码。
-5. 每次任务结束必须更新以下文档中受影响的部分：
+5. 遵循 TDD 方法论：每个实现闭环必须先编写失败测试，再实现，再重构。
+6. 每次任务结束必须更新以下文档中受影响的部分：
    - `docs/project/DECISION_LOG.md`
    - `docs/project/TRACEABILITY_MATRIX.md`
    - `docs/project/SESSION_HANDOFF.md`
-6. 涉及上线时，必须同步更新：
+7. 涉及上线时，必须同步更新：
    - `docs/project/GO_LIVE_RECORD.md`
+
+## 第三方工具管理
+参见 `references/global-engineering-standards/31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md` 管理项目所需的 MCP 工具。
 
 ## 项目推进顺序
 1. 项目初始化
@@ -20,7 +24,7 @@
 3. 页面与交互结构化
 4. 数据与 API 设计
 5. 项目框架初始化
-6. 按小闭环实现
+6. TDD 驱动按小闭环实现
 7. Review / 测试 / Debug
 8. 部署 / 上线
 

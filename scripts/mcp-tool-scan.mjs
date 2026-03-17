@@ -1,0 +1,437 @@
+#!/usr/bin/env node
+/**
+ * MCP Tool Scanner & Installer
+ *
+ * Implements the auto-install flow from 31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md:
+ *   1. Scan → 2. Detect missing → 3. Suggest install → 4. User authorize →
+ *   5. Execute install → 6. Verify → 7. Record results
+ *
+ * Usage:
+ *   node scripts/mcp-tool-scan.mjs [options]
+ *
+ * Options:
+ *   --provider codex|claude     Target provider (auto-detected if omitted)
+ *   --install                   Attempt to install missing tools (interactive)
+ *   --json                      Output results as JSON
+ *   --output PATH               Write status report to file
+ *   --yes                       Skip confirmation prompts (auto-approve installs)
+ */
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { createInterface } from "node:readline";
+
+// ---------------------------------------------------------------------------
+// Tool registry (mirrors 31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md)
+// ---------------------------------------------------------------------------
+
+const TOOL_REGISTRY = [
+  {
+    id: "pencil",
+    name: "Pencil MCP",
+    purpose: "UI/UX design drafts",
+    type: "desktop-app",
+    detect: detectPencil,
+    install: null, // manual desktop install only
+    degradation: "AI-generated text layout descriptions"
+  },
+  {
+    id: "notebooklm",
+    name: "NotebookLM MCP",
+    purpose: "Requirements analysis & project skeleton",
+    type: "mcp-service",
+    detect: detectNotebookLM,
+    installClaude: ["claude", "mcp", "add", "notebooklm", "npx", "notebooklm-mcp@latest"],
+    installCodex: ["codex", "mcp", "add", "notebooklm", "--", "npx", "notebooklm-mcp@latest"],
+    degradation: "Direct AI analysis (no NotebookLM enhancement)"
+  },
+  {
+    id: "shadcn",
+    name: "shadcn MCP",
+    purpose: "UI component library integration",
+    type: "mcp-service",
+    detect: detectShadcn,
+    installClaude: ["npx", "shadcn@latest", "mcp", "init", "--client", "claude"],
+    installCodex: null, // requires manual config.toml edit
+    installCodexManual: `Add to ~/.codex/config.toml:\n[mcp.servers.shadcn]\ncommand = "npx"\nargs = ["-y", "shadcn@latest", "mcp"]`,
+    degradation: "Manual component library setup"
+  },
+  {
+    id: "chrome-devtools",
+    name: "Chrome DevTools MCP",
+    purpose: "Frontend debugging",
+    type: "mcp-service",
+    detect: detectChromeDevTools,
+    installClaude: ["claude", "mcp", "add", "chrome-devtools", "--scope", "user", "npx", "chrome-devtools-mcp@latest"],
+    installCodex: ["codex", "mcp", "add", "chrome-devtools", "--", "npx", "chrome-devtools-mcp@latest"],
+    degradation: "Traditional browser developer tools"
+  }
+];
+
+// ---------------------------------------------------------------------------
+// Detection functions
+// ---------------------------------------------------------------------------
+
+function detectPencil() {
+  const platform = os.platform();
+  if (platform === "darwin") {
+    return fs.existsSync("/Applications/Pencil.app");
+  }
+  if (platform === "win32") {
+    const programFiles = process.env.ProgramFiles || "C:\\Program Files";
+    const programFilesX86 = process.env["ProgramFiles(x86)"] || "C:\\Program Files (x86)";
+    return (
+      fs.existsSync(path.join(programFiles, "Pencil")) ||
+      fs.existsSync(path.join(programFilesX86, "Pencil"))
+    );
+  }
+  // Linux: check common paths
+  const linuxPaths = ["/usr/bin/pencil", "/usr/local/bin/pencil", "/opt/pencil/pencil"];
+  return linuxPaths.some((p) => fs.existsSync(p));
+}
+
+function readCodexConfig() {
+  const configPath = path.join(process.env.CODEX_HOME || path.join(os.homedir(), ".codex"), "config.toml");
+  if (!fs.existsSync(configPath)) return "";
+  return fs.readFileSync(configPath, "utf8");
+}
+
+function readClaudeMcpConfig() {
+  // Claude Code stores MCP config in several possible locations
+  const candidates = [
+    path.join(process.env.CLAUDE_HOME || path.join(os.homedir(), ".claude"), "claude_mcp_config.json"),
+    path.join(process.env.CLAUDE_HOME || path.join(os.homedir(), ".claude"), "mcp.json"),
+    path.join(process.env.CLAUDE_HOME || path.join(os.homedir(), ".claude"), "settings.json"),
+    path.join(process.cwd(), ".mcp.json")
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      try {
+        return { path: candidate, content: JSON.parse(fs.readFileSync(candidate, "utf8")) };
+      } catch (_) { /* not valid JSON */ }
+    }
+  }
+  return null;
+}
+
+function codexHasMcpServer(serverName) {
+  const config = readCodexConfig();
+  // TOML: look for [mcp_servers.<name>] or [mcp.servers.<name>]
+  const patterns = [
+    new RegExp(`\\[mcp_servers\\.${serverName}\\]`, "i"),
+    new RegExp(`\\[mcp\\.servers\\.${serverName}\\]`, "i")
+  ];
+  return patterns.some((p) => p.test(config));
+}
+
+function claudeHasMcpServer(serverName) {
+  const mcpConfig = readClaudeMcpConfig();
+  if (!mcpConfig) return false;
+  const content = mcpConfig.content;
+  // Check common structures: { mcpServers: { name: ... } } or { permissions: { allow: ["mcp__name"] } }
+  if (content.mcpServers && content.mcpServers[serverName]) return true;
+  if (content.permissions && content.permissions.allow) {
+    return content.permissions.allow.some((p) => p === `mcp__${serverName}` || p.startsWith(`mcp__${serverName}__`));
+  }
+  return false;
+}
+
+function detectNotebookLM(provider) {
+  if (provider === "codex") return codexHasMcpServer("notebooklm");
+  if (provider === "claude") return claudeHasMcpServer("notebooklm");
+  return codexHasMcpServer("notebooklm") || claudeHasMcpServer("notebooklm");
+}
+
+function detectShadcn(provider) {
+  if (provider === "codex") return codexHasMcpServer("shadcn");
+  if (provider === "claude") return claudeHasMcpServer("shadcn");
+  return codexHasMcpServer("shadcn") || claudeHasMcpServer("shadcn");
+}
+
+function detectChromeDevTools(provider) {
+  if (provider === "codex") return codexHasMcpServer("chrome-devtools");
+  if (provider === "claude") return claudeHasMcpServer("chrome-devtools");
+  return codexHasMcpServer("chrome-devtools") || claudeHasMcpServer("chrome-devtools");
+}
+
+// ---------------------------------------------------------------------------
+// Provider detection
+// ---------------------------------------------------------------------------
+
+function detectProvider() {
+  const hasCodex = spawnSync("which", ["codex"], { encoding: "utf8" }).status === 0;
+  const hasClaude = spawnSync("which", ["claude"], { encoding: "utf8" }).status === 0;
+  if (hasCodex && hasClaude) return "both";
+  if (hasCodex) return "codex";
+  if (hasClaude) return "claude";
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Step 1 & 2: Scan and detect missing
+// ---------------------------------------------------------------------------
+
+function scanTools(provider) {
+  const results = [];
+  for (const tool of TOOL_REGISTRY) {
+    const detected = tool.detect(provider);
+    results.push({
+      id: tool.id,
+      name: tool.name,
+      purpose: tool.purpose,
+      type: tool.type,
+      status: detected ? "installed" : "missing",
+      degradation: tool.degradation
+    });
+  }
+  return results;
+}
+
+// ---------------------------------------------------------------------------
+// Step 3: Suggest installation
+// ---------------------------------------------------------------------------
+
+function getInstallCommand(tool, provider) {
+  if (provider === "claude" && tool.installClaude) return tool.installClaude;
+  if (provider === "codex" && tool.installCodex) return tool.installCodex;
+  return null;
+}
+
+function getManualInstructions(tool, provider) {
+  if (tool.type === "desktop-app") return `Download from ${tool.id === "pencil" ? "https://www.pencil.dev/" : "the official website"}`;
+  if (provider === "codex" && tool.installCodexManual) return tool.installCodexManual;
+  return null;
+}
+
+function suggestInstalls(scanResults, provider) {
+  const missing = scanResults.filter((r) => r.status === "missing");
+  if (missing.length === 0) return [];
+
+  const suggestions = [];
+  for (const result of missing) {
+    const tool = TOOL_REGISTRY.find((t) => t.id === result.id);
+    const cmd = getInstallCommand(tool, provider);
+    const manual = getManualInstructions(tool, provider);
+    suggestions.push({
+      id: result.id,
+      name: result.name,
+      command: cmd,
+      manualInstructions: manual,
+      canAutoInstall: cmd !== null
+    });
+  }
+  return suggestions;
+}
+
+// ---------------------------------------------------------------------------
+// Step 4 & 5: User authorization + execute install
+// ---------------------------------------------------------------------------
+
+function prompt(question) {
+  return new Promise((resolve) => {
+    const rl = createInterface({ input: process.stdin, output: process.stdout });
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer.trim().toLowerCase());
+    });
+  });
+}
+
+async function installTool(suggestion, provider, tmpDir) {
+  if (!suggestion.canAutoInstall) {
+    return { id: suggestion.id, success: false, reason: "manual_only", instructions: suggestion.manualInstructions };
+  }
+
+  const cmd = suggestion.command;
+  const result = spawnSync(cmd[0], cmd.slice(1), {
+    encoding: "utf8",
+    cwd: tmpDir,
+    timeout: 120_000,
+    env: { ...process.env, npm_config_cache: path.join(tmpDir, ".npm-cache") }
+  });
+
+  return {
+    id: suggestion.id,
+    success: result.status === 0,
+    reason: result.status === 0 ? null : "install_failed",
+    stdout: result.stdout,
+    stderr: result.stderr
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Step 7: Record results
+// ---------------------------------------------------------------------------
+
+function formatReport(scanResults, provider) {
+  const lines = [
+    "## MCP Tool Status",
+    "",
+    "| Tool | Status | Purpose | Notes |",
+    "|------|--------|---------|-------|"
+  ];
+  for (const r of scanResults) {
+    const notes = r.status === "missing" ? `Degradation: ${r.degradation}` : "-";
+    lines.push(`| ${r.name} | ${r.status} | ${r.purpose} | ${notes} |`);
+  }
+  lines.push("");
+  lines.push(`Provider: ${provider || "unknown"}`);
+  lines.push(`Scan time: ${new Date().toISOString()}`);
+  return lines.join("\n");
+}
+
+function formatJson(scanResults, provider) {
+  return JSON.stringify({
+    provider,
+    timestamp: new Date().toISOString(),
+    tools: scanResults
+  }, null, 2);
+}
+
+// ---------------------------------------------------------------------------
+// CLI argument parser
+// ---------------------------------------------------------------------------
+
+function parseArgs(argv) {
+  const args = {};
+  for (let i = 0; i < argv.length; i += 1) {
+    const item = argv[i];
+    if (!item.startsWith("--")) continue;
+    const key = item.slice(2);
+    const next = argv[i + 1];
+    if (!next || next.startsWith("--")) {
+      args[key] = "true";
+      continue;
+    }
+    args[key] = next;
+    i += 1;
+  }
+  return args;
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const outputJson = args.json === "true";
+  const doInstall = args.install === "true";
+  const autoYes = args.yes === "true";
+  const outputPath = args.output || null;
+
+  // Detect provider
+  let provider = args.provider || null;
+  if (!provider) {
+    provider = detectProvider();
+  }
+
+  if (!provider) {
+    console.error("No provider detected. Install Codex or Claude Code first, or pass --provider.");
+    process.exit(1);
+  }
+
+  // Step 1 & 2: Scan
+  let scanResults = scanTools(provider);
+
+  const missing = scanResults.filter((r) => r.status === "missing");
+
+  if (!outputJson) {
+    console.log("Acode-kit MCP Tool Scanner");
+    console.log(`Provider: ${provider}`);
+    console.log("");
+    for (const r of scanResults) {
+      const icon = r.status === "installed" ? "[OK]" : "[--]";
+      console.log(`  ${icon} ${r.name} (${r.status})`);
+    }
+    console.log("");
+  }
+
+  // Step 3-6: Install flow
+  if (doInstall && missing.length > 0) {
+    const suggestions = suggestInstalls(scanResults, provider);
+    const installable = suggestions.filter((s) => s.canAutoInstall);
+    const manualOnly = suggestions.filter((s) => !s.canAutoInstall);
+
+    if (manualOnly.length > 0 && !outputJson) {
+      console.log("Manual installation required:");
+      for (const s of manualOnly) {
+        console.log(`  - ${s.name}: ${s.manualInstructions}`);
+      }
+      console.log("");
+    }
+
+    if (installable.length > 0) {
+      if (!outputJson) {
+        console.log("Auto-installable tools:");
+        for (const s of installable) {
+          console.log(`  - ${s.name}: ${s.command.join(" ")}`);
+        }
+        console.log("");
+      }
+
+      let proceed = autoYes;
+      if (!proceed) {
+        const answer = await prompt("Install missing tools? (y/n): ");
+        proceed = answer === "y" || answer === "yes";
+      }
+
+      if (proceed) {
+        // Create temp directory for install operations
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "acode-mcp-install-"));
+
+        try {
+          for (const s of installable) {
+            if (!outputJson) process.stdout.write(`  Installing ${s.name}...`);
+            const result = await installTool(s, provider, tmpDir);
+            if (!outputJson) {
+              console.log(result.success ? " OK" : ` FAILED (${result.stderr || result.reason})`);
+            }
+          }
+        } finally {
+          // Cleanup temp directory
+          fs.rmSync(tmpDir, { recursive: true, force: true });
+          if (!outputJson) console.log(`  Temp directory cleaned up.`);
+        }
+
+        // Step 6: Re-scan to verify
+        scanResults = scanTools(provider);
+        if (!outputJson) {
+          console.log("");
+          console.log("Post-install scan:");
+          for (const r of scanResults) {
+            const icon = r.status === "installed" ? "[OK]" : "[--]";
+            console.log(`  ${icon} ${r.name} (${r.status})`);
+          }
+          console.log("");
+        }
+      }
+    }
+  } else if (missing.length === 0 && !outputJson) {
+    console.log("All registered MCP tools are installed.");
+  } else if (missing.length > 0 && !doInstall && !outputJson) {
+    console.log(`${missing.length} tool(s) missing. Run with --install to install.`);
+  }
+
+  // Step 7: Output
+  if (outputJson) {
+    console.log(formatJson(scanResults, provider));
+  }
+
+  if (outputPath) {
+    const report = formatReport(scanResults, provider);
+    fs.writeFileSync(outputPath, report, "utf8");
+    if (!outputJson) console.log(`Report written to ${outputPath}`);
+  }
+
+  // Exit code: 0 if all installed, 1 if any missing
+  const finalMissing = scanResults.filter((r) => r.status === "missing").length;
+  process.exit(finalMissing > 0 ? 1 : 0);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(2);
+});

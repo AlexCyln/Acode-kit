@@ -53,6 +53,12 @@
       "phase": "上线",
       "task_type": "发布总结",
       "difficulty": "low"
+    },
+    {
+      "keywords": ["tool", "mcp", "install", "scan", "pencil", "notebooklm", "shadcn", "chrome-devtools"],
+      "phase": "设计",
+      "task_type": "工具管理",
+      "difficulty": "low"
     }
   ]
 }

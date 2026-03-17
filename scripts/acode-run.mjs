@@ -113,13 +113,31 @@ function main() {
   });
 
   const result = spawnSync("node", routerArgs, { cwd, encoding: "utf8" });
+
+  // Extract model routing info from router stdout
+  let selectedModel = null;
+  let finalModel = null;
+  let fallbackTriggeredBy = null;
+  try {
+    const routerOutput = JSON.parse(result.stdout);
+    selectedModel = routerOutput.selectedModel || routerOutput.selected_model || null;
+    finalModel = routerOutput.finalModel || routerOutput.final_model || selectedModel;
+    fallbackTriggeredBy = routerOutput.fallbackTriggeredBy || routerOutput.fallback_triggered_by || null;
+  } catch (_) {
+    // Router stdout may not be valid JSON in all cases
+  }
+
   const envelope = {
     success: result.status === 0,
     route: {
       provider,
       phase,
       taskType,
-      difficulty
+      difficulty,
+      selectedModel,
+      finalModel,
+      fallbackTriggered: fallbackTriggeredBy !== null,
+      fallbackTriggeredBy
     },
     routerStatus: result.status,
     routerStdout: result.stdout,

@@ -2,26 +2,26 @@
 `04_BACKEND_ARCHITECTURE_SPEC.md`
 
 # 文件定位
-Spring Boot 主后端与 Python 辅助服务的工程架构规范。
+后端主服务与辅助服务的工程架构规范。
 
 # 适用范围
-适用于基于 Java Spring Boot、Maven、MyBatis-Plus、MySQL、Redis 的业务后端，以及配套 Python 辅助服务。
+适用于基于已声明后端运行时、ORM/数据访问框架、数据库的业务后端，以及配套辅助服务。具体技术栈由 `PROJECT_OVERRIDES.md` 确定。
 
 # 与其他文件的关系
 本文件依赖 `05_API_DESIGN_SPEC.md`、`06_DATABASE_DESIGN_SPEC.md`、`16_SECURITY_SPEC.md`，并为 `13_DEPLOYMENT_AND_DEVOPS_SPEC.md` 提供服务结构基础。
 
 # 编写目的
-统一 Spring Boot 主后端与 Python 辅助服务的职责边界、分层方式和工程治理规则，避免实现失控与角色错位。
+统一后端主服务与辅助服务的职责边界、分层方式和工程治理规则，避免实现失控与角色错位。
 
 ## 1. 架构立场
 1. 单体优先，模块清晰。
 2. 在单体内先解决分层与边界，再决定是否拆服务。
-3. 业务主链路放在 Java Spring Boot。
-4. Python 只承载辅助能力，不替代默认主业务后端。
+3. 业务主链路放在已声明的主后端服务。
+4. 辅助服务只承载辅助能力（如 AI 推理、数据处理），不替代主业务后端。
 
 ## 2. 推荐目录结构
 ```text
-src/main/java/com/company/project/
+src/
   common/
     config/
     constant/
@@ -32,10 +32,10 @@ src/main/java/com/company/project/
     audit/
   module/
     user/
-      controller/
+      handler/
       service/
       service/impl/
-      mapper/
+      repository/
       entity/
       dto/
       vo/
@@ -45,11 +45,13 @@ src/main/java/com/company/project/
     system/
 ```
 
+说明：`handler/` 对应请求处理层（如 Controller/Handler/Route），`repository/` 对应数据访问层（如 Mapper/Repository/DAO）。具体命名按已声明框架惯例调整。
+
 ## 3. 分层职责边界
-1. `controller`：接收请求、参数绑定、调用 service、返回统一响应，不写核心业务。
+1. `handler`（请求处理层）：接收请求、参数绑定、调用 service、返回统一响应，不写核心业务。
 2. `service`：定义业务用例接口。
-3. `service/impl`：实现业务编排、事务、权限前置检查、调用 mapper 与外部服务。
-4. `mapper`：数据库访问层，负责 SQL 语义，不承载复杂业务规则。
+3. `service/impl`：实现业务编排、事务、权限前置检查、调用数据访问层与外部服务。
+4. `repository`（数据访问层）：数据库访问层，负责查询语义，不承载复杂业务规则。
 5. `entity`：数据库实体映射。
 6. `dto`：入参对象，强调校验与接口边界。
 7. `vo`：出参对象，强调前端展示语义。
@@ -79,15 +81,15 @@ src/main/java/com/company/project/
 
 ## 5. 统一异常处理
 1. 业务异常、参数异常、权限异常、系统异常分层处理。
-2. Controller 不得直接返回裸异常堆栈。
+2. 请求处理层不得直接返回裸异常堆栈。
 3. 全局异常处理器统一转换错误码与日志。
 4. 对用户可见错误只返回必要信息，不暴露内部实现细节。
 
 ## 6. 参数校验规范
-1. DTO 必须使用 `javax.validation` 或 Jakarta Validation 注解。
-2. Controller 层必须开启校验。
+1. DTO 必须使用已声明框架的校验机制（如注解校验、装饰器校验、Schema 校验等）。
+2. 请求处理层必须开启校验。
 3. 复杂跨字段校验可在 service 层补充。
-4. 禁止使用 `Map<String, Object>` 作为复杂业务入参。
+4. 禁止使用无类型的通用字典对象（如 `Map<String, Object>`、`dict`、`any`）作为复杂业务入参。
 
 ## 7. 日志与审计规范
 1. 使用统一日志框架，区分业务日志、错误日志、审计日志。
@@ -117,7 +119,7 @@ src/main/java/com/company/project/
 2. 任务需记录状态、开始时间、结束时间、执行结果、失败原因。
 3. 重试策略必须显式配置，禁止无上限重试。
 
-## 12. Python 辅助服务边界
+## 12. 辅助服务边界
 适用场景：
 1. AI 推理或模型调用。
 2. 数据清洗、脚本任务、ETL、异步分析。
@@ -126,41 +128,43 @@ src/main/java/com/company/project/
 不适用场景：
 1. 默认主业务 CRUD。
 2. 权限主链路。
-3. 需要与组织级 Java 基础设施深度一致的核心领域模块。
+3. 需要与主后端基础设施深度一致的核心领域模块。
 
-## 13. Java 与 Python 协作边界
-1. Java 负责业务编排、鉴权、审计、主数据落库。
-2. Python 负责辅助计算与结果返回。
+## 13. 主服务与辅助服务协作边界
+1. 主服务负责业务编排、鉴权、审计、主数据落库。
+2. 辅助服务负责辅助计算与结果返回。
 3. 交互方式优先 HTTP REST 或消息队列，避免共享数据库强耦合。
-4. Python 输出必须定义稳定 DTO 契约。
+4. 辅助服务输出必须定义稳定 DTO 契约。
 
 ## 14. 明确禁止事项
-1. Controller 直接操作 Mapper。
+1. 请求处理层直接操作数据访问层。
 2. Entity 直接作为对外 API 出参。
 3. 跨模块随意互调内部实现。
-4. 在 ServiceImpl 中堆叠超长方法且无拆分。
-5. 用 Python 偷换主后端职责。
+4. 在 Service 实现中堆叠超长方法且无拆分。
+5. 用辅助服务偷换主后端职责。
 
 ## 15. 后端模块示例
 ```text
 module/order/
-  controller/OrderController.java
-  service/OrderService.java
-  service/impl/OrderServiceImpl.java
-  mapper/OrderMapper.java
-  entity/OrderEntity.java
-  dto/OrderCreateDTO.java
-  dto/OrderQueryDTO.java
-  vo/OrderDetailVO.java
-  convert/OrderConvert.java
-  enums/OrderStatusEnum.java
+  handler/OrderHandler
+  service/OrderService
+  service/impl/OrderServiceImpl
+  repository/OrderRepository
+  entity/OrderEntity
+  dto/OrderCreateDTO
+  dto/OrderQueryDTO
+  vo/OrderDetailVO
+  convert/OrderConvert
+  enums/OrderStatusEnum
 ```
 
+说明：文件扩展名和命名后缀按已声明语言惯例调整。
+
 ## 本文件使用建议
-后端新建项目、拆分模块、重构分层、引入 Python 服务时应以本文件作为架构判断基准。
+后端新建项目、拆分模块、重构分层、引入辅助服务时应以本文件作为架构判断基准。
 
 ## AI 调用建议
-AI 在生成 Controller、Service、Mapper、DTO、VO、配置类、异常类前，必须先按本文件划定分层职责与 Java/Python 边界。
+AI 在生成请求处理层、Service、数据访问层、DTO、VO、配置类、异常类前，必须先按本文件划定分层职责与主服务/辅助服务边界。
 
 ## 后续可扩展点
 可增加消息队列规范、定时任务规范、租户隔离规范、领域事件规范。
