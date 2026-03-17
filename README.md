@@ -180,17 +180,30 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
 
 ### 初始化（安装后必须执行）
 
-安装完成后，**必须先运行初始化命令**，完成 MCP 工具扫描、安装和 NotebookLM 认证配置：
+安装完成后，**必须先运行初始化命令**，完成 MCP 工具扫描、安装和 NotebookLM 认证配置。
 
-```bash
-# 在项目目录中运行
+**方式 1：在 AI Agent 中执行（推荐）**
+
+重启 Claude Code / Codex 后，直接告诉 AI：
+
+```text
 acode-kit init
-
-# 或指定工作目录和 provider
-acode-kit init --cwd /path/to/project --provider claude
 ```
 
-> 如果 `acode-kit` 命令不可用，可直接使用 `node ./scripts/acode-kit.mjs init`。
+AI 会自动读取 `acode-init.md` 适配器并执行初始化流程。
+
+**方式 2：CLI 命令行**
+
+```bash
+# 如果通过 npm link 或 npm install 安装
+acode-kit init
+
+# 如果通过 curl | bash 安装（使用安装目录下的脚本）
+node .claude/Acode-kit/scripts/acode-kit.mjs init
+
+# 指定参数
+node .claude/Acode-kit/scripts/acode-kit.mjs init --provider claude --yes
+```
 
 初始化流程：
 1. 检查项目文件夹状态（空 / 已有项目）
@@ -248,7 +261,7 @@ node ./scripts/acode-run.mjs \
 
 #### 在 Agent 中使用
 
-安装后直接告诉 AI：
+安装并初始化后，直接告诉 AI：
 
 ```text
 使用 Acode-kit，帮我从 0 开始规划并启动一个移动端 App 项目。
@@ -469,17 +482,30 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
 
 ### Initialization (Required After Install)
 
-After installation, **you must run the init command first** to scan/install MCP tools and configure NotebookLM authentication:
+After installation, **you must run the init command first** to scan/install MCP tools and configure NotebookLM authentication.
 
-```bash
-# Run in your project directory
+**Option 1: In your AI Agent (Recommended)**
+
+Restart Claude Code / Codex, then simply tell the AI:
+
+```text
 acode-kit init
-
-# Or specify working directory and provider
-acode-kit init --cwd /path/to/project --provider claude
 ```
 
-> If `acode-kit` is not on your PATH, use `node ./scripts/acode-kit.mjs init` instead.
+The AI will read the `acode-init.md` adapter and execute the initialization flow.
+
+**Option 2: CLI**
+
+```bash
+# If installed via npm link or npm install
+acode-kit init
+
+# If installed via curl | bash (use the script path directly)
+node .claude/Acode-kit/scripts/acode-kit.mjs init
+
+# With options
+node .claude/Acode-kit/scripts/acode-kit.mjs init --provider claude --yes
+```
 
 Initialization flow:
 1. Check project folder state (empty / existing)
@@ -528,7 +554,7 @@ Output includes full routing info:
 
 #### In your AI agent
 
-After installation, simply tell the AI:
+After installation and initialization, simply tell the AI:
 
 ```text
 Use Acode-kit to plan and start a mobile app project from scratch.

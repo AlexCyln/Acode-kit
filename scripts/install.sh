@@ -196,5 +196,8 @@ else
   install_agent "$SOURCE_DIR" "$AGENT"
 fi
 
+echo ""
 echo "Restart your target AI agent after installation."
-echo "After restarting, run 'acode-kit init' to complete first-time setup."
+echo ""
+echo "To complete first-time setup, open your AI agent and tell it:"
+echo '  "acode-kit init"'

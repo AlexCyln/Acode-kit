@@ -217,8 +217,11 @@ function main() {
     if (prepared.cleanup) prepared.cleanup();
   }
 
+  console.log("");
   console.log("Restart your target AI agent after installation.");
-  console.log("After restarting, run 'acode-kit init' to complete first-time setup.");
+  console.log("");
+  console.log('To complete first-time setup, open your AI agent and tell it:');
+  console.log('  "acode-kit init"');
 }
 
 main();
