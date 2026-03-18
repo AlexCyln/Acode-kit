@@ -114,7 +114,32 @@ Step 5: 持续实施     → 8 阶段闭环 × TDD × 小垂直切片
 
 ### 快速安装
 
-#### macOS / Linux
+> **当前仓库为 Private**：`curl | bash` 远程安装方式暂不可用。请使用下方「本地安装」方式。仓库公开后远程安装命令将自动生效。
+
+#### 本地安装（Private 阶段推荐）
+
+先克隆仓库，然后用 `--source-dir` 从本地安装：
+
+```bash
+git clone https://github.com/AlexCyln/Acode-kit-Plus.git
+cd Acode-kit-Plus
+
+# Claude 用户级
+node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope user
+
+# Claude 项目级
+node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope project
+
+# Codex
+node scripts/install.mjs --source-dir ./Acode-kit --agent codex
+
+# 本地便携包
+node scripts/install.mjs --source-dir ./Acode-kit --agent local
+```
+
+#### 远程安装（仓库公开后可用）
+
+##### macOS / Linux
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | bash
@@ -140,7 +165,7 @@ curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/script
 
 > 注意：环境变量必须写在 `bash` 一侧，而非 `curl` 前面。
 
-#### Windows PowerShell
+##### Windows PowerShell
 
 ```powershell
 irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
@@ -151,14 +176,7 @@ $env:AGENT = "codex"
 irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
 ```
 
-#### Node 安装器
-
-```bash
-node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir /tmp/agent-skills
-node ./scripts/install.mjs --repo AlexCyln/Acode-kit-Plus --agent claude --scope user
-```
-
-#### Codex 内置安装器
+##### Codex 内置安装器
 
 ```bash
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
@@ -182,17 +200,20 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
 
 安装完成后，**必须先运行初始化命令**，完成 MCP 工具扫描、安装和 NotebookLM 认证配置。
 
-在终端运行初始化脚本：
+安装完成后，终端会输出 init 脚本的完整路径，直接复制运行即可。不同安装方式的路径：
 
 ```bash
-# 如果通过 curl | bash 安装
+# Claude 用户级
 node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs
 
-# 如果通过 npm link 或 npm install 安装
-acode-kit init
+# Claude 项目级
+node ./.claude/Acode-kit/scripts/acode-kit-init.mjs
+
+# Codex
+node ~/.codex/skills/Acode-kit/scripts/acode-kit-init.mjs
 
 # 指定参数
-node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs --provider claude --yes
+node <安装路径>/scripts/acode-kit-init.mjs --provider claude --yes
 ```
 
 初始化流程（CLI 自动执行，无需 AI 参与）：
@@ -200,7 +221,7 @@ node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs --provider claude --yes
 2. 扫描 4 个 MCP 工具的安装状态
 3. 询问是否安装缺失工具（可跳过）
 4. 验证安装结果
-5. 配置 NotebookLM 认证状态
+5. 配置 NotebookLM 认证（提示用户在 AI Agent 中完成浏览器认证）
 6. 写入 `.acode-kit-initialized.json` 状态文件
 
 | 参数 | 说明 |
@@ -419,7 +440,32 @@ Step 5: Continuous Delivery   → 8-stage loop × TDD × small vertical slices
 
 ### Quick Install
 
-#### macOS / Linux
+> **This repo is currently Private.** The `curl | bash` remote install method is unavailable. Use the "Local Install" method below. Remote install commands will work automatically once the repo is made public.
+
+#### Local Install (Recommended while Private)
+
+Clone the repo first, then install from the local copy using `--source-dir`:
+
+```bash
+git clone git@github.com:AlexCyln/Acode-kit-Plus.git
+cd Acode-kit-Plus
+
+# Claude user-level
+node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope user
+
+# Claude project-level
+node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope project
+
+# Codex
+node scripts/install.mjs --source-dir ./Acode-kit --agent codex
+
+# Local portable
+node scripts/install.mjs --source-dir ./Acode-kit --agent local
+```
+
+#### Remote Install (Available after repo is public)
+
+##### macOS / Linux
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | bash
@@ -442,19 +488,13 @@ curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/script
 
 > Note: Environment variables must be passed to `bash`, not before `curl`.
 
-#### Windows PowerShell
+##### Windows PowerShell
 
 ```powershell
 irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
 ```
 
-#### Node installer
-
-```bash
-node ./scripts/install.mjs --repo AlexCyln/Acode-kit-Plus --agent claude --scope user
-```
-
-#### Codex built-in installer
+##### Codex built-in installer
 
 ```bash
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
@@ -474,19 +514,20 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
 
 After installation, **you must run the init command first** to scan/install MCP tools and configure NotebookLM authentication.
 
-**Option 1: In your AI Agent (Recommended)**
-
-Run the init script in your terminal:
+After installation, the terminal will print the full init script path — just copy and run it. Paths by install method:
 
 ```bash
-# If installed via curl | bash
+# Claude user-level
 node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs
 
-# If installed via npm link or npm install
-acode-kit init
+# Claude project-level
+node ./.claude/Acode-kit/scripts/acode-kit-init.mjs
+
+# Codex
+node ~/.codex/skills/Acode-kit/scripts/acode-kit-init.mjs
 
 # With options
-node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs --provider claude --yes
+node <install-path>/scripts/acode-kit-init.mjs --provider claude --yes
 ```
 
 Initialization flow:
@@ -494,7 +535,7 @@ Initialization flow:
 2. Scan 4 MCP tools for installation status
 3. Prompt to install missing tools (skippable)
 4. Verify installation results
-5. Configure NotebookLM authentication (triggers browser login)
+5. Configure NotebookLM authentication (prompts user to complete browser auth in AI Agent)
 6. Write `.acode-kit-initialized.json` status file
 
 | Flag | Description |

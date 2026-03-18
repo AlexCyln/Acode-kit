@@ -80,7 +80,7 @@ function createJobs(args) {
   }
 
   const codexRoot = path.resolve(args["dest-dir"] || path.join(process.env.CODEX_HOME || path.join(os.homedir(), ".codex"), "skills"));
-  const claudeRoot = path.resolve(args["dest-dir"] || path.join(scope === "project" ? process.cwd() : (process.env.CLAUDE_HOME || path.join(os.homedir(), ".claude"))));
+  const claudeRoot = path.resolve(args["dest-dir"] || (scope === "project" ? path.join(process.cwd(), ".claude") : (process.env.CLAUDE_HOME || path.join(os.homedir(), ".claude"))));
   const localRoot = path.resolve(args["dest-dir"] || DEFAULT_LOCAL_ROOT);
 
   if (resolvedAgent === "both") {
@@ -126,7 +126,7 @@ function installCodex(sourceDir, destRoot) {
   const bundleDir = path.join(destRoot, path.basename(sourceDir));
   copyDir(sourceDir, bundleDir);
   copyBundleScripts(sourceDir, bundleDir);
-  return [`Installed Codex skill to ${bundleDir}`];
+  return { lines: [`Installed Codex skill to ${bundleDir}`], bundleDir };
 }
 
 function installClaude(sourceDir, destRoot) {
@@ -155,7 +155,7 @@ function installClaude(sourceDir, destRoot) {
       ? `Installed Claude unified entry to ${routerAgentFile}`
       : "Claude unified entry adapter not found; skipping acode-run adapter."
   ];
-  return lines;
+  return { lines, bundleDir };
 }
 
 function installLocal(sourceDir, destRoot) {
@@ -169,6 +169,7 @@ function installLocal(sourceDir, destRoot) {
   copyDir(sourceDir, bundleDir);
   copyBundleScripts(sourceDir, bundleDir);
   const lines = [`Installed portable bundle to ${bundleDir}`];
+  const result = { lines, bundleDir };
 
   if (exists(adapterTemplate)) {
     copyFile(adapterTemplate, portableClaudeFile);
@@ -182,7 +183,7 @@ function installLocal(sourceDir, destRoot) {
   lines.push("Manual next step:");
   lines.push("- Codex: copy the Acode-kit folder into ~/.codex/skills/");
   lines.push("- Claude Code: copy the Acode-kit folder into ~/.claude/ and copy claude/*.md into ~/.claude/agents/");
-  return lines;
+  return result;
 }
 
 function main() {
@@ -190,14 +191,16 @@ function main() {
   const jobs = createJobs(args);
   const prepared = prepareSource(args);
 
+  let lastBundleDir = "";
   try {
     for (const job of jobs) {
-      const lines = job.agent === "codex"
+      const result = job.agent === "codex"
         ? installCodex(prepared.sourceDir, job.destRoot)
         : job.agent === "claude"
           ? installClaude(prepared.sourceDir, job.destRoot)
           : installLocal(prepared.sourceDir, job.destRoot);
-      for (const line of lines) console.log(line);
+      for (const line of result.lines) console.log(line);
+      lastBundleDir = result.bundleDir;
     }
   } finally {
     if (prepared.cleanup) prepared.cleanup();
@@ -207,7 +210,7 @@ function main() {
   console.log("Restart your target AI agent after installation.");
   console.log("");
   console.log("To complete first-time setup, run this in your terminal:");
-  console.log("  node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs");
+  console.log(`  node ${lastBundleDir}/scripts/acode-kit-init.mjs`);
 }
 
 main();

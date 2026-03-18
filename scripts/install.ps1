@@ -84,6 +84,7 @@ function Install-Agent {
     Remove-Item -LiteralPath $targetDir -Recurse -Force
   }
   Copy-Item -LiteralPath $SourceDir -Destination $targetDir -Recurse -Force
+  $script:LAST_BUNDLE_DIR = $targetDir
   if (Test-PathExists $scriptsDir) {
     if (Test-PathExists $targetScriptsDir) {
       Remove-Item -LiteralPath $targetScriptsDir -Recurse -Force
@@ -123,6 +124,8 @@ function Install-Agent {
     }
   }
 }
+
+$LAST_BUNDLE_DIR = ""
 
 $REQUESTED_AGENT = $AGENT
 if ($AGENT -eq "auto") {
@@ -181,7 +184,11 @@ try {
     Install-Agent -SourceDir $sourceDir -AgentName $AGENT
   }
 
+  Write-Host ""
   Write-Host "Restart your target AI agent after installation."
+  Write-Host ""
+  Write-Host "To complete first-time setup, run this in your terminal:"
+  Write-Host "  node $LAST_BUNDLE_DIR\scripts\acode-kit-init.mjs"
 } finally {
   if (Test-PathExists $tmpDir) {
     Remove-Item -LiteralPath $tmpDir -Recurse -Force

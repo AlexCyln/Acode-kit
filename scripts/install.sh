@@ -95,6 +95,7 @@ install_agent() {
   mkdir -p "$dest_root"
   rm -rf "$target_dir"
   cp -R "$source_dir" "$target_dir"
+  LAST_BUNDLE_DIR="$target_dir"
   if [[ -d "$repo_root/scripts" ]]; then
     rm -rf "$target_dir/scripts"
     cp -R "$repo_root/scripts" "$target_dir/scripts"
@@ -130,6 +131,8 @@ install_agent() {
       ;;
   esac
 }
+
+LAST_BUNDLE_DIR=""
 
 REQUESTED_AGENT="$AGENT"
 if [[ "$AGENT" == "auto" ]]; then
@@ -196,4 +199,4 @@ echo ""
 echo "Restart your target AI agent after installation."
 echo ""
 echo "To complete first-time setup, run this in your terminal:"
-echo "  node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs"
+echo "  node $LAST_BUNDLE_DIR/scripts/acode-kit-init.mjs"
