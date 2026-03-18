@@ -60,13 +60,15 @@ CALLER: Present the FULL content above to the user. WAIT for their explicit repl
 
 **Actions:**
 1. Check the workspace folder: empty (new project) or existing files (continuation)?
-2. Read tool status and NotebookLM config from `.acode-kit-initialized.json`.
+2. Read `.acode-kit-initialized.json` and extract:
+   - Tool status list (which MCP tools are installed/missing)
+   - `notebookLM.configured`, `notebookLM.authCompleted`, `notebookLM.notebookUrl`
 3. Locate the Acode-kit bundle directory (check `~/.claude/Acode-kit/` then `./.claude/Acode-kit/`). Remember this path as `BUNDLE_PATH` for later use.
-4. Check whether NotebookLM MCP tools are available in your current environment (look for tools prefixed with `NotebookLM`).
+4. **Discover NotebookLM MCP tools:** Search your available tool list for any tool whose name contains "notebooklm" (case-insensitive). If found, **record the exact tool name(s)** — you will call them in Step 2. Also check if `notebookLM.authCompleted` is true in the status file.
 5. Output a workspace status report:
    - Workspace state (empty / existing project)
    - MCP tool status (from saved data)
-   - NotebookLM: installed / authenticated / available as MCP
+   - NotebookLM status: MCP tool found? (list exact tool name) / authenticated? / notebook URL
    - Acode-kit bundle path
 
 6. End your output with:
@@ -94,13 +96,21 @@ Do NOT start this step until you receive the user's explicit reply to the GATE 1
 1. Read ONLY `<BUNDLE_PATH>/references/global-engineering-standards/00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2 (tech stack decision framework). No other reference docs.
 2. Read the user's project prompt/brief.
 3. Analyze the brief and produce a **project skeleton**:
-   - If NotebookLM MCP tools are available: call NotebookLM to deepen the requirements analysis. Construct the prompt as:
-     ```
-     [user's project brief / requirements text]
+   - **If NotebookLM MCP tool was found in Step 1 AND `authCompleted` is true:**
+     a. Read the `notebookUrl` from the status file you loaded in Step 1.
+     b. Construct the combined prompt:
+        ```
+        [user's project brief / requirements text]
 
-     使用NotebookLM这个链接：https://notebooklm.google.com/notebook/7ec4ec07-abb3-478e-99aa-f8946e103499
-     ```
-   - If NotebookLM MCP tools are NOT available: perform the analysis directly without NotebookLM.
+        使用NotebookLM这个链接：[notebookUrl from status file]
+        ```
+     c. Call the NotebookLM MCP tool (use the exact tool name you recorded in Step 1) with this combined prompt.
+     d. Use NotebookLM's response to enrich your analysis.
+     e. If the call fails, fall back to direct analysis and note the failure in your output.
+   - **If NotebookLM MCP tool was found but `authCompleted` is false:**
+     Tell the user NotebookLM requires authentication. They can authenticate by typing "Log me in to NotebookLM" in a separate session, then re-run init with `--force`. For now, proceed with direct analysis.
+   - **If NotebookLM MCP tool was NOT found:**
+     Perform the analysis directly without NotebookLM.
 4. The skeleton MUST include: recommended tech stack, core business logic summary, system modules, UI/UX style direction, scope boundaries.
 5. Present the skeleton to the user.
 
@@ -193,14 +203,26 @@ acode-run returns JSON with routing metadata (`selectedModel`, `finalModel`, `fa
 
 ---
 
-## NotebookLM prompt injection
+## NotebookLM integration
 
-When calling any NotebookLM MCP tool, always append the notebook URL to the prompt:
-```
-[user's original prompt/requirements]
+**When to call NotebookLM:**
+- Step 2: requirements analysis and project skeleton (see STEP 2 above)
+- Large-scale requirement changes (>30% of modules) — re-run analysis with change description
 
-使用NotebookLM这个链接：https://notebooklm.google.com/notebook/7ec4ec07-abb3-478e-99aa-f8946e103499
-```
+**How to call NotebookLM:**
+1. Use the exact MCP tool name you discovered in Step 1 (e.g., a tool whose name contains "notebooklm").
+2. Read `notebookUrl` from `.acode-kit-initialized.json` — do NOT hardcode the URL.
+3. Construct the prompt by appending the notebook URL:
+   ```
+   [your prompt/requirements text]
+
+   使用NotebookLM这个链接：[notebookUrl from status file]
+   ```
+4. If the call fails, fall back to direct AI analysis and note the failure.
+
+**When NOT to call NotebookLM:**
+- `authCompleted` is false in the status file → tell user to authenticate first
+- NotebookLM MCP tool not found in your tool list → skip, use direct analysis
 
 ---
 
@@ -208,4 +230,4 @@ When calling any NotebookLM MCP tool, always append the notebook URL to the prom
 - Treat `<BUNDLE_PATH>/references/` as the reference library; load only what is needed for the current stage.
 - Treat `<BUNDLE_PATH>/assets/project-doc-templates/` as the template source for project documents.
 - Follow scope control, traceability, and handoff discipline in `<BUNDLE_PATH>/SKILL.md`.
-- When NotebookLM MCP is available, use it for requirements analysis and large-scale change impact assessment.
+- When NotebookLM MCP is available and authenticated, use it for requirements analysis and large-scale change impact assessment.

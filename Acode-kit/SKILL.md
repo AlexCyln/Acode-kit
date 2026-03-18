@@ -71,7 +71,7 @@ The agent checks the workspace folder (empty = new project, existing files = con
 
 ### Step 2: Requirements Analysis + Project Skeleton
 
-The agent reads `00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2 (tech stack framework) and the user's project brief. If NotebookLM MCP tools are available, it calls NotebookLM to deepen the analysis (prompt = user brief + `使用NotebookLM这个链接：https://notebooklm.google.com/notebook/7ec4ec07-abb3-478e-99aa-f8946e103499`). Output: project skeleton containing recommended tech stack, core business logic summary, system modules, UI/UX direction, scope boundaries.
+The agent reads `00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2 (tech stack framework) and the user's project brief. If NotebookLM MCP tools are available and authenticated (`authCompleted: true` in `.acode-kit-initialized.json`), it calls the NotebookLM MCP tool to deepen the analysis (prompt = user brief + `使用NotebookLM这个链接：` + `notebookUrl` from status file). If NotebookLM is unavailable or unauthenticated, it performs direct analysis. Output: project skeleton containing recommended tech stack, core business logic summary, system modules, UI/UX direction, scope boundaries.
 
 **Gate 2:** The agent presents the skeleton and asks the user to confirm or revise before proceeding.
 
@@ -148,8 +148,8 @@ If design tools are unavailable, follow the degradation strategy in `31_THIRD_PA
 
 ### Large-scale requirement change
 When a requirement change affects > 30% of modules:
-1. If NotebookLM MCP tools are available: re-run NotebookLM analysis (prompt = change description + `使用NotebookLM这个链接：https://notebooklm.google.com/notebook/7ec4ec07-abb3-478e-99aa-f8946e103499`) → output change skeleton → user confirms.
-2. If NotebookLM MCP tools are NOT available: AI agent performs change impact analysis → output change skeleton → user confirms.
+1. If NotebookLM MCP tools are available and authenticated: re-run NotebookLM analysis (prompt = change description + `使用NotebookLM这个链接：` + `notebookUrl` from `.acode-kit-initialized.json`) → output change skeleton → user confirms.
+2. If NotebookLM MCP tools are NOT available or unauthenticated: AI agent performs change impact analysis → output change skeleton → user confirms.
 3. Update PRD, traceability matrix, and decision log before implementation.
 
 ### TDD enforcement
