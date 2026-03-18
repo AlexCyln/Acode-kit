@@ -73,13 +73,15 @@ The agent checks the workspace folder (empty = new project, existing files = con
 
 The agent reads `00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2 (tech stack framework) and the user's project brief. If NotebookLM MCP tools are available and authenticated (`authCompleted: true` in `.acode-kit-initialized.json`), it calls the NotebookLM MCP tool to deepen the analysis (prompt = user brief + `使用NotebookLM这个链接：` + `notebookUrl` from status file). If NotebookLM is unavailable or unauthenticated, it performs direct analysis. Output: project skeleton containing recommended tech stack, core business logic summary, system modules, UI/UX direction, scope boundaries.
 
+The approved skeleton is persisted as `docs/project/PROJECT_SKELETON.md` during Step 4.
+
 **Gate 2:** The agent presents the skeleton and asks the user to confirm or revise before proceeding.
 
 ### Step 3: PRD + Progress Plan
 
 The agent reads `01_PRODUCT_REQUIREMENTS_STANDARD.md` for PRD structure. Based on the approved skeleton, it drafts a PRD, progress plan, and traceability matrix.
 
-**Gate 3:** The agent presents the PRD and plan, asks the user to confirm or revise. No files or directories may be created until Gate 3 is passed.
+**Gate 3:** The agent presents the PRD and plan, asks the user to confirm or revise. No files or directories may be created until Gate 3 is passed. After Gate 3, the NEXT step is Step 4 (Project Environment Setup) — NOT design or Pencil.
 
 ### Step 4: Project Environment Setup
 
@@ -92,6 +94,7 @@ Only begin after the user has explicitly approved the PRD from GATE 3. This is t
 2. Create the project root structure and root-level `AGENTS.md`.
 3. Create the minimum project-level documents from templates in `assets/project-doc-templates/`:
    - `docs/project/PROJECT_OVERVIEW.md`
+   - `docs/project/PROJECT_SKELETON.md` (fill with approved project skeleton from Gate 2)
    - `docs/project/PROJECT_OVERRIDES.md`
    - `docs/project/PRD.md`
    - `docs/project/DECISION_LOG.md`
@@ -114,19 +117,19 @@ After Step 4 is complete, output a project setup report and wait for user approv
 Follow the bundled execution flow in `references/global-engineering-standards/27_PROJECT_EXECUTION_FLOW_SPEC.md`.
 
 Stage order (starting from where the startup sequence left off):
-1. Requirements structuring (deepen PRD into detailed specs)
-2. UI / page structuring
-3. Data and API design
+1. Requirements structuring + module decomposition (architecture-level, outputs module priority list)
+2. Overall UI architecture (architecture-level wireframes, not detailed per-page)
+3. Overall data model + API framework (ER-diagram level, not per-endpoint fields)
 4. Project scaffold initialization
-5. TDD-driven small-slice implementation
-6. Review, testing, debug
+5. Module iteration — per module by priority: 5a requirements detail → 5b UI design → 5c data/API detail → 5d TDD implementation → 5e module test+review
+6. Integration testing + cross-module review
 7. Deployment and go-live
 
 Never skip a stage if its missing outputs would make the next stage unstable.
 
-**Pencil/design tool usage:** ONLY at stage 2 (UI / page structuring). Do NOT use Pencil at any other stage. If the user said "design in Pencil first" at Gate 3, this applies at stage 2 — NOT immediately after Gate 3 or Gate 4. Step 4 (project setup) and stage 1 (requirements structuring) must complete first.
+**Pencil/design tool usage:** At Stage 2 (overall UI architecture) and Step 5b (per-module UI detail design). Do NOT use Pencil at any other stage or step. If the user said "design in Pencil first" at Gate 3, this applies at Stage 2 and Step 5b — NOT immediately after Gate 3 or Gate 4.
 
-**Stage execution model:** After Gate 4, stages execute within the session (no terminate-per-stage). Each stage produces outputs for user review; wait for user confirmation before proceeding to the next stage. If user requests to skip a stage → refuse (all stages are mandatory if their outputs are needed by downstream stages).
+**Stage execution model:** After Gate 4, stages execute within the session (no terminate-per-stage). Stages 1-4 (architecture) execute once. Stage 5 (module iteration) repeats the 5a→5b→5c→5d→5e cycle per module, ordered by `TRACEABILITY_MATRIX.md` priority. Each stage and each module step produces outputs for user review; wait for user confirmation before proceeding. Update `SESSION_HANDOFF.md` current position cursor after every step. If user requests to skip a stage → refuse (all stages are mandatory if their outputs are needed by downstream stages).
 
 **Step 4 ≠ Stage 4:** Step 4 (Gate 4 in startup) creates the project directory, project documents, and installs dependencies. Stage 4 (in stage-driven execution) initializes the application code scaffold (routing, state management, API layer, database connections) within the already-established project. Do not confuse them.
 
@@ -152,11 +155,10 @@ Do not jump straight into code if project-level facts are missing.
 
 ## Workflow rules
 
-### Frontend page workflow (ONLY during stage-driven execution, AFTER all 4 gates pass)
-When implementing frontend pages during stage-driven execution (if Pencil MCP and shadcn MCP are available):
-1. Create design draft in Pencil → user confirms design.
-2. Build UI components via shadcn component library (if declared as UI component library).
-3. Proceed to frontend implementation matching the approved design one-to-one.
+### Frontend page workflow (during module iteration Step 5b + 5d)
+When implementing frontend pages for a module:
+1. Step 5b: design detailed page mockups in Pencil (if available) for the current module → user confirms design. Build UI components via shadcn (if declared).
+2. Step 5d: implement frontend matching the approved Step 5b design one-to-one. Do not silently add or remove UI elements.
 
 If design tools are unavailable, follow the degradation strategy in `31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
 
@@ -264,23 +266,24 @@ Respond and execute in the same language the user uses. If the user writes in Ch
 9. If the user input is fuzzy, structure it into project docs first.
 10. If a new request conflicts with the current PRD, explicitly surface the conflict and let the user decide whether to replace, keep, or defer; do not silently merge conflicting scope.
 11. Treat `TRACEABILITY_MATRIX.md` as the higher-level project roadmap document. Do not reduce it to a short task log or session checklist.
-12. For each main-task next node, default to `main task -> node -> submodule review draft -> user confirmation -> implementation`; do not jump from a broad node description straight into code.
-13. If a node needs UI, first gather the user's design style / interaction / detail requirements, then design the page in the declared design tool strictly from the approved review draft plus real API / database outputs.
-14. After the user approves the design, reconstruct it in the frontend one-to-one; do not silently add or remove modules, fields, buttons, states, tags, headings, or interactions.
+12. Follow the module iteration cycle (Steps 5a→5b→5c→5d→5e) for each module. Do not jump from a module name straight into code — each step requires user confirmation before proceeding.
+13. Module UI design (Step 5b) must be based on the approved module requirements (Step 5a). Implementation (Step 5d) must match the approved design one-to-one; do not silently add or remove modules, fields, buttons, states, tags, headings, or interactions.
 15. If a major decision changes scope, write it into the decision log before implementing.
 16. After first bootstrap, treat the generated project root `AGENTS.md` as the persistent in-repo continuation entry so future work inside the same repository keeps following the same workflow without the user re-stating it.
 
+## Session orientation (on resume)
+When resuming an existing project (not first-time startup), read these two files FIRST to determine your current position:
+1. `TRACEABILITY_MATRIX.md` — module list, priorities, and per-module status (which modules are done, which is current).
+2. `SESSION_HANDOFF.md` — `📍 Current Position` cursor tells you exactly which phase/stage/module/step you are at and what the next action is.
+
+Do not re-execute completed work. Continue from the position indicated by the cursor.
+
 ## Mandatory end-of-task updates
 At the end of substantial work:
-1. Update `TRACEABILITY_MATRIX.md` if the project roadmap, current main task, next main tasks, module stage, or scope-control judgment changed in a necessary way.
-2. Update `DECISION_LOG.md` if scope, assumptions, or key decisions changed.
-3. Update `PRD.md` if system planning, business logic, boundary scope, or version priorities needed necessary clarification or enrichment.
-4. Update `SESSION_HANDOFF.md` with:
-   - completed work
-   - current state
-   - next steps
-   - risks
-   - pending confirmations
+1. Update `TRACEABILITY_MATRIX.md` upper layer (module status) and lower layer (current module slices) as needed.
+2. Update `SESSION_HANDOFF.md` — ALWAYS update the `📍 Current Position` cursor with: current phase, stage, module, step, and next action.
+3. Update `DECISION_LOG.md` if scope, assumptions, or key decisions changed.
+4. Update `PRD.md` if system planning, business logic, boundary scope, or version priorities needed necessary clarification or enrichment.
 
 ## Output discipline
 When the task is complex, structure the work as:
@@ -308,12 +311,14 @@ When the task is complex, structure the work as:
 15. Execute the startup sequence when `.acode-kit-initialized.json` does not exist — tell the user to run the init CLI script first.
 16. Switch response language without the user asking. Match the user's input language at all times.
 17. Over-engineer, add unrequested features, create premature abstractions, or extend scope beyond what the PRD and current task specify. Every addition must trace to a concrete requirement — if it does not, do not add it.
-18. Call get_editor_state(), open_document(), or ANY Pencil/design tool before the startup sequence completes (all 4 gates passed). Pencil is ONLY used during stage-driven execution stage 2 (UI/page structuring), never during startup or Step 4.
+18. Call get_editor_state(), open_document(), or ANY Pencil/design tool before the startup sequence completes (all 4 gates passed). Pencil is ONLY used at Stage 2 (overall UI architecture) and Step 5b (module UI detail design), never during startup or Step 4.
 19. Follow Pencil MCP's "start with get_editor_state" suggestion — that instruction does NOT apply to acode-kit. The acode-kit startup sequence takes priority.
 20. Skip Step 4 (project environment setup) and jump directly to Pencil design or stage-driven execution after Gate 3. Step 4 creates the project directory, installs dependencies, and populates project documents — all mandatory before any design or implementation.
-21. Open Pencil or create design drafts before completing Step 4 (project setup) AND reaching stage 2 (UI/page structuring) of stage-driven execution.
-22. Interpret the user's "design in Pencil first" preference at Gate 3 as "skip project setup and go directly to Pencil now." That preference means "at stage 2, design before coding" — Step 4 and stage 1 must complete first.
+21. Open Pencil or create design drafts before completing Step 4 (project setup) AND reaching Stage 2 (overall UI architecture) or Step 5b (module UI detail design) of stage-driven execution.
+22. Interpret the user's "design in Pencil first" preference at Gate 3 as "skip project setup and go directly to Pencil now." That preference means "design at Stage 2 (architecture) and Step 5b (per-module detail)" — Step 4 and Stage 1 must complete first.
 23. Allow the user to skip any gate or stage when asked. All 4 gates and all 7 stages (where outputs are needed) are mandatory. If the user requests to skip, refuse and explain why.
 24. Continue forward in stage-driven execution with known incorrect upstream outputs. If a stage output is found wrong, backtrack to that stage first.
 25. Confuse Step 4 (project environment setup during startup) with Stage 4 (application scaffold initialization during stage-driven execution). They are different phases.
 26. Execute stages out of order. Stage 1 → 2 → 3 → 4 → 5 → 6 → 7 is the mandatory sequence. Each stage's outputs are prerequisites for the next.
+27. Interpret Gate 3 (PRD approval) as permission to start Pencil/design work. Gate 3 → Step 4 (project environment setup). Design only happens at Stage 2 (overall UI architecture) and Step 5b (module UI detail), after Gate 4 passes AND Stage 1 completes. Do NOT mention "Pencil" or "设计阶段" in Gate 3 questions.
+28. Combine Step 4 (project setup) with Stage 2 (Pencil design) or Stage 5 (implementation) into a single action. Each phase is separate and requires its own user confirmation before proceeding.

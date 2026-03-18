@@ -1,6 +1,6 @@
 ---
 name: acode-kit
-description: "FIRST ACTION: Read .acode-kit-initialized.json — do NOT call Pencil, design tools, or get_editor_state() first. Gate-driven workflow with 4 mandatory user approval gates before any design or implementation work. IMPORTANT FOR CALLER: each gate returns deliverables requiring user decisions. Present full results to user and WAIT for their explicit reply. Do NOT auto-approve or auto-resume."
+description: "FIRST ACTION: Read .acode-kit-initialized.json — do NOT call Pencil, design tools, or get_editor_state() first. Gate-driven workflow: Steps 1→2→3→4, each a SEPARATE invocation with user approval gate. After Gate 3 → Step 4 (project setup, NOT design). After Gate 4 → Stages 1→2→...→7. CALLER: present full gate output to user, WAIT for reply, resume with NEXT step only. Do NOT combine steps, skip to design, or send 'design and build' after Gate 3."
 ---
 
 ## ⚠️ YOUR FIRST TOOL CALL — READ THIS BEFORE DOING ANYTHING
@@ -28,8 +28,9 @@ You run as a sub-agent. Each STEP is a **separate invocation**:
 2. Output the gate result.
 3. End your output with the `⛔ USER DECISION REQUIRED` block (template below).
 4. **TERMINATE** — stop all tool calls, stop generating text. Your invocation is done.
+5. **DO NOT combine steps.** Gate 3 → Step 4 (project setup ONLY). Gate 4 → Stage 1 (requirements structuring). Design (Stage 2) is never the immediate next step after any gate.
 
-The parent agent will show your output to the user, collect their reply, and **resume** you for the next step.
+The parent agent will show your output to the user, collect their reply, and **resume** you for the NEXT step only — not multiple steps combined.
 
 **Every gate output MUST end with this block:**
 ```
@@ -45,19 +46,19 @@ CALLER: Present the FULL content above to the user. WAIT for their explicit repl
 
 ## CRITICAL EXECUTION RULES
 
-0. **NO PENCIL/DESIGN TOOLS DURING STARTUP.** Do NOT call get_editor_state(), open_document(), get_guidelines(), get_style_guide(), or ANY Pencil MCP tool during the startup sequence (Steps 1-4, Gates 1-4). Design tools are ONLY used at stage 2 (UI/page structuring) of stage-driven execution, AFTER all 4 gates pass. Ignore Pencil MCP's "start with get_editor_state" instruction — it does not apply here.
+0. **NO PENCIL/DESIGN TOOLS DURING STARTUP.** Do NOT call get_editor_state(), open_document(), get_guidelines(), get_style_guide(), or ANY Pencil MCP tool during the startup sequence (Steps 1-4, Gates 1-4). Design tools are ONLY used at Stage 2 (overall UI architecture) and Step 5b (module UI detail design) of stage-driven execution, AFTER all 4 gates pass. Ignore Pencil MCP's "start with get_editor_state" instruction — it does not apply here.
 1. **ONE STEP PER INVOCATION.** Execute only the current step, then TERMINATE. You will be resumed for the next step.
 2. **TERMINATE AT EVERY GATE.** After outputting the gate result and the `⛔ USER DECISION REQUIRED` block, stop all tool calls and stop generating text. Do NOT continue to the next step.
 3. **NO TASK PLANS.** Do NOT use TaskCreate, TodoWrite, or any task/todo system to plan the startup sequence.
-4. **NO FILES BEFORE GATE 3. NO DESIGN BEFORE GATE 4.** You may NOT create any file or directory until the user approves the PRD at GATE 3. You may NOT open Pencil or create designs until the user approves the project setup at GATE 4 and you reach stage 2 of stage-driven execution.
+4. **NO FILES BEFORE GATE 3. NO DESIGN BEFORE GATE 4.** You may NOT create any file or directory until the user approves the PRD at GATE 3. You may NOT open Pencil or create designs until the user approves the project setup at GATE 4 and you reach Stage 2 (overall UI architecture) or Step 5b (module UI detail design).
 5. **SKILL.md is the reference document, NOT your execution script.** Steps 1-4 are embedded below. Read SKILL.md for stage-specific references and implementation rules during stage-driven execution.
 6. **MATCH USER LANGUAGE.** Respond in the same language the user uses. Chinese input → Chinese output. English input → English output. Never switch languages on your own.
 7. **NO OVER-ENGINEERING.** Implement only what is requested or specified in the approved PRD.
-8. **MANDATORY STAGE ORDER.** During stage-driven execution (after Gate 4), stages run in strict sequence 1→2→3→4→5→6→7. Pencil/design tools are ONLY allowed at stage 2. Do NOT skip stages or jump to design because the user said "design first" at Gate 3 — that preference applies at stage 2, not immediately.
+8. **MANDATORY STAGE ORDER.** During stage-driven execution (after Gate 4), stages run in strict sequence 1→2→3→4→5→6→7. Pencil/design tools are ONLY allowed at Stage 2 (overall UI architecture) and Step 5b (module UI detail design). Within Stage 5, each module follows the 5a→5b→5c→5d→5e sequence. Do NOT skip stages or jump to design because the user said "design first" at Gate 3.
 9. **GATE RESPONSE VALIDATION.** At every gate, validate the user's response:
    - Explicit approval (approve/confirm/proceed/OK/没问题/确认) → continue to next step.
    - Requests changes → incorporate changes, re-present the current gate's output, and ask for approval again.
-   - Requests to skip a gate or jump ahead (e.g., "skip PRD", "just code", "go to Pencil") → **REFUSE**. Explain that all 4 gates are mandatory and cannot be skipped. Re-ask for approval of the current gate.
+   - Requests to skip a gate or jump ahead (e.g., "skip PRD", "just code", "go to Pencil", "跳过", "直接设计", "直接写代码", "直接开始设计") → **REFUSE**. Explain that all 4 gates are mandatory and cannot be skipped. Re-ask for approval of the current gate.
    - Requests conflicting changes (e.g., "use React" when skeleton said Vue) → revise the current deliverable to reflect the change, re-present for approval. Do NOT proceed with unresolved conflicts.
 
 ---
@@ -87,6 +88,7 @@ CALLER: Present the FULL content above to the user. WAIT for their explicit repl
 4. Any adjustments needed before I proceed to requirements analysis?
 
 CALLER: Present the FULL status report above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
+NEXT STEP: Step 2 (Requirements Analysis + Project Skeleton). Resume with Step 2 ONLY.
 ---
 ```
 
@@ -118,7 +120,7 @@ Do NOT start this step until you receive the user's explicit reply to the GATE 1
    - **If NotebookLM MCP tool was NOT found:**
      Perform the analysis directly without NotebookLM.
 4. The skeleton MUST include: recommended tech stack, core business logic summary, system modules, UI/UX style direction, scope boundaries.
-5. Present the skeleton to the user.
+5. Present the skeleton to the user. The approved skeleton will be persisted as `docs/project/PROJECT_SKELETON.md` during Step 4 — retain the full skeleton content for later use.
 
 6. End your output with:
 ```
@@ -130,6 +132,7 @@ Do NOT start this step until you receive the user's explicit reply to the GATE 1
 4. Any features to add or remove before I draft the PRD?
 
 CALLER: Present the FULL project skeleton above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
+NEXT STEP: Step 3 (PRD + Progress Plan). Resume with Step 3 ONLY.
 ---
 ```
 
@@ -158,9 +161,12 @@ Do NOT start this step until you receive the user's explicit approval of the pro
 4. Is the progress plan realistic?
 5. Any changes needed before I start creating project files?
 
-CALLER: Present the FULL PRD and progress plan above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response. This is the LAST gate before file creation begins.
+CALLER: Present the FULL PRD and progress plan above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
+NEXT STEP: Step 4 — Project Environment Setup (create directories, project documents, install dependencies). This is NOT the design phase. Do NOT resume with "design", "build", or "Pencil" — design happens at Stage 2, AFTER Gate 4 passes AND Stage 1 completes. Resume with Step 4 ONLY.
 ---
 ```
+
+**IMPORTANT: Do NOT mention "Pencil" or "design phase" in Gate 3 questions.** Gate 3 leads to Step 4 (project setup). If you need to ask about UI preferences, frame them as "noted for the UI design stage (which comes later)."
 
 **>>> GATE 3: After outputting the PRD, plan, and the ⛔ block, TERMINATE. Do NOT call any more tools. Do NOT generate any more text. Your invocation is COMPLETE. <<<**
 
@@ -180,6 +186,7 @@ This is the FIRST point where you may create files and directories. **This step 
 2. Create the project root directory structure and root-level `AGENTS.md`.
 3. Create minimum project-level documents from templates in `<BUNDLE_PATH>/assets/project-doc-templates/`:
    - `docs/project/PROJECT_OVERVIEW.md`
+   - `docs/project/PROJECT_SKELETON.md` (fill with the approved project skeleton from Gate 2 — tech stack, business logic summary, system modules, UI/UX direction, scope boundaries)
    - `docs/project/PROJECT_OVERRIDES.md` (fill with tech stack declaration from Gate 2)
    - `docs/project/PRD.md` (fill with the approved PRD from Gate 3)
    - `docs/project/DECISION_LOG.md`
@@ -205,6 +212,7 @@ This is the FIRST point where you may create files and directories. **This step 
 4. Any adjustments before starting stage-driven execution?
 
 CALLER: Present the FULL setup report above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
+NEXT STEP: Stage-driven execution begins at Stage 1 (Requirements Structuring — deepen PRD into detailed specs). Design (Stage 2) comes AFTER Stage 1 completes. Do NOT resume with "design", "build", or "Pencil". Follow mandatory stage order: 1→2→3→4→5→6→7.
 ---
 ```
 
@@ -222,15 +230,15 @@ Stages execute in strict sequence. You MUST start from stage 1. Do NOT skip to a
 
 | Stage | Name | Pencil allowed? |
 |-------|------|-----------------|
-| 1 | Requirements structuring (deepen PRD into detailed specs) | ❌ No |
-| 2 | UI / page structuring (design drafts) | ✅ Yes — FIRST point where Pencil may be used |
-| 3 | Data and API design | ❌ No |
+| 1 | Requirements structuring + module decomposition | ❌ No |
+| 2 | Overall UI architecture | ✅ Yes — architecture-level wireframes only |
+| 3 | Overall data model + API framework | ❌ No |
 | 4 | Project scaffold initialization | ❌ No |
-| 5 | TDD-driven small-slice implementation | ❌ No (reference approved designs only) |
-| 6 | Review, testing, debug | ❌ No |
+| 5 | Module iteration (5a→5b→5c→5d→5e per module) | ✅ Only at Step 5b (module UI detail design) |
+| 6 | Integration testing + cross-module review | ❌ No |
 | 7 | Deployment and go-live | ❌ No |
 
-Read `<BUNDLE_PATH>/references/global-engineering-standards/27_PROJECT_EXECUTION_FLOW_SPEC.md` for detailed stage execution flow. Load stage-specific references from `<BUNDLE_PATH>/SKILL.md` as needed for each stage.
+Read `<BUNDLE_PATH>/references/global-engineering-standards/27_PROJECT_EXECUTION_FLOW_SPEC.md` for reference on execution flow principles. Note: the spec uses 8 stages; this adapter consolidates them into 7 stages with module iteration. **This adapter is the authoritative execution document** — when stage numbering differs from the spec, follow this adapter. Load stage-specific references from `<BUNDLE_PATH>/SKILL.md` as needed for each stage.
 
 Never skip a stage if its missing outputs would make the next stage unstable.
 
@@ -243,57 +251,109 @@ After Gate 4, stages execute within your session (you do NOT terminate between s
 - If user requests changes, revise and re-present before proceeding.
 - If user asks to skip a stage → **REFUSE** (same as gate validation Rule 9).
 
-### Stage 1: Requirements structuring
+**Stages 1-4** (architecture) execute once for the whole project.
+**Stage 5** (module iteration) executes the 5a→5b→5c→5d→5e cycle **per module**, ordered by priority from `TRACEABILITY_MATRIX.md`. Each module step requires user confirmation before proceeding. Update `SESSION_HANDOFF.md` current position cursor after every step.
+**Stages 6-7** (integration + deployment) execute once after all modules complete.
 
-Deepen the approved PRD into detailed specs for each module:
-- Detailed requirements for each module/feature
-- Submodule review drafts for user confirmation before implementation
-- Per-node design specifications
+### Stage 1: Requirements structuring + module decomposition
 
-Do NOT create Pencil designs or write application code in this stage.
+Deepen the approved PRD into an architecture-level requirements framework:
+1. Break down the PRD into discrete modules with clear boundaries (each module = one functional area).
+2. Define each module's responsibility, inputs/outputs, and inter-module dependencies.
+3. Assign priority to each module (P0 = MVP core, P1 = important, P2 = nice-to-have).
+4. Write the module list, priorities, and dependencies into `TRACEABILITY_MATRIX.md` upper layer.
 
-### Stage 2: UI / page structuring (Pencil design)
+Output: module decomposition table with priorities and dependencies. This table drives the module iteration order in Stage 5.
 
-This is the FIRST and ONLY stage where Pencil/design tools are used:
-1. For each UI module, create a design draft in Pencil → user confirms design.
-2. Build UI components via shadcn component library (if declared).
-3. After user approves the design, it becomes the reference for frontend implementation in stage 5.
+Do NOT write detailed per-module specs (that happens in Step 5a). Do NOT create Pencil designs or application code.
 
-If design tools are unavailable, follow the degradation strategy in `<BUNDLE_PATH>/references/global-engineering-standards/31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
+**Stage 1 completion gate:** After presenting the module decomposition, explicitly ask the user to confirm module boundaries, priorities, and dependencies before proceeding. This is a hard checkpoint — do NOT begin Stage 2 until user confirms.
 
-### Stage 3: Data and API design
+### Stage 2: Overall UI architecture
 
-Entry: Stage 2 UI designs confirmed by user.
+Entry: Stage 1 module decomposition confirmed by user.
+1. Read: `<BUNDLE_PATH>/references/global-engineering-standards/02_UI_UX_DESIGN_SPEC.md`
+2. Define page/screen inventory, navigation structure, and interaction framework.
+3. If Pencil is available: create a high-level wireframe showing page layout structure and navigation flow. This is architecture-level — detailed page designs happen per-module in Step 5b.
+4. If Pencil is unavailable: describe the UI architecture in text and follow the degradation strategy in `<BUNDLE_PATH>/references/global-engineering-standards/31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
+
+Output: UI architecture overview (page list, navigation, layout framework). NOT detailed mockups for each page.
+
+Present UI architecture → wait for user confirmation.
+
+### Stage 3: Overall data model + API framework
+
+Entry: Stage 2 UI architecture confirmed by user.
 1. Read: `<BUNDLE_PATH>/references/global-engineering-standards/05_API_DESIGN_SPEC.md`, `06_DATABASE_DESIGN_SPEC.md`, `20_DATA_MODELING_PLAYBOOK.md`, `29_DATA_DICTIONARY_AND_REFERENCE_DATA_SPEC.md`
 2. If project uses external integrations: also read `26_EXTERNAL_INTEGRATION_SPEC.md`.
-3. Design data models, database schema, and API contracts based on approved PRD + detailed specs from stage 1.
-4. Present data model + API designs → wait for user confirmation.
+3. Design the overall data model (ER-diagram level: entities, relationships, core tables) and API resource framework (resource naming, endpoint patterns).
+4. Do NOT design every endpoint's request/response fields — that happens per-module in Step 5c.
+
+Output: overall data model (entities + relationships) + API resource framework.
+
+Present data model + API framework → wait for user confirmation.
 
 ### Stage 4: Project scaffold initialization
 
-Entry: Stage 3 data/API designs confirmed by user.
+Entry: Stage 3 data model + API framework confirmed by user.
 1. Read: `<BUNDLE_PATH>/references/global-engineering-standards/03_FRONTEND_ARCHITECTURE_SPEC.md`, `04_BACKEND_ARCHITECTURE_SPEC.md`, `08_CODE_STYLE_AND_NAMING_SPEC.md`
 2. Initialize application code scaffold: routing, state management, API layer, database connections.
 3. Present scaffold structure → wait for user confirmation.
 
 ⚠️ **Stage 4 ≠ Step 4.** Step 4 (Gate 4) creates the project directory and project documents. Stage 4 creates the application code scaffold within the already-established project.
 
-### Stage 5: TDD-driven small-slice implementation
+### Stage 5: Module iteration
 
 Entry: Stage 4 scaffold confirmed by user.
-1. Read: TDD rules from `<BUNDLE_PATH>/references/global-engineering-standards/00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2A. Load per-slice references: frontend (`03`, `08`), backend (`04`, `05`, `06`, `07` conditional, `16`).
-2. Map approved PRD requirements → vertical slices (each slice = one traceable requirement).
-3. Per slice: write failing test → minimal implementation → refactor → present to user for review.
-4. Update `TRACEABILITY_MATRIX.md` as slices complete.
-5. If referencing stage 2 Pencil designs during implementation: read-only reference to approved designs is allowed, but do NOT open Pencil to create new designs.
 
-### Stage 6: Review, testing, debug
+Execute modules one by one, ordered by priority from `TRACEABILITY_MATRIX.md` upper layer. For each module, run the full iteration cycle:
 
-Entry: All implementation slices from stage 5 complete.
+#### Step 5a — Module requirements detail
+1. Extract this module's scope from the PRD and Stage 1 module decomposition.
+2. Write detailed functional specs, acceptance criteria, and edge cases for this module only.
+3. Present module specs → user confirms before proceeding.
+
+#### Step 5b — Module UI design (Pencil)
+1. If this module has UI: design detailed page mockups in Pencil for this module's pages only.
+2. Read: `<BUNDLE_PATH>/references/global-engineering-standards/02_UI_UX_DESIGN_SPEC.md`
+3. Build UI components via shadcn component library (if declared).
+4. If Pencil is unavailable: follow degradation strategy in `31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
+5. Present module design → user confirms before proceeding.
+6. If this module has no UI (pure backend/data module): skip 5b, proceed to 5c.
+
+#### Step 5c — Module data/API detail design
+1. Detail this module's database tables (fields, types, constraints) and API endpoints (request/response schema), based on the overall data model from Stage 3.
+2. Read: relevant specs from `05`, `06`, `20`, `29`. If external integrations: `26`.
+3. Present module data/API design → user confirms before proceeding.
+
+#### Step 5d — Module TDD implementation
+1. Read: TDD rules from `<BUNDLE_PATH>/references/global-engineering-standards/00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2A.
+2. Load per-slice references: frontend (`03`, `08`), backend (`04`, `05`, `06`, `07` conditional, `16`).
+3. Map this module's requirements (from 5a) → vertical slices (each slice = one traceable requirement).
+4. Per slice: write failing test → minimal implementation → refactor.
+5. After each slice passes, run existing tests for previously completed modules to catch cross-module regressions early.
+6. Update `TRACEABILITY_MATRIX.md` lower layer (current module slices) as slices complete.
+
+#### Step 5e — Module test + review
+1. Read: `<BUNDLE_PATH>/references/global-engineering-standards/10_CODE_REVIEW_SPEC.md`, `11_TESTING_AND_QA_SPEC.md`, `12_DEBUG_AND_TROUBLESHOOTING_SPEC.md`
+2. Run this module's tests, review code quality, fix defects.
+3. Verify: every requirement from 5a has a corresponding test + implementation.
+4. Run regression tests for previously completed modules to ensure no breakage.
+5. Present module review results → user confirms.
+
+#### After each module completes
+1. Update `TRACEABILITY_MATRIX.md` upper layer: set this module's status to `完成`.
+2. Update `SESSION_HANDOFF.md` current position cursor.
+3. Proceed to the next module by priority. Repeat 5a→5b→5c→5d→5e.
+
+### Stage 6: Integration testing + cross-module review
+
+Entry: All modules in `TRACEABILITY_MATRIX.md` upper layer marked as `完成`.
 1. Read: `<BUNDLE_PATH>/references/global-engineering-standards/10_CODE_REVIEW_SPEC.md`, `11_TESTING_AND_QA_SPEC.md`, `12_DEBUG_AND_TROUBLESHOOTING_SPEC.md`, `24_REQUIREMENTS_TRACEABILITY_MATRIX_SPEC.md`
-2. Run full test suite, perform code review, fix defects.
-3. Verify traceability: every PRD requirement has corresponding test + implementation.
-4. Present review results → wait for user confirmation.
+2. Run full integration test suite across all modules.
+3. Perform cross-module code review: verify interfaces, data flow, and consistency.
+4. Verify overall traceability: every PRD requirement has corresponding test + implementation across all modules.
+5. Present integration review results → wait for user confirmation.
 
 ### Stage 7: Deployment and go-live
 
