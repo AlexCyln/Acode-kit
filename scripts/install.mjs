@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 
 const DEFAULT_REPO = "AlexCyln/Acode-kit-Plus";
 const DEFAULT_SKILL_PATH = "Acode-kit";
@@ -186,10 +186,53 @@ function installLocal(sourceDir, destRoot) {
   return result;
 }
 
+function runInit(bundleDir, projectRoot, args) {
+  const initScript = path.join(bundleDir, "scripts", "acode-kit-init.mjs");
+  if (!exists(initScript)) {
+    console.log("\nInit script not found at expected location. Run manually:");
+    console.log(`  node ${initScript} --cwd ${projectRoot}`);
+    return false;
+  }
+
+  console.log("");
+  console.log("Running initialization...");
+  console.log("========================");
+
+  const initArgs = ["--cwd", projectRoot];
+
+  // Map install --agent to init --provider
+  const agent = args.agent || "auto";
+  if (agent === "claude" || agent === "codex") {
+    initArgs.push("--provider", agent);
+  }
+
+  // Forward --yes flag for non-interactive mode
+  if (args.yes === "true") {
+    initArgs.push("--yes");
+  }
+
+  // Always --force since this is a fresh install
+  initArgs.push("--force");
+
+  const result = spawnSync("node", [initScript, ...initArgs], {
+    stdio: "inherit",
+    encoding: "utf8"
+  });
+
+  if (result.status !== 0) {
+    console.error("\nInit completed with errors. You can re-run manually:");
+    console.error(`  node ${initScript} --cwd ${projectRoot}`);
+    return false;
+  }
+  return true;
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
   const jobs = createJobs(args);
   const prepared = prepareSource(args);
+  const scope = args.scope || "user";
+  const skipInit = args["skip-init"] === "true";
 
   let lastBundleDir = "";
   try {
@@ -208,9 +251,21 @@ function main() {
 
   console.log("");
   console.log("Restart your target AI agent after installation.");
-  console.log("");
-  console.log("To complete first-time setup, run this in your terminal:");
-  console.log(`  node ${lastBundleDir}/scripts/acode-kit-init.mjs`);
+
+  // For project-level installs, auto-run init to complete the full setup
+  if (scope === "project" && !skipInit && lastBundleDir) {
+    // Derive project root: dest-dir points to .claude/ (or similar), project root is its parent
+    const destDir = args["dest-dir"];
+    const projectRoot = destDir
+      ? path.dirname(path.resolve(destDir))
+      : process.cwd();
+
+    runInit(lastBundleDir, projectRoot, args);
+  } else {
+    console.log("");
+    console.log("To complete first-time setup, run this in your terminal:");
+    console.log(`  node ${lastBundleDir}/scripts/acode-kit-init.mjs`);
+  }
 }
 
 main();
