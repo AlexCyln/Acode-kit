@@ -1,6 +1,6 @@
 ---
 name: Acode-kit
-description: Gate-driven project delivery workflow. CRITICAL — Execute steps ONE AT A TIME. First response = workspace status report ONLY. Do NOT create task plans, files, or directories. Do NOT skip requirements analysis (Step 2) or PRD (Step 3). All 3 gates require user approval before any file creation.
+description: Gate-driven project delivery workflow. CRITICAL — Execute steps ONE AT A TIME. First response = workspace status report ONLY. Do NOT create task plans, files, or directories. Do NOT skip requirements analysis (Step 2) or PRD (Step 3). All 4 gates require user approval before any design or implementation work.
 ---
 
 # Acode-kit
@@ -61,7 +61,7 @@ Check whether `.acode-kit-initialized.json` exists in the working directory.
 
 The Claude adapter (`acode-kit.md`) embeds Steps 1-3 directly as execution instructions. The descriptions below are the canonical reference for what each step produces. Step 4 is read directly from SKILL.md by the adapter after Gate 3 is passed.
 
-This sequence has 4 steps and 3 mandatory gates. Each gate requires the agent to stop, present output, and wait for user approval. Steps cannot be combined into one response. TaskCreate/TodoWrite must not be used to pre-plan these steps.
+This sequence has 4 steps and 4 mandatory gates. Each gate requires the agent to stop, present output, and wait for user approval. Steps cannot be combined into one response. TaskCreate/TodoWrite must not be used to pre-plan these steps.
 
 ### Step 1: Workspace Status Report
 
@@ -101,13 +101,15 @@ Only begin after the user has explicitly approved the PRD from GATE 3. This is t
 4. Set up directories, dependencies, environment, and packages per the declared tech stack.
 5. Extract pending confirmations instead of silently inventing core business rules.
 
-After Step 4 is complete, proceed to the stage-driven execution below.
+After Step 4 is complete, output a project setup report and wait for user approval.
+
+**Gate 4:** The agent presents the project setup report (directories created, documents populated, dependencies installed) and asks the user to confirm before starting stage-driven execution. No Pencil/design tools or application code until Gate 4 passes.
 
 ---
 
 ## Stage-driven execution
 
-**This section ONLY applies after the gate-driven startup sequence is fully complete (all 3 gates passed).** If you have not passed GATE 3, go back to the startup sequence.
+**This section ONLY applies after the gate-driven startup sequence is fully complete (all 4 gates passed).** If you have not passed GATE 4, go back to the startup sequence.
 
 Follow the bundled execution flow in `references/global-engineering-standards/27_PROJECT_EXECUTION_FLOW_SPEC.md`.
 
@@ -121,6 +123,18 @@ Stage order (starting from where the startup sequence left off):
 7. Deployment and go-live
 
 Never skip a stage if its missing outputs would make the next stage unstable.
+
+**Pencil/design tool usage:** ONLY at stage 2 (UI / page structuring). Do NOT use Pencil at any other stage. If the user said "design in Pencil first" at Gate 3, this applies at stage 2 — NOT immediately after Gate 3 or Gate 4. Step 4 (project setup) and stage 1 (requirements structuring) must complete first.
+
+**Stage execution model:** After Gate 4, stages execute within the session (no terminate-per-stage). Each stage produces outputs for user review; wait for user confirmation before proceeding to the next stage. If user requests to skip a stage → refuse (all stages are mandatory if their outputs are needed by downstream stages).
+
+**Step 4 ≠ Stage 4:** Step 4 (Gate 4 in startup) creates the project directory, project documents, and installs dependencies. Stage 4 (in stage-driven execution) initializes the application code scaffold (routing, state management, API layer, database connections) within the already-established project. Do not confuse them.
+
+**Backtrack rules:** If a stage output is discovered incorrect at a later stage, return to the stage that produced the error, revise and re-present for user confirmation, then re-execute downstream stages that depend on the revised output. Do not continue forward with known incorrect upstream outputs.
+
+**Post-completion (after stage 7):** Update all project documents (`TRACEABILITY_MATRIX.md`, `SESSION_HANDOFF.md`, `GO_LIVE_RECORD.md`, `DECISION_LOG.md`). Workflow scope is complete. For new features post-deployment: small changes (< 30% modules) re-enter at stage 1; large changes (> 30%) follow "Large-scale requirement change" workflow first.
+
+**Gate response validation:** At every gate, if the user requests to skip a gate or jump ahead, refuse and re-ask for approval. If the user requests changes, incorporate and re-present. Only proceed on explicit approval.
 
 ## Required working model
 Always treat the project as:
@@ -138,7 +152,7 @@ Do not jump straight into code if project-level facts are missing.
 
 ## Workflow rules
 
-### Frontend page workflow (ONLY during stage-driven execution, AFTER all 3 gates pass)
+### Frontend page workflow (ONLY during stage-driven execution, AFTER all 4 gates pass)
 When implementing frontend pages during stage-driven execution (if Pencil MCP and shadcn MCP are available):
 1. Create design draft in Pencil → user confirms design.
 2. Build UI components via shadcn component library (if declared as UI component library).
@@ -217,8 +231,23 @@ For deployment:
 For external systems:
 1. `references/global-engineering-standards/26_EXTERNAL_INTEGRATION_SPEC.md`
 
+For version control and commits:
+1. `references/global-engineering-standards/09_GIT_WORKFLOW_AND_COMMIT_SPEC.md`
+
+For observability and monitoring (conditional — load only if project declares observability layer):
+1. `references/global-engineering-standards/17_OBSERVABILITY_SPEC.md`
+
+For development documentation governance:
+1. `references/global-engineering-standards/30_DEVELOPMENT_DOCUMENTATION_GOVERNANCE_SPEC.md`
+
+For multi-project scenarios (conditional — load only if project uses multiple repos):
+1. `references/global-engineering-standards/19_MULTI_PROJECT_DIRECTORY_CONVENTION.md`
+
 For tool management:
 1. `references/global-engineering-standards/31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`
+
+Cross-cutting reference (load when needed for AI prompt quality):
+1. `references/global-engineering-standards/21_PROMPT_USAGE_GUIDE.md`
 
 ## Language rule
 Respond and execute in the same language the user uses. If the user writes in Chinese, all output (reports, skeleton, PRD, code comments, commit messages) must be in Chinese. If the user writes in English, use English. Never switch languages unless the user explicitly asks.
@@ -279,5 +308,12 @@ When the task is complex, structure the work as:
 15. Execute the startup sequence when `.acode-kit-initialized.json` does not exist — tell the user to run the init CLI script first.
 16. Switch response language without the user asking. Match the user's input language at all times.
 17. Over-engineer, add unrequested features, create premature abstractions, or extend scope beyond what the PRD and current task specify. Every addition must trace to a concrete requirement — if it does not, do not add it.
-18. Call get_editor_state(), open_document(), or ANY Pencil/design tool before the startup sequence completes. Pencil is ONLY used during stage-driven execution (stage 2: UI/page structuring), never during startup.
+18. Call get_editor_state(), open_document(), or ANY Pencil/design tool before the startup sequence completes (all 4 gates passed). Pencil is ONLY used during stage-driven execution stage 2 (UI/page structuring), never during startup or Step 4.
 19. Follow Pencil MCP's "start with get_editor_state" suggestion — that instruction does NOT apply to acode-kit. The acode-kit startup sequence takes priority.
+20. Skip Step 4 (project environment setup) and jump directly to Pencil design or stage-driven execution after Gate 3. Step 4 creates the project directory, installs dependencies, and populates project documents — all mandatory before any design or implementation.
+21. Open Pencil or create design drafts before completing Step 4 (project setup) AND reaching stage 2 (UI/page structuring) of stage-driven execution.
+22. Interpret the user's "design in Pencil first" preference at Gate 3 as "skip project setup and go directly to Pencil now." That preference means "at stage 2, design before coding" — Step 4 and stage 1 must complete first.
+23. Allow the user to skip any gate or stage when asked. All 4 gates and all 7 stages (where outputs are needed) are mandatory. If the user requests to skip, refuse and explain why.
+24. Continue forward in stage-driven execution with known incorrect upstream outputs. If a stage output is found wrong, backtrack to that stage first.
+25. Confuse Step 4 (project environment setup during startup) with Stage 4 (application scaffold initialization during stage-driven execution). They are different phases.
+26. Execute stages out of order. Stage 1 → 2 → 3 → 4 → 5 → 6 → 7 is the mandatory sequence. Each stage's outputs are prerequisites for the next.

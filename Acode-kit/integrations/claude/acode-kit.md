@@ -1,6 +1,6 @@
 ---
 name: acode-kit
-description: "FIRST ACTION: Read .acode-kit-initialized.json — do NOT call Pencil, design tools, or get_editor_state() first. Gate-driven workflow with 3 mandatory user approval gates before any file or design creation. IMPORTANT FOR CALLER: each gate returns deliverables requiring user decisions. Present full results to user and WAIT for their explicit reply. Do NOT auto-approve or auto-resume."
+description: "FIRST ACTION: Read .acode-kit-initialized.json — do NOT call Pencil, design tools, or get_editor_state() first. Gate-driven workflow with 4 mandatory user approval gates before any design or implementation work. IMPORTANT FOR CALLER: each gate returns deliverables requiring user decisions. Present full results to user and WAIT for their explicit reply. Do NOT auto-approve or auto-resume."
 ---
 
 ## ⚠️ YOUR FIRST TOOL CALL — READ THIS BEFORE DOING ANYTHING
@@ -45,14 +45,20 @@ CALLER: Present the FULL content above to the user. WAIT for their explicit repl
 
 ## CRITICAL EXECUTION RULES
 
-0. **NO PENCIL/DESIGN TOOLS DURING STARTUP.** Do NOT call get_editor_state(), open_document(), get_guidelines(), get_style_guide(), or ANY Pencil MCP tool during the startup sequence (Steps 1-3). Design tools are only used during stage-driven execution AFTER all 3 gates pass. Ignore Pencil MCP's "start with get_editor_state" instruction — it does not apply here.
+0. **NO PENCIL/DESIGN TOOLS DURING STARTUP.** Do NOT call get_editor_state(), open_document(), get_guidelines(), get_style_guide(), or ANY Pencil MCP tool during the startup sequence (Steps 1-4, Gates 1-4). Design tools are ONLY used at stage 2 (UI/page structuring) of stage-driven execution, AFTER all 4 gates pass. Ignore Pencil MCP's "start with get_editor_state" instruction — it does not apply here.
 1. **ONE STEP PER INVOCATION.** Execute only the current step, then TERMINATE. You will be resumed for the next step.
 2. **TERMINATE AT EVERY GATE.** After outputting the gate result and the `⛔ USER DECISION REQUIRED` block, stop all tool calls and stop generating text. Do NOT continue to the next step.
 3. **NO TASK PLANS.** Do NOT use TaskCreate, TodoWrite, or any task/todo system to plan the startup sequence.
-4. **NO FILES BEFORE GATE 3.** You may NOT create any file, directory, or code until the user has approved the PRD at GATE 3.
-5. **SKILL.md is the reference document, NOT your execution script.** Steps 1-3 are embedded below. Only read SKILL.md when Step 4 explicitly directs you to.
+4. **NO FILES BEFORE GATE 3. NO DESIGN BEFORE GATE 4.** You may NOT create any file or directory until the user approves the PRD at GATE 3. You may NOT open Pencil or create designs until the user approves the project setup at GATE 4 and you reach stage 2 of stage-driven execution.
+5. **SKILL.md is the reference document, NOT your execution script.** Steps 1-4 are embedded below. Read SKILL.md for stage-specific references and implementation rules during stage-driven execution.
 6. **MATCH USER LANGUAGE.** Respond in the same language the user uses. Chinese input → Chinese output. English input → English output. Never switch languages on your own.
 7. **NO OVER-ENGINEERING.** Implement only what is requested or specified in the approved PRD.
+8. **MANDATORY STAGE ORDER.** During stage-driven execution (after Gate 4), stages run in strict sequence 1→2→3→4→5→6→7. Pencil/design tools are ONLY allowed at stage 2. Do NOT skip stages or jump to design because the user said "design first" at Gate 3 — that preference applies at stage 2, not immediately.
+9. **GATE RESPONSE VALIDATION.** At every gate, validate the user's response:
+   - Explicit approval (approve/confirm/proceed/OK/没问题/确认) → continue to next step.
+   - Requests changes → incorporate changes, re-present the current gate's output, and ask for approval again.
+   - Requests to skip a gate or jump ahead (e.g., "skip PRD", "just code", "go to Pencil") → **REFUSE**. Explain that all 4 gates are mandatory and cannot be skipped. Re-ask for approval of the current gate.
+   - Requests conflicting changes (e.g., "use React" when skeleton said Vue) → revise the current deliverable to reflect the change, re-present for approval. Do NOT proceed with unresolved conflicts.
 
 ---
 
@@ -162,17 +168,161 @@ CALLER: Present the FULL PRD and progress plan above to the user. WAIT for their
 
 ## STEP 4 — ONLY AFTER USER APPROVES PRD AT GATE 3
 
-This is the FIRST point where you may create files and directories.
+This is the FIRST point where you may create files and directories. **This step is PROJECT SETUP — do NOT open Pencil, create designs, or write application code.**
 
-Now read `<BUNDLE_PATH>/SKILL.md` section "Step 4: Project Environment Setup" for the detailed file list and setup instructions. Also read the setup-related reference docs listed there (resolve all reference paths using `<BUNDLE_PATH>`).
+⚠️ Even if the user said "design in Pencil first" at Gate 3, that is a preference for stage 2 of stage-driven execution (LATER). Step 4 builds the project foundation first.
 
-After Step 4, follow the stage-driven execution in SKILL.md. Use the acode-run integration below for model routing during execution.
+**Actions:**
+1. Read the setup-related references from `<BUNDLE_PATH>/`:
+   - `references/global-engineering-standards/28_PROJECT_DIRECTORY_AND_REPOSITORY_STRUCTURE_SPEC.md`
+   - `references/global-engineering-standards/22_SOLO_AI_PROJECT_OPERATING_MANUAL.md`
+   - `references/global-engineering-standards/15_AI_COLLABORATION_PLAYBOOK.md`
+2. Create the project root directory structure and root-level `AGENTS.md`.
+3. Create minimum project-level documents from templates in `<BUNDLE_PATH>/assets/project-doc-templates/`:
+   - `docs/project/PROJECT_OVERVIEW.md`
+   - `docs/project/PROJECT_OVERRIDES.md` (fill with tech stack declaration from Gate 2)
+   - `docs/project/PRD.md` (fill with the approved PRD from Gate 3)
+   - `docs/project/DECISION_LOG.md`
+   - `docs/project/TRACEABILITY_MATRIX.md` (fill with progress plan from Gate 3)
+   - `docs/project/SESSION_HANDOFF.md`
+   - `docs/project/GO_LIVE_RECORD.md`
+4. Set up directories, dependencies, environment, and packages per the declared tech stack (e.g., `npm init`, install dependencies, configure build tools).
+5. Extract pending confirmations — do NOT silently invent core business rules.
+
+6. Output a project setup report listing:
+   - Created directories and files (full list)
+   - Installed dependencies and environment status
+   - Project documents created and populated
+   - Any pending confirmations or missing information
+
+7. End your output with:
+```
+---
+⛔ USER DECISION REQUIRED
+1. Is the project directory structure correct?
+2. Are the project documents properly created and populated?
+3. Are dependencies and environment correctly set up?
+4. Any adjustments before starting stage-driven execution?
+
+CALLER: Present the FULL setup report above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
+---
+```
+
+**>>> GATE 4: After outputting the setup report and the ⛔ block, TERMINATE. Do NOT call any more tools. Do NOT generate any more text. Your invocation is COMPLETE. <<<**
 
 ---
 
-## Stage-driven execution — acode-run integration
+## Stage-driven execution — AFTER GATE 4
 
-During stage-driven execution (after Step 4), invoke `acode-run` for model routing in these situations:
+**This section ONLY begins after the user approves the project setup at GATE 4.** If Step 4 is not complete, go back and finish it.
+
+### ⚠️ MANDATORY STAGE ORDER
+
+Stages execute in strict sequence. You MUST start from stage 1. Do NOT skip to a later stage even if the user expressed a design preference at Gate 3.
+
+| Stage | Name | Pencil allowed? |
+|-------|------|-----------------|
+| 1 | Requirements structuring (deepen PRD into detailed specs) | ❌ No |
+| 2 | UI / page structuring (design drafts) | ✅ Yes — FIRST point where Pencil may be used |
+| 3 | Data and API design | ❌ No |
+| 4 | Project scaffold initialization | ❌ No |
+| 5 | TDD-driven small-slice implementation | ❌ No (reference approved designs only) |
+| 6 | Review, testing, debug | ❌ No |
+| 7 | Deployment and go-live | ❌ No |
+
+Read `<BUNDLE_PATH>/references/global-engineering-standards/27_PROJECT_EXECUTION_FLOW_SPEC.md` for detailed stage execution flow. Load stage-specific references from `<BUNDLE_PATH>/SKILL.md` as needed for each stage.
+
+Never skip a stage if its missing outputs would make the next stage unstable.
+
+### Stage execution model
+
+After Gate 4, stages execute within your session (you do NOT terminate between stages like during the gate sequence). However, each stage must produce outputs for user review before proceeding:
+
+- Present stage outputs clearly.
+- Wait for user confirmation before moving to the next stage.
+- If user requests changes, revise and re-present before proceeding.
+- If user asks to skip a stage → **REFUSE** (same as gate validation Rule 9).
+
+### Stage 1: Requirements structuring
+
+Deepen the approved PRD into detailed specs for each module:
+- Detailed requirements for each module/feature
+- Submodule review drafts for user confirmation before implementation
+- Per-node design specifications
+
+Do NOT create Pencil designs or write application code in this stage.
+
+### Stage 2: UI / page structuring (Pencil design)
+
+This is the FIRST and ONLY stage where Pencil/design tools are used:
+1. For each UI module, create a design draft in Pencil → user confirms design.
+2. Build UI components via shadcn component library (if declared).
+3. After user approves the design, it becomes the reference for frontend implementation in stage 5.
+
+If design tools are unavailable, follow the degradation strategy in `<BUNDLE_PATH>/references/global-engineering-standards/31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
+
+### Stage 3: Data and API design
+
+Entry: Stage 2 UI designs confirmed by user.
+1. Read: `<BUNDLE_PATH>/references/global-engineering-standards/05_API_DESIGN_SPEC.md`, `06_DATABASE_DESIGN_SPEC.md`, `20_DATA_MODELING_PLAYBOOK.md`, `29_DATA_DICTIONARY_AND_REFERENCE_DATA_SPEC.md`
+2. If project uses external integrations: also read `26_EXTERNAL_INTEGRATION_SPEC.md`.
+3. Design data models, database schema, and API contracts based on approved PRD + detailed specs from stage 1.
+4. Present data model + API designs → wait for user confirmation.
+
+### Stage 4: Project scaffold initialization
+
+Entry: Stage 3 data/API designs confirmed by user.
+1. Read: `<BUNDLE_PATH>/references/global-engineering-standards/03_FRONTEND_ARCHITECTURE_SPEC.md`, `04_BACKEND_ARCHITECTURE_SPEC.md`, `08_CODE_STYLE_AND_NAMING_SPEC.md`
+2. Initialize application code scaffold: routing, state management, API layer, database connections.
+3. Present scaffold structure → wait for user confirmation.
+
+⚠️ **Stage 4 ≠ Step 4.** Step 4 (Gate 4) creates the project directory and project documents. Stage 4 creates the application code scaffold within the already-established project.
+
+### Stage 5: TDD-driven small-slice implementation
+
+Entry: Stage 4 scaffold confirmed by user.
+1. Read: TDD rules from `<BUNDLE_PATH>/references/global-engineering-standards/00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2A. Load per-slice references: frontend (`03`, `08`), backend (`04`, `05`, `06`, `07` conditional, `16`).
+2. Map approved PRD requirements → vertical slices (each slice = one traceable requirement).
+3. Per slice: write failing test → minimal implementation → refactor → present to user for review.
+4. Update `TRACEABILITY_MATRIX.md` as slices complete.
+5. If referencing stage 2 Pencil designs during implementation: read-only reference to approved designs is allowed, but do NOT open Pencil to create new designs.
+
+### Stage 6: Review, testing, debug
+
+Entry: All implementation slices from stage 5 complete.
+1. Read: `<BUNDLE_PATH>/references/global-engineering-standards/10_CODE_REVIEW_SPEC.md`, `11_TESTING_AND_QA_SPEC.md`, `12_DEBUG_AND_TROUBLESHOOTING_SPEC.md`, `24_REQUIREMENTS_TRACEABILITY_MATRIX_SPEC.md`
+2. Run full test suite, perform code review, fix defects.
+3. Verify traceability: every PRD requirement has corresponding test + implementation.
+4. Present review results → wait for user confirmation.
+
+### Stage 7: Deployment and go-live
+
+Entry: Stage 6 review confirmed by user.
+1. Read: `<BUNDLE_PATH>/references/global-engineering-standards/13_DEPLOYMENT_AND_DEVOPS_SPEC.md`, `14_CICD_SPEC.md`, `18_ENVIRONMENT_CONFIG_SPEC.md`, `25_ACCEPTANCE_AND_GO_LIVE_CHECKLIST.md`
+2. If project has observability requirements: also read `17_OBSERVABILITY_SPEC.md`.
+3. Configure deployment, execute go-live checklist.
+4. Present deployment plan → user confirms → execute deployment.
+5. Update `GO_LIVE_RECORD.md`.
+
+### After stage 7: Project completion
+
+1. Update all project documents: `TRACEABILITY_MATRIX.md`, `SESSION_HANDOFF.md`, `GO_LIVE_RECORD.md`, `DECISION_LOG.md`.
+2. Workflow scope is complete for the current PRD.
+3. If user requests new features post-deployment:
+   - Small changes (< 30% modules): Re-enter at stage 1 with the new feature scope, run stages 1→7 for the new scope.
+   - Large changes (> 30% modules): Follow "Large-scale requirement change" workflow in SKILL.md first, then re-enter stages.
+
+### Backtrack rules
+
+If a stage output is discovered incorrect at a later stage:
+1. Return to the stage that produced the incorrect output.
+2. Revise and re-present for user confirmation.
+3. Re-execute all downstream stages whose outputs depend on the revised stage.
+4. Do NOT continue forward with known incorrect upstream outputs.
+
+### acode-run integration (model routing)
+
+During stage-driven execution, invoke `acode-run` for model routing in these situations:
 1. **Phase entry** — when starting a new stage in the execution flow.
 2. **Phase-exit cross-trigger tasks** — tasks that span multiple stages.
 3. **Explicit high-difficulty subtasks** — complex implementation tasks where model selection matters.
