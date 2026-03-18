@@ -182,35 +182,25 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
 
 安装完成后，**必须先运行初始化命令**，完成 MCP 工具扫描、安装和 NotebookLM 认证配置。
 
-**方式 1：在 AI Agent 中执行（推荐）**
-
-重启 Claude Code / Codex 后，直接告诉 AI：
-
-```text
-acode-kit init
-```
-
-AI 会自动读取 `acode-init.md` 适配器并执行初始化流程。
-
-**方式 2：CLI 命令行**
+在终端运行初始化脚本：
 
 ```bash
+# 如果通过 curl | bash 安装
+node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs
+
 # 如果通过 npm link 或 npm install 安装
 acode-kit init
 
-# 如果通过 curl | bash 安装（使用安装目录下的脚本）
-node .claude/Acode-kit/scripts/acode-kit.mjs init
-
 # 指定参数
-node .claude/Acode-kit/scripts/acode-kit.mjs init --provider claude --yes
+node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs --provider claude --yes
 ```
 
-初始化流程：
+初始化流程（CLI 自动执行，无需 AI 参与）：
 1. 检查项目文件夹状态（空 / 已有项目）
 2. 扫描 4 个 MCP 工具的安装状态
 3. 询问是否安装缺失工具（可跳过）
 4. 验证安装结果
-5. 配置 NotebookLM 认证（触发浏览器登录）
+5. 配置 NotebookLM 认证状态
 6. 写入 `.acode-kit-initialized.json` 状态文件
 
 | 参数 | 说明 |
@@ -289,7 +279,7 @@ Use Acode-kit to continue the current project, review PRD and traceability matri
 │   │   └── claude/                       # Claude 子代理适配
 │   │       ├── acode-kit.md
 │   │       ├── acode-run.md
-│   │       └── acode-init.md
+│   │       └── (init handled by CLI script, no adapter needed)
 │   ├── assets/
 │   │   └── project-doc-templates/        # 8 份项目文档模板
 │   └── references/
@@ -486,25 +476,17 @@ After installation, **you must run the init command first** to scan/install MCP 
 
 **Option 1: In your AI Agent (Recommended)**
 
-Restart Claude Code / Codex, then simply tell the AI:
-
-```text
-acode-kit init
-```
-
-The AI will read the `acode-init.md` adapter and execute the initialization flow.
-
-**Option 2: CLI**
+Run the init script in your terminal:
 
 ```bash
+# If installed via curl | bash
+node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs
+
 # If installed via npm link or npm install
 acode-kit init
 
-# If installed via curl | bash (use the script path directly)
-node .claude/Acode-kit/scripts/acode-kit.mjs init
-
 # With options
-node .claude/Acode-kit/scripts/acode-kit.mjs init --provider claude --yes
+node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs --provider claude --yes
 ```
 
 Initialization flow:

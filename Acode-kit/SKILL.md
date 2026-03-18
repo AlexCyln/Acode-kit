@@ -24,86 +24,50 @@ This skill is the single public entry point for the whole workflow.
 
 ## Command hierarchy
 
-Acode-kit has three commands with distinct roles. They execute in strict order:
+Acode-kit has two user-facing commands and one internal layer:
 
-| Command | Purpose | When | Claude adapter |
-|---------|---------|------|----------------|
-| `acode-kit init` | One-time environment setup | Once after installation | `acode-init.md` — self-contained, does NOT read SKILL.md |
-| `acode-kit` | Project delivery workflow | Each project | `acode-kit.md` — embeds Steps 1-3, delegates to SKILL.md from Step 4 |
-| `acode-run` | Internal model routing | During stage-driven execution | `acode-run.md` — invoked by acode-kit, NOT by users directly |
+| Command | Purpose | How it runs |
+|---------|---------|-------------|
+| `acode-kit init` | One-time environment setup | **CLI script** — runs in terminal: `node scripts/acode-kit-init.mjs`. No AI involvement. |
+| `acode-kit` | Project delivery workflow | **AI adapter** — `acode-kit.md` embeds Steps 1-3, delegates to SKILL.md from Step 4. |
+| `acode-run` | Internal model routing | **AI adapter** — `acode-run.md` invoked by acode-kit during stage-driven execution. Not user-facing. |
 
-**Dependency chain:** `init` must complete before `acode-kit` can run. `acode-run` is called internally by `acode-kit` during implementation stages — users never invoke it directly.
+**Dependency chain:** `init` (CLI) must complete before `acode-kit` (AI) can run. The AI adapter checks for `.acode-kit-initialized.json` — if missing, it tells the user to run the CLI init script first.
 
 ---
 
 ## INITIALIZATION CHECK (before anything else)
 
-**Before executing any project workflow, check whether `.acode-kit-initialized.json` exists in the working directory.**
+Check whether `.acode-kit-initialized.json` exists in the working directory.
 
-- **If NOT found**: Tell the user: "Acode-kit has not been initialized. Please run `acode-kit init` first to set up MCP tools and NotebookLM authentication." Then STOP. Do NOT proceed with any startup gates or project work.
-- **If found**: Read the file to load saved tool status and NotebookLM configuration. Use this data instead of re-scanning tools. Proceed to the startup sequence below.
-
----
-
-## MANDATORY FIRST ACTION
-
-**When this skill is loaded for a new project or a fresh project brief, you MUST execute the gate-driven startup sequence below. This is NOT optional. Do NOT skip to "Stage-driven execution". Do NOT create any files, directories, or task plans until you have passed GATE 3.**
-
-**Your first response to the user MUST be the output of Step 1 (workspace status report). Nothing else.**
-
-**IMPORTANT: Do NOT use TaskCreate, TodoWrite, or any task/todo planning tool to plan Steps 1-4 upfront. Execute each step individually as a single response, then STOP and wait for the user. The gate system requires human interaction between every step — pre-planning defeats the purpose.**
+- **If NOT found**: Tell the user to run the init CLI script in their terminal: `node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs`. Then STOP.
+- **If found**: Read the file to load saved tool status and NotebookLM configuration. Proceed to the startup sequence below.
 
 ---
 
-## Gate-driven startup sequence
+## Gate-driven startup sequence (reference)
 
-This sequence has 4 steps and 3 mandatory gates. Each gate requires you to STOP, present output to the user, and WAIT for explicit user approval before continuing. You may NOT combine multiple steps into one response.
+The Claude adapter (`acode-kit.md`) embeds Steps 1-3 directly as execution instructions. The descriptions below are the canonical reference for what each step produces. Step 4 is read directly from SKILL.md by the adapter after Gate 3 is passed.
 
-### Step 1: Workspace Status Report (YOUR ONLY ACTION RIGHT NOW)
+This sequence has 4 steps and 3 mandatory gates. Each gate requires the agent to stop, present output, and wait for user approval. Steps cannot be combined into one response. TaskCreate/TodoWrite must not be used to pre-plan these steps.
 
-Do this FIRST and ONLY this. Do not read reference docs, do not analyze requirements, do not plan stages, do not create task lists.
+### Step 1: Workspace Status Report
 
-1. Scan the current workspace folder:
-   - Empty folder → new project
-   - Existing project → continuation or iteration
-2. Read tool status from `.acode-kit-initialized.json` (already loaded in Initialization Check above). Do NOT re-scan or re-install tools — that was handled during `acode-kit init`.
-3. Present to the user:
-   - Workspace state (empty / existing project)
-   - MCP tool status summary (from saved initialization data)
-   - NotebookLM authentication status
+The agent checks the workspace folder (empty = new project, existing files = continuation) and reads saved tool status from `.acode-kit-initialized.json`. Output: workspace state, MCP tool status summary, NotebookLM authentication status.
 
-**>>> GATE 1: STOP HERE. Output the workspace status report. Explicitly ask: "Please confirm the workspace status, or tell me if anything needs adjustment." Wait for the user's reply. DO NOT continue to Step 2 in this same response. <<<**
+**Gate 1:** The agent presents the status report and asks the user to confirm before proceeding.
 
-### Step 2: Requirements Analysis + Project Skeleton (MANDATORY — DO NOT SKIP)
+### Step 2: Requirements Analysis + Project Skeleton
 
-Only begin after the user has replied to GATE 1. This step is NOT optional — it produces the project skeleton that the user must approve before any PRD or file creation.
+The agent reads `00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2 (tech stack framework) and the user's project brief. If NotebookLM MCP is available, it deepens the analysis via NotebookLM. Output: project skeleton containing recommended tech stack, core business logic summary, system modules, UI/UX direction, scope boundaries.
 
-1. Read ONLY `references/global-engineering-standards/00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2 (tech stack decision framework). Do NOT read other reference documents at this stage — they are loaded later per stage as needed.
-2. Read the user's project prompt/brief.
-3. Analyze the project brief and produce a **project skeleton**:
-   - If NotebookLM MCP is available: invoke NotebookLM to deepen the analysis. When calling NotebookLM, append the notebook URL to the prompt: `"Here's my NotebookLM: [notebookLM.notebookUrl from .acode-kit-initialized.json]"`.
-   - If NotebookLM MCP is unavailable: perform the analysis directly.
-4. The project skeleton MUST contain:
-   - Recommended tech stack (frontend, backend, database, deployment, design tool)
-   - Core business logic summary
-   - System modules / partitions
-   - UI/UX style direction
-   - Scope boundaries and constraints
-5. Present the project skeleton to the user.
+**Gate 2:** The agent presents the skeleton and asks the user to confirm or revise before proceeding.
 
-**>>> GATE 2: STOP HERE. Present the project skeleton. Explicitly ask: "Please confirm this project skeleton, or tell me what to revise." Wait for the user's reply. DO NOT draft a PRD, create any files, or plan any stages until the user explicitly approves. If the user requests changes, revise and re-present until approved. <<<**
+### Step 3: PRD + Progress Plan
 
-### Step 3: PRD + Progress Plan (MANDATORY — DO NOT SKIP)
+The agent reads `01_PRODUCT_REQUIREMENTS_STANDARD.md` for PRD structure. Based on the approved skeleton, it drafts a PRD, progress plan, and traceability matrix.
 
-Only begin after the user has explicitly approved the project skeleton from GATE 2. This step is NOT optional — the PRD must be approved before any file or directory creation.
-
-1. Read `references/global-engineering-standards/01_PRODUCT_REQUIREMENTS_STANDARD.md` (PRD structure reference). Do NOT load other specs yet.
-2. Based on the approved skeleton, determine the tech stack and prepare `PROJECT_OVERRIDES.md` content.
-3. Draft a structured PRD.
-4. Generate a progress plan and requirements traceability matrix.
-5. Present the PRD and progress plan to the user.
-
-**>>> GATE 3: STOP HERE. Present the PRD and progress plan. Explicitly ask: "Please confirm this PRD and plan, or tell me what to revise." Wait for the user's reply. DO NOT create project directories, files, dependencies, or any code until the user explicitly approves. If the user requests changes, revise and re-present until approved. <<<**
+**Gate 3:** The agent presents the PRD and plan, asks the user to confirm or revise. No files or directories may be created until Gate 3 is passed.
 
 ### Step 4: Project Environment Setup
 
@@ -300,6 +264,6 @@ When the task is complex, structure the work as:
 12. Use TaskCreate, TodoWrite, or any task/todo tool to pre-plan the startup sequence (Steps 1-4). Each step must be a separate user interaction, not a batch of tasks.
 13. Jump from receiving a project brief directly to "Stage-driven execution" — the startup sequence is mandatory first.
 14. Skip Steps 2-3 (requirements analysis + PRD) and jump directly to Step 4 (file creation). Steps 2-3 involve NotebookLM analysis, project skeleton presentation, and PRD drafting — all requiring user approval before any file is created.
-15. Execute the startup sequence when `.acode-kit-initialized.json` does not exist — tell the user to run `acode-kit init` first.
+15. Execute the startup sequence when `.acode-kit-initialized.json` does not exist — tell the user to run the init CLI script first.
 16. Switch response language without the user asking. Match the user's input language at all times.
 17. Over-engineer, add unrequested features, create premature abstractions, or extend scope beyond what the PRD and current task specify. Every addition must trace to a concrete requirement — if it does not, do not add it.

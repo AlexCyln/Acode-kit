@@ -180,7 +180,7 @@ function verifyScan(provider) {
 // Step 5: Configure NotebookLM
 // ---------------------------------------------------------------------------
 
-async function configureNotebookLM(scanResult, autoYes) {
+function configureNotebookLM(scanResult) {
   const notebookLM = scanResult.tools.find((t) => t.id === "notebooklm");
   const notebookUrl = "https://notebooklm.google.com/notebook/7ec4ec07-abb3-478e-99aa-f8946e103499";
 
@@ -194,24 +194,22 @@ async function configureNotebookLM(scanResult, autoYes) {
     };
   }
 
-  console.log("\nNotebookLM MCP is installed.");
-  console.log("To complete setup, NotebookLM needs browser authentication.");
+  console.log("\n──────────────────────────────────────────────");
+  console.log("NotebookLM Authentication (manual step)");
+  console.log("──────────────────────────────────────────────");
+  console.log("NotebookLM MCP is installed but requires browser authentication.");
   console.log("");
-  console.log("When you first use Acode-kit in your AI agent, the agent will");
-  console.log('automatically send "Log me in to NotebookLM" to trigger the');
-  console.log("authentication page. Complete the sign-in in your browser.");
+  console.log("  1. Open your AI agent (Claude Code / Codex)");
+  console.log('  2. Type: Log me in to NotebookLM');
+  console.log("  3. A browser window will open — complete the Google sign-in");
+  console.log("  4. Return to the agent and confirm authentication is done");
   console.log("");
   console.log(`NotebookLM URL: ${notebookUrl}`);
-
-  let authCompleted = false;
-  if (!autoYes) {
-    const answer = await prompt("Have you already authenticated NotebookLM? (y/n): ");
-    authCompleted = answer === "y" || answer === "yes";
-  }
+  console.log("──────────────────────────────────────────────");
 
   return {
     configured: true,
-    authCompleted,
+    authCompleted: false,
     notebookUrl
   };
 }
@@ -288,7 +286,7 @@ async function main() {
   const finalScan = verifyScan(resolvedProvider) || initialScan;
 
   // Step 5: Configure NotebookLM
-  const notebookLMConfig = await configureNotebookLM(finalScan, autoYes);
+  const notebookLMConfig = configureNotebookLM(finalScan);
 
   // Step 6: Write status file
   const toolsSummary = finalScan.tools.map((t) => ({
