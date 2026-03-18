@@ -127,7 +127,7 @@ Stage order (starting from where the startup sequence left off):
 
 Never skip a stage if its missing outputs would make the next stage unstable.
 
-**Pencil/design tool usage:** At Stage 2 (overall UI architecture) and Step 5b (per-module UI detail design). Do NOT use Pencil at any other stage or step. If the user said "design in Pencil first" at Gate 3, this applies at Stage 2 and Step 5b — NOT immediately after Gate 3 or Gate 4.
+**Pencil/design tool usage:** At Stage 2 (overall UI architecture: 1-5 architecture-level wireframes covering core layout, navigation, key pages — NOT all pages) and Step 5b (per-module UI detail design: detailed page mockups for the current module only). Do NOT use Pencil at any other stage or step. If the user said "design in Pencil first" at Gate 3, this applies at Stage 2 and Step 5b — NOT immediately after Gate 3 or Gate 4.
 
 **Stage execution model:** After Gate 4, stages execute within the session (no terminate-per-stage). Stages 1-4 (architecture) execute once. Stage 5 (module iteration) repeats the 5a→5b→5c→5d→5e cycle per module, ordered by `TRACEABILITY_MATRIX.md` priority. Each stage and each module step produces outputs for user review; wait for user confirmation before proceeding. Update `SESSION_HANDOFF.md` current position cursor after every step. If user requests to skip a stage → refuse (all stages are mandatory if their outputs are needed by downstream stages).
 
@@ -157,8 +157,13 @@ Do not jump straight into code if project-level facts are missing.
 
 ### Frontend page workflow (during module iteration Step 5b + 5d)
 When implementing frontend pages for a module:
-1. Step 5b: design detailed page mockups in Pencil (if available) for the current module → user confirms design. Build UI components via shadcn (if declared).
-2. Step 5d: implement frontend matching the approved Step 5b design one-to-one. Do not silently add or remove UI elements.
+1. Step 5b: based on Stage 2 UI architecture, design **detailed page mockups** in Pencil (if available) for the **current module only** (component layouts, interaction states, data display fields). Stage 2 only established the framework; Step 5b is where per-page detail happens.
+   - **shadcn enforcement:** If the tech stack declares shadcn, design with shadcn components (Button, Card, Dialog, Input, Select, Table, etc.). Do NOT design custom primitives when shadcn equivalents exist.
+   - **Pencil validation (mandatory):** After designing, call `get_screenshot()` to visually verify layout, spacing, typography, and hierarchy. Call `snapshot_layout(problemsOnly: true)` to detect clipping/overlap/misalignment. Fix all issues before presenting to user.
+   - Present design with validated screenshots → **STOP and wait for user explicit approval.** Do NOT auto-proceed to 5c/5d.
+2. Step 5d: implement frontend matching the approved Step 5b design one-to-one.
+   - **shadcn enforcement:** Use shadcn components (Button, Card, Dialog, Input, Select, Table, Tabs, Badge, etc.) — do NOT create custom HTML/CSS primitives when shadcn equivalents exist.
+   - Do not silently add or remove UI elements.
 
 If design tools are unavailable, follow the degradation strategy in `31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
 
@@ -268,6 +273,7 @@ Respond and execute in the same language the user uses. If the user writes in Ch
 11. Treat `TRACEABILITY_MATRIX.md` as the higher-level project roadmap document. Do not reduce it to a short task log or session checklist.
 12. Follow the module iteration cycle (Steps 5a→5b→5c→5d→5e) for each module. Do not jump from a module name straight into code — each step requires user confirmation before proceeding.
 13. Module UI design (Step 5b) must be based on the approved module requirements (Step 5a). Implementation (Step 5d) must match the approved design one-to-one; do not silently add or remove modules, fields, buttons, states, tags, headings, or interactions.
+14. When the tech stack declares shadcn, ALL frontend UI must use shadcn components. Do not create custom Button, Input, Card, Dialog, Select, Table, or other components when shadcn equivalents exist. Check `PROJECT_OVERRIDES.md` for the declared component library.
 15. If a major decision changes scope, write it into the decision log before implementing.
 16. After first bootstrap, treat the generated project root `AGENTS.md` as the persistent in-repo continuation entry so future work inside the same repository keeps following the same workflow without the user re-stating it.
 
@@ -322,3 +328,7 @@ When the task is complex, structure the work as:
 26. Execute stages out of order. Stage 1 → 2 → 3 → 4 → 5 → 6 → 7 is the mandatory sequence. Each stage's outputs are prerequisites for the next.
 27. Interpret Gate 3 (PRD approval) as permission to start Pencil/design work. Gate 3 → Step 4 (project environment setup). Design only happens at Stage 2 (overall UI architecture) and Step 5b (module UI detail), after Gate 4 passes AND Stage 1 completes. Do NOT mention "Pencil" or "设计阶段" in Gate 3 questions.
 28. Combine Step 4 (project setup) with Stage 2 (Pencil design) or Stage 5 (implementation) into a single action. Each phase is separate and requires its own user confirmation before proceeding.
+29. Present a Pencil design to the user without first validating it: call `get_screenshot()` to visually verify and `snapshot_layout(problemsOnly: true)` to detect layout bugs. Every Pencil design must pass validation before user review.
+30. Proceed from Pencil design (Stage 2 or Step 5b) to the next step without the user's explicit approval. Design → user confirms → next step. No auto-proceeding.
+31. Implement frontend UI with custom HTML/CSS primitives when shadcn is declared in the tech stack. Use shadcn components (Button, Card, Dialog, Input, Select, Table, etc.) — do not reinvent them.
+32. Batch-design all pages' detailed UI at Stage 2. Stage 2 only produces 1-5 architecture-level wireframes (core layout, navigation, key functional areas). Each module's detailed page UI is designed at Step 5b, not Stage 2.

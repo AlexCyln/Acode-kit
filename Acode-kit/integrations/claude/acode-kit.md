@@ -273,13 +273,27 @@ Do NOT write detailed per-module specs (that happens in Step 5a). Do NOT create 
 
 Entry: Stage 1 module decomposition confirmed by user.
 1. Read: `<BUNDLE_PATH>/references/global-engineering-standards/02_UI_UX_DESIGN_SPEC.md`
-2. Define page/screen inventory, navigation structure, and interaction framework.
-3. If Pencil is available: create a high-level wireframe showing page layout structure and navigation flow. This is architecture-level — detailed page designs happen per-module in Step 5b.
-4. If Pencil is unavailable: describe the UI architecture in text and follow the degradation strategy in `<BUNDLE_PATH>/references/global-engineering-standards/31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
+2. Define page/screen inventory (text list only), navigation structure, and interaction framework.
+3. If Pencil is available: create **1-5 architecture-level wireframes** (exact count depends on module count and project complexity). These frames should cover:
+   - Core layout framework (header / sidebar / content / footer structure)
+   - Navigation flow between key pages
+   - Key functional area placement (which module maps to which screen region)
+   - Example: a project with 4 modules might produce 2-3 frames (overall layout + navigation structure + one representative page skeleton).
+4. **Scope limit — do NOT design at this stage:**
+   - Individual module pages with full component detail
+   - Detailed component layouts, interaction states, or data display fields
+   - All pages of the application — only key/representative pages
+   - These all belong to Step 5b (per-module UI detail design).
+5. **MANDATORY Pencil design validation (before presenting to user):**
+   a. Call `get_screenshot()` for each designed frame — visually inspect layout, spacing, alignment, typography, and visual hierarchy.
+   b. Call `snapshot_layout()` with `problemsOnly: true` — detect clipping, overlap, or misalignment issues.
+   c. Fix ALL issues found. Repeat validation until clean.
+   d. Do NOT present an unvalidated design to the user.
+6. If Pencil is unavailable: describe the UI architecture in text and follow the degradation strategy in `<BUNDLE_PATH>/references/global-engineering-standards/31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
 
-Output: UI architecture overview (page list, navigation, layout framework). NOT detailed mockups for each page.
+Output: page inventory list + 1-5 architecture-level wireframes (core layout, navigation, key pages) with validated screenshots. NOT detailed per-page mockups or full UI for all modules.
 
-Present UI architecture → wait for user confirmation.
+⚠️ **STOP HERE.** Present UI architecture with screenshots → wait for user explicit confirmation. Do NOT proceed to Stage 3 until user approves. This is a hard checkpoint, same as a gate.
 
 ### Stage 3: Overall data model + API framework
 
@@ -314,12 +328,19 @@ Execute modules one by one, ordered by priority from `TRACEABILITY_MATRIX.md` up
 3. Present module specs → user confirms before proceeding.
 
 #### Step 5b — Module UI design (Pencil)
-1. If this module has UI: design detailed page mockups in Pencil for this module's pages only.
+1. If this module has no UI (pure backend/data module): skip 5b, proceed to 5c.
 2. Read: `<BUNDLE_PATH>/references/global-engineering-standards/02_UI_UX_DESIGN_SPEC.md`
-3. Build UI components via shadcn component library (if declared).
-4. If Pencil is unavailable: follow degradation strategy in `31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
-5. Present module design → user confirms before proceeding.
-6. If this module has no UI (pure backend/data module): skip 5b, proceed to 5c.
+3. Based on the Stage 2 UI architecture (core layout + navigation), design **detailed page UI** for the **current module only**: component layouts, interaction states, data display fields, responsive behavior. This is where per-page detail happens — Stage 2 only established the framework.
+4. **shadcn enforcement:** If the tech stack declares shadcn (check `PROJECT_OVERRIDES.md`), design using shadcn components (Button, Card, Dialog, Input, Select, Table, etc.). Do NOT design custom UI primitives when shadcn equivalents exist.
+5. **MANDATORY Pencil design validation (before presenting to user):**
+   a. Call `get_screenshot()` for each designed frame — visually inspect layout, spacing, alignment, typography, and visual hierarchy.
+   b. Call `snapshot_layout()` with `problemsOnly: true` — detect clipping, overlap, or misalignment issues.
+   c. Fix ALL issues found. Repeat validation until clean.
+   d. Do NOT present an unvalidated design to the user.
+6. If Pencil is unavailable: follow degradation strategy in `31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`.
+7. Present module design with validated screenshots → user MUST explicitly confirm before proceeding.
+
+⚠️ **STOP HERE.** Do NOT proceed to Step 5c or 5d until the user has explicitly approved the Step 5b design. This is a hard checkpoint — treat it like a gate.
 
 #### Step 5c — Module data/API detail design
 1. Detail this module's database tables (fields, types, constraints) and API endpoints (request/response schema), based on the overall data model from Stage 3.
@@ -327,12 +348,15 @@ Execute modules one by one, ordered by priority from `TRACEABILITY_MATRIX.md` up
 3. Present module data/API design → user confirms before proceeding.
 
 #### Step 5d — Module TDD implementation
-1. Read: TDD rules from `<BUNDLE_PATH>/references/global-engineering-standards/00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2A.
-2. Load per-slice references: frontend (`03`, `08`), backend (`04`, `05`, `06`, `07` conditional, `16`).
-3. Map this module's requirements (from 5a) → vertical slices (each slice = one traceable requirement).
-4. Per slice: write failing test → minimal implementation → refactor.
-5. After each slice passes, run existing tests for previously completed modules to catch cross-module regressions early.
-6. Update `TRACEABILITY_MATRIX.md` lower layer (current module slices) as slices complete.
+1. **Pre-check:** Verify that Step 5b design has been explicitly approved by the user. If not, go back to 5b. Do NOT start implementation with an unapproved design.
+2. Read: TDD rules from `<BUNDLE_PATH>/references/global-engineering-standards/00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2A.
+3. Load per-slice references: frontend (`03`, `08`), backend (`04`, `05`, `06`, `07` conditional, `16`).
+4. Map this module's requirements (from 5a) → vertical slices (each slice = one traceable requirement).
+5. Per slice: write failing test → minimal implementation → refactor.
+6. **shadcn enforcement:** If the tech stack declares shadcn, ALL frontend UI components MUST use shadcn (e.g., `Button`, `Card`, `Dialog`, `Input`, `Select`, `Table`, `Tabs`, `Badge`). Do NOT create custom HTML/CSS primitives when shadcn equivalents exist. Import from the shadcn library, not hand-coded.
+7. **Design fidelity:** Frontend implementation MUST match the approved Step 5b Pencil design one-to-one. Do not silently add, remove, or rearrange UI elements.
+8. After each slice passes, run existing tests for previously completed modules to catch cross-module regressions early.
+9. Update `TRACEABILITY_MATRIX.md` lower layer (current module slices) as slices complete.
 
 #### Step 5e — Module test + review
 1. Read: `<BUNDLE_PATH>/references/global-engineering-standards/10_CODE_REVIEW_SPEC.md`, `11_TESTING_AND_QA_SPEC.md`, `12_DEBUG_AND_TROUBLESHOOTING_SPEC.md`
