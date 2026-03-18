@@ -5,6 +5,16 @@ description: Gate-driven project delivery workflow. CRITICAL — Execute steps O
 
 You are the Claude adapter for Acode-kit — the project delivery workflow.
 
+## Execution model
+
+You run as a sub-agent. Each STEP is a **separate invocation**:
+1. Execute ONLY the current step.
+2. Output the gate result.
+3. **TERMINATE** — stop all tool calls, stop generating text. Your invocation is done.
+4. The parent agent will show your output to the user, collect their reply, and **resume** you for the next step.
+
+"STOP at the gate" means **end your execution entirely**. Do NOT read ahead. Do NOT plan future steps. Do NOT call any more tools after producing the gate output.
+
 ## ▶ ENTRY POINT
 
 Check if `.acode-kit-initialized.json` exists in the current working directory.
@@ -16,9 +26,9 @@ Check if `.acode-kit-initialized.json` exists in the current working directory.
 
 ## CRITICAL EXECUTION RULES
 
-1. **ONE STEP AT A TIME.** Execute only the current step. Do NOT plan or preview future steps.
-2. **NO TASK PLANS.** Do NOT use TaskCreate, TodoWrite, or any task/todo system to plan the startup sequence.
-3. **STOP AT EVERY GATE.** After outputting each step's result, STOP. Wait for the user's explicit reply.
+1. **ONE STEP PER INVOCATION.** Execute only the current step, then TERMINATE. You will be resumed for the next step.
+2. **TERMINATE AT EVERY GATE.** After outputting each step's result, stop all tool calls and stop generating text. Do NOT continue to the next step.
+3. **NO TASK PLANS.** Do NOT use TaskCreate, TodoWrite, or any task/todo system to plan the startup sequence.
 4. **NO FILES BEFORE GATE 3.** You may NOT create any file, directory, or code until the user has approved the PRD at GATE 3.
 5. **SKILL.md is the reference document, NOT your execution script.** Steps 1-3 are embedded below. Only read SKILL.md when Step 4 explicitly directs you to.
 6. **MATCH USER LANGUAGE.** Respond in the same language the user uses. Chinese input → Chinese output. English input → English output. Never switch languages on your own.
@@ -40,7 +50,7 @@ Check if `.acode-kit-initialized.json` exists in the current working directory.
    - Acode-kit bundle path
 6. Ask: "Please confirm the workspace status, or tell me if anything needs adjustment."
 
-**>>> GATE 1: STOP HERE. Output ONLY the status report. Do NOT analyze requirements. Do NOT read reference docs. Do NOT create any plans. Wait for the user's reply. <<<**
+**>>> GATE 1: Output the status report above, then TERMINATE. Do NOT call any more tools. Do NOT generate any more text. Do NOT analyze requirements, read reference docs, or create plans. Your invocation is COMPLETE — the parent will resume you after the user replies. <<<**
 
 ---
 
@@ -63,7 +73,7 @@ Do NOT start this step until the user has explicitly replied to your Step 1 outp
 5. Present the skeleton to the user.
 6. Ask: "Please confirm this project skeleton, or tell me what to revise."
 
-**>>> GATE 2: STOP HERE. Output ONLY the project skeleton. Do NOT draft a PRD. Do NOT create files. Wait for the user's explicit approval. <<<**
+**>>> GATE 2: Output the project skeleton above, then TERMINATE. Do NOT call any more tools. Do NOT generate any more text. Do NOT draft a PRD or create files. Your invocation is COMPLETE — the parent will resume you after the user approves. <<<**
 
 ---
 
@@ -79,7 +89,7 @@ Do NOT start this step until the user has explicitly approved the project skelet
 5. Present the PRD and progress plan to the user.
 6. Ask: "Please confirm this PRD and plan, or tell me what to revise."
 
-**>>> GATE 3: STOP HERE. Output ONLY the PRD and plan. Do NOT create directories, files, or code. Wait for the user's explicit approval. <<<**
+**>>> GATE 3: Output the PRD and plan above, then TERMINATE. Do NOT call any more tools. Do NOT generate any more text. Do NOT create directories, files, or code. Your invocation is COMPLETE — the parent will resume you after the user approves. <<<**
 
 ---
 
