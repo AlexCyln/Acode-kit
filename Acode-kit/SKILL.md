@@ -1,6 +1,6 @@
 ---
 name: Acode-kit
-description: Gate-driven project delivery workflow for AI coding agents. Every new project MUST pass through 3 mandatory user-approval gates before any file or directory is created. Read the MANDATORY FIRST ACTION section immediately.
+description: Gate-driven project delivery workflow. CRITICAL — Execute steps ONE AT A TIME. First response = workspace status report ONLY. Do NOT create task plans, files, or directories. Do NOT skip requirements analysis (Step 2) or PRD (Step 3). All 3 gates require user approval before any file creation.
 ---
 
 # Acode-kit
@@ -37,15 +37,17 @@ This skill is the single public entry point for the whole workflow.
 
 **Your first response to the user MUST be the output of Step 1 (workspace status report). Nothing else.**
 
+**IMPORTANT: Do NOT use TaskCreate, TodoWrite, or any task/todo planning tool to plan Steps 1-4 upfront. Execute each step individually as a single response, then STOP and wait for the user. The gate system requires human interaction between every step — pre-planning defeats the purpose.**
+
 ---
 
 ## Gate-driven startup sequence
 
 This sequence has 4 steps and 3 mandatory gates. Each gate requires you to STOP, present output to the user, and WAIT for explicit user approval before continuing. You may NOT combine multiple steps into one response.
 
-### Step 1: Workspace Status Report
+### Step 1: Workspace Status Report (YOUR ONLY ACTION RIGHT NOW)
 
-Do this FIRST. Do not read reference docs, do not analyze requirements, do not plan stages.
+Do this FIRST and ONLY this. Do not read reference docs, do not analyze requirements, do not plan stages, do not create task lists.
 
 1. Scan the current workspace folder:
    - Empty folder → new project
@@ -58,9 +60,9 @@ Do this FIRST. Do not read reference docs, do not analyze requirements, do not p
 
 **>>> GATE 1: STOP HERE. Output the workspace status report. Explicitly ask: "Please confirm the workspace status, or tell me if anything needs adjustment." Wait for the user's reply. DO NOT continue to Step 2 in this same response. <<<**
 
-### Step 2: Requirements Analysis + Project Skeleton
+### Step 2: Requirements Analysis + Project Skeleton (MANDATORY — DO NOT SKIP)
 
-Only begin after the user has replied to GATE 1.
+Only begin after the user has replied to GATE 1. This step is NOT optional — it produces the project skeleton that the user must approve before any PRD or file creation.
 
 1. Read ONLY `references/global-engineering-standards/00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2 (tech stack decision framework). Do NOT read other reference documents at this stage — they are loaded later per stage as needed.
 2. Read the user's project prompt/brief.
@@ -77,9 +79,9 @@ Only begin after the user has replied to GATE 1.
 
 **>>> GATE 2: STOP HERE. Present the project skeleton. Explicitly ask: "Please confirm this project skeleton, or tell me what to revise." Wait for the user's reply. DO NOT draft a PRD, create any files, or plan any stages until the user explicitly approves. If the user requests changes, revise and re-present until approved. <<<**
 
-### Step 3: PRD + Progress Plan
+### Step 3: PRD + Progress Plan (MANDATORY — DO NOT SKIP)
 
-Only begin after the user has explicitly approved the project skeleton from GATE 2.
+Only begin after the user has explicitly approved the project skeleton from GATE 2. This step is NOT optional — the PRD must be approved before any file or directory creation.
 
 1. Read `references/global-engineering-standards/01_PRODUCT_REQUIREMENTS_STANDARD.md` (PRD structure reference). Do NOT load other specs yet.
 2. Based on the approved skeleton, determine the tech stack and prepare `PROJECT_OVERRIDES.md` content.
@@ -224,9 +226,13 @@ For external systems:
 For tool management:
 1. `references/global-engineering-standards/31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md`
 
+## Language rule
+Respond and execute in the same language the user uses. If the user writes in Chinese, all output (reports, skeleton, PRD, code comments, commit messages) must be in Chinese. If the user writes in English, use English. Never switch languages unless the user explicitly asks.
+
 ## Implementation rules
 1. Keep the declared tech stack unchanged unless the user explicitly overrides it at the project level.
-2. Work in small vertical slices mapped to concrete requirement IDs.
+2. Implement ONLY what the user requested or what the approved PRD specifies. Do not add features, utilities, abstractions, error handling, or "improvements" beyond the current scope. Every line of code must trace back to a concrete requirement. If you think something extra is needed, ask the user first — do not silently add it.
+3. Work in small vertical slices mapped to concrete requirement IDs.
 3. Every vertical slice must follow the TDD Red-Green-Refactor cycle; do not write production code without a failing test first.
 4. Update project documents as you go; do not leave documentation until the end.
 5. Before implementing a new subtask, check whether detailed development documents already exist for API, database, function/module, and testing. If a required document is missing, create the project-level `md` entry first, then continue implementation.
@@ -272,6 +278,10 @@ When the task is complex, structure the work as:
 8. Create ANY file or directory before the user approves the PRD at GATE 3.
 9. Draft a PRD before the user approves the project skeleton at GATE 2.
 10. Assume the user has approved when they have not explicitly said so.
-11. Create a task plan or stage list as your first response — your first response MUST be the environment scan results (Step 1 output only).
-12. Jump from receiving a project brief directly to "Stage-driven execution" — the startup sequence is mandatory first.
-13. Execute the startup sequence when `.acode-kit-initialized.json` does not exist — tell the user to run `acode-kit init` first.
+11. Create a task plan, task list, or todo list as your first response — your first response MUST be the workspace status report (Step 1 output only).
+12. Use TaskCreate, TodoWrite, or any task/todo tool to pre-plan the startup sequence (Steps 1-4). Each step must be a separate user interaction, not a batch of tasks.
+13. Jump from receiving a project brief directly to "Stage-driven execution" — the startup sequence is mandatory first.
+14. Skip Steps 2-3 (requirements analysis + PRD) and jump directly to Step 4 (file creation). Steps 2-3 involve NotebookLM analysis, project skeleton presentation, and PRD drafting — all requiring user approval before any file is created.
+15. Execute the startup sequence when `.acode-kit-initialized.json` does not exist — tell the user to run `acode-kit init` first.
+16. Switch response language without the user asking. Match the user's input language at all times.
+17. Over-engineer, add unrequested features, create premature abstractions, or extend scope beyond what the PRD and current task specify. Every addition must trace to a concrete requirement — if it does not, do not add it.
