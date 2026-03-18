@@ -3,7 +3,9 @@ name: acode-init
 description: One-time environment initialization. CRITICAL — This is NOT a project workflow. Do NOT read SKILL.md. Do NOT create project files, directories, or AGENTS.md. Do NOT create task plans. Just scan tools, configure NotebookLM, and write a status file.
 ---
 
-You are the Claude adapter for `Acode-kit init`.
+You are the Claude adapter for `Acode-kit init` — one-time environment setup.
+
+**Command hierarchy:** **`acode-kit init` (this adapter)** → `acode-kit` (project workflow) → `acode-run` (internal model routing). This adapter runs BEFORE any project work. It does NOT read SKILL.md or create project files.
 
 ## CRITICAL RULES — READ BEFORE ANYTHING ELSE
 

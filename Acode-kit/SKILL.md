@@ -22,6 +22,20 @@ This skill is the single public entry point for the whole workflow.
 
 ---
 
+## Command hierarchy
+
+Acode-kit has three commands with distinct roles. They execute in strict order:
+
+| Command | Purpose | When | Claude adapter |
+|---------|---------|------|----------------|
+| `acode-kit init` | One-time environment setup | Once after installation | `acode-init.md` — self-contained, does NOT read SKILL.md |
+| `acode-kit` | Project delivery workflow | Each project | `acode-kit.md` — embeds Steps 1-3, delegates to SKILL.md from Step 4 |
+| `acode-run` | Internal model routing | During stage-driven execution | `acode-run.md` — invoked by acode-kit, NOT by users directly |
+
+**Dependency chain:** `init` must complete before `acode-kit` can run. `acode-run` is called internally by `acode-kit` during implementation stages — users never invoke it directly.
+
+---
+
 ## INITIALIZATION CHECK (before anything else)
 
 **Before executing any project workflow, check whether `.acode-kit-initialized.json` exists in the working directory.**
@@ -168,20 +182,24 @@ Every implementation slice must follow the Red-Green-Refactor cycle defined in `
 2. Write minimal implementation to make the test pass.
 3. Refactor under test protection.
 
-## Router integration
-Use `extensions/router` as the model-routing execution layer when the task needs model-version selection.
+## Router integration (`acode-run`)
+
+`acode-run` is the internal model-routing layer (see "Command hierarchy" above). It is called by `acode-kit` during stage-driven execution — users never invoke it directly.
+
+When to invoke `acode-run`:
+1. At phase entry — when starting a new stage.
+2. At phase-exit cross-trigger tasks — tasks spanning multiple stages.
+3. For explicit high-difficulty subtasks — complex implementation tasks where model selection matters.
+4. For simple low-risk tasks — default to no multi-model routing; ask user confirmation before bypassing.
 
 Rules:
 1. Acode-kit remains the stage orchestrator and is responsible for phase transitions.
-2. Use unified entry `acode-run` for task execution so users only interact with Acode-kit as a single entry point.
-3. Router is called at phase entry, phase-exit cross-trigger tasks, and explicit high-difficulty subtasks.
-4. Route input must include `project_id`, `phase`, `task_type`, `difficulty`, `provider`, `prompt`, and `context_summary`.
-5. Always treat `logical_session_id` and `native_session_id` as different keys:
+2. Route input must include `project_id`, `phase`, `task_type`, `difficulty`, `provider`, `prompt`, and `context_summary`.
+3. Always treat `logical_session_id` and `native_session_id` as different keys:
    - `logical_session_id`: routing state key, default `project_id:phase`
    - `native_session_id`: provider continuation key from runtime execution
-6. Fallback order is fixed: `error -> timeout -> quality_low -> budget_exceeded`.
-7. Phase token budget is hard cap; task budget is soft cap.
-8. For simple low-risk tasks, default to no multi-model routing and ask user confirmation before bypassing router.
+4. Fallback order is fixed: `error -> timeout -> quality_low -> budget_exceeded`.
+5. Phase token budget is hard cap; task budget is soft cap.
 
 ## Stage-specific references
 Load only what is needed for the current stage.
@@ -233,19 +251,19 @@ Respond and execute in the same language the user uses. If the user writes in Ch
 1. Keep the declared tech stack unchanged unless the user explicitly overrides it at the project level.
 2. Implement ONLY what the user requested or what the approved PRD specifies. Do not add features, utilities, abstractions, error handling, or "improvements" beyond the current scope. Every line of code must trace back to a concrete requirement. If you think something extra is needed, ask the user first — do not silently add it.
 3. Work in small vertical slices mapped to concrete requirement IDs.
-3. Every vertical slice must follow the TDD Red-Green-Refactor cycle; do not write production code without a failing test first.
-4. Update project documents as you go; do not leave documentation until the end.
-5. Before implementing a new subtask, check whether detailed development documents already exist for API, database, function/module, and testing. If a required document is missing, create the project-level `md` entry first, then continue implementation.
-6. Keep project documents layered as: current control docs, active review drafts, approved reference materials, detailed implementation docs, and archived history. Do not mix current execution docs with long historical records.
-7. `SESSION_HANDOFF.md` should stay concise and current-facing. Move long historical progress, superseded handoffs, and closed review drafts into an archive area instead of letting active control docs grow indefinitely.
-8. If the user input is fuzzy, structure it into project docs first.
-9. If a new request conflicts with the current PRD, explicitly surface the conflict and let the user decide whether to replace, keep, or defer; do not silently merge conflicting scope.
-10. Treat `TRACEABILITY_MATRIX.md` as the higher-level project roadmap document. Do not reduce it to a short task log or session checklist.
-11. For each main-task next node, default to `main task -> node -> submodule review draft -> user confirmation -> implementation`; do not jump from a broad node description straight into code.
-12. If a node needs UI, first gather the user's design style / interaction / detail requirements, then design the page in the declared design tool strictly from the approved review draft plus real API / database outputs.
-13. After the user approves the design, reconstruct it in the frontend one-to-one; do not silently add or remove modules, fields, buttons, states, tags, headings, or interactions.
-14. If a major decision changes scope, write it into the decision log before implementing.
-15. After first bootstrap, treat the generated project root `AGENTS.md` as the persistent in-repo continuation entry so future work inside the same repository keeps following the same workflow without the user re-stating it.
+4. Every vertical slice must follow the TDD Red-Green-Refactor cycle; do not write production code without a failing test first.
+5. Update project documents as you go; do not leave documentation until the end.
+6. Before implementing a new subtask, check whether detailed development documents already exist for API, database, function/module, and testing. If a required document is missing, create the project-level `md` entry first, then continue implementation.
+7. Keep project documents layered as: current control docs, active review drafts, approved reference materials, detailed implementation docs, and archived history. Do not mix current execution docs with long historical records.
+8. `SESSION_HANDOFF.md` should stay concise and current-facing. Move long historical progress, superseded handoffs, and closed review drafts into an archive area instead of letting active control docs grow indefinitely.
+9. If the user input is fuzzy, structure it into project docs first.
+10. If a new request conflicts with the current PRD, explicitly surface the conflict and let the user decide whether to replace, keep, or defer; do not silently merge conflicting scope.
+11. Treat `TRACEABILITY_MATRIX.md` as the higher-level project roadmap document. Do not reduce it to a short task log or session checklist.
+12. For each main-task next node, default to `main task -> node -> submodule review draft -> user confirmation -> implementation`; do not jump from a broad node description straight into code.
+13. If a node needs UI, first gather the user's design style / interaction / detail requirements, then design the page in the declared design tool strictly from the approved review draft plus real API / database outputs.
+14. After the user approves the design, reconstruct it in the frontend one-to-one; do not silently add or remove modules, fields, buttons, states, tags, headings, or interactions.
+15. If a major decision changes scope, write it into the decision log before implementing.
+16. After first bootstrap, treat the generated project root `AGENTS.md` as the persistent in-repo continuation entry so future work inside the same repository keeps following the same workflow without the user re-stating it.
 
 ## Mandatory end-of-task updates
 At the end of substantial work:

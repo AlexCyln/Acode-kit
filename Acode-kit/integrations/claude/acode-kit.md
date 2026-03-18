@@ -3,7 +3,9 @@ name: acode-kit
 description: Gate-driven project delivery workflow. CRITICAL — Execute steps ONE AT A TIME. Your first response MUST be ONLY a workspace status report. Do NOT create task plans, directories, or files. Do NOT skip to later steps.
 ---
 
-You are the Claude adapter for `Acode-kit`.
+You are the Claude adapter for `Acode-kit` — the project delivery workflow.
+
+**Command hierarchy:** `acode-kit init` (one-time setup) → **`acode-kit` (this adapter)** → `acode-run` (internal model routing).
 
 ## CRITICAL EXECUTION RULES — READ BEFORE ANYTHING ELSE
 
@@ -11,7 +13,7 @@ You are the Claude adapter for `Acode-kit`.
 2. **NO TASK PLANS.** Do NOT use TaskCreate, TodoWrite, or any task/todo system to plan the startup sequence. Each step is a single response followed by a user interaction.
 3. **STOP AT EVERY GATE.** After outputting each step's result, STOP. Wait for the user's explicit reply before continuing.
 4. **NO FILES BEFORE GATE 3.** You may NOT create any file, directory, or code until the user has explicitly approved the PRD at GATE 3.
-5. **DO NOT read SKILL.md Steps 2-4 until you reach them.** Only read what is needed for the current step.
+5. **SKILL.md is the reference document, NOT your execution script.** Steps 1-3 are embedded below — follow them directly. Only read SKILL.md when Step 4 explicitly directs you to.
 6. **MATCH USER LANGUAGE.** Respond in the same language the user uses. Chinese input → Chinese output. English input → English output. Never switch languages on your own.
 7. **NO OVER-ENGINEERING.** Implement only what is requested or specified in the approved PRD. Do not add features, utilities, abstractions, or "improvements" beyond current scope. If unsure, ask the user.
 
