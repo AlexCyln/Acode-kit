@@ -118,18 +118,38 @@ Step 5: 持续实施     → 8 阶段闭环 × TDD × 小垂直切片
 
 #### 本地安装（Private 阶段推荐）
 
-先克隆仓库，然后用 `--source-dir` 从本地安装：
+先克隆仓库，然后用 `--source-dir` 从本地安装。安装完成后 clone 目录可删除。
+
+**用户级安装（推荐）** — 装一次，任意目录可用：
 
 ```bash
 git clone https://github.com/AlexCyln/Acode-kit-Plus.git
 cd Acode-kit-Plus
-
-# Claude 用户级
 node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope user
+cd ..
+rm -rf Acode-kit-Plus  # clone 目录已无用，可删除
+```
 
-# Claude 项目级
-node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope project
+安装后在任意空文件夹启动项目即可：
 
+```bash
+mkdir my-project && cd my-project
+# 告诉 AI agent: "Use Acode-kit to build ..."
+```
+
+**项目级安装** — 仅在指定项目目录生效：
+
+```bash
+git clone https://github.com/AlexCyln/Acode-kit-Plus.git
+cd Acode-kit-Plus
+node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope project --dest-dir /path/to/my-project/.claude
+cd ..
+rm -rf Acode-kit-Plus
+```
+
+**其他 Agent：**
+
+```bash
 # Codex
 node scripts/install.mjs --source-dir ./Acode-kit --agent codex
 
@@ -444,18 +464,38 @@ Step 5: Continuous Delivery   → 8-stage loop × TDD × small vertical slices
 
 #### Local Install (Recommended while Private)
 
-Clone the repo first, then install from the local copy using `--source-dir`:
+Clone the repo first, then install from the local copy using `--source-dir`. The clone directory can be deleted after installation.
+
+**User-level install (Recommended)** — install once, use from any directory:
 
 ```bash
-git clone git@github.com:AlexCyln/Acode-kit-Plus.git
+git clone https://github.com/AlexCyln/Acode-kit-Plus.git
 cd Acode-kit-Plus
-
-# Claude user-level
 node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope user
+cd ..
+rm -rf Acode-kit-Plus  # clone directory no longer needed
+```
 
-# Claude project-level
-node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope project
+Then start a project from any empty folder:
 
+```bash
+mkdir my-project && cd my-project
+# Tell your AI agent: "Use Acode-kit to build ..."
+```
+
+**Project-level install** — scoped to a specific project directory:
+
+```bash
+git clone https://github.com/AlexCyln/Acode-kit-Plus.git
+cd Acode-kit-Plus
+node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope project --dest-dir /path/to/my-project/.claude
+cd ..
+rm -rf Acode-kit-Plus
+```
+
+**Other agents:**
+
+```bash
 # Codex
 node scripts/install.mjs --source-dir ./Acode-kit --agent codex
 

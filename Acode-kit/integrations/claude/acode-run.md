@@ -26,7 +26,10 @@ Always use the unified entry `scripts/acode-run.mjs` for task execution.
 ## Routing inputs
 
 Required fields for every route request:
-- `project_id`, `phase`, `task_type`, `difficulty`, `provider`, `prompt`, `context_summary`
+- `project_id`, `phase`, `task_type`, `difficulty`, `provider`, `prompt`
+
+Optional fields:
+- `context_summary`, `logical_session_id`, `native_session_id`
 
 ## Session handling
 

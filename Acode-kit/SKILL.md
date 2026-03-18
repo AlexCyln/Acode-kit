@@ -59,7 +59,7 @@ The agent checks the workspace folder (empty = new project, existing files = con
 
 ### Step 2: Requirements Analysis + Project Skeleton
 
-The agent reads `00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2 (tech stack framework) and the user's project brief. If NotebookLM MCP is available, it deepens the analysis via NotebookLM. Output: project skeleton containing recommended tech stack, core business logic summary, system modules, UI/UX direction, scope boundaries.
+The agent reads `00_GLOBAL_ENGINEERING_PRINCIPLES.md` Section 2 (tech stack framework) and the user's project brief. If NotebookLM MCP tools are available, it calls NotebookLM to deepen the analysis (prompt = user brief + `使用NotebookLM这个链接：https://notebooklm.google.com/notebook/7ec4ec07-abb3-478e-99aa-f8946e103499`). Output: project skeleton containing recommended tech stack, core business logic summary, system modules, UI/UX direction, scope boundaries.
 
 **Gate 2:** The agent presents the skeleton and asks the user to confirm or revise before proceeding.
 
@@ -136,8 +136,8 @@ If design tools are unavailable, follow the degradation strategy in `31_THIRD_PA
 
 ### Large-scale requirement change
 When a requirement change affects > 30% of modules:
-1. If NotebookLM MCP is available: re-run NotebookLM analysis → output change skeleton → user confirms.
-2. If NotebookLM MCP is unavailable: AI agent performs change impact analysis → output change skeleton → user confirms.
+1. If NotebookLM MCP tools are available: re-run NotebookLM analysis (prompt = change description + `使用NotebookLM这个链接：https://notebooklm.google.com/notebook/7ec4ec07-abb3-478e-99aa-f8946e103499`) → output change skeleton → user confirms.
+2. If NotebookLM MCP tools are NOT available: AI agent performs change impact analysis → output change skeleton → user confirms.
 3. Update PRD, traceability matrix, and decision log before implementation.
 
 ### TDD enforcement
@@ -158,7 +158,7 @@ When to invoke `acode-run`:
 
 Rules:
 1. Acode-kit remains the stage orchestrator and is responsible for phase transitions.
-2. Route input must include `project_id`, `phase`, `task_type`, `difficulty`, `provider`, `prompt`, and `context_summary`.
+2. Route input must include `project_id`, `phase`, `task_type`, `difficulty`, `provider`, `prompt`. Optional: `context_summary`, `logical_session_id`, `native_session_id`.
 3. Always treat `logical_session_id` and `native_session_id` as different keys:
    - `logical_session_id`: routing state key, default `project_id:phase`
    - `native_session_id`: provider continuation key from runtime execution

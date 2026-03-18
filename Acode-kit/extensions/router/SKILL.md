@@ -23,7 +23,7 @@ Use this skill when:
 4. `difficulty`
 5. `provider` (`codex` or `claude`)
 6. `prompt`
-7. `context_summary`
+7. optional `context_summary`
 8. optional `logical_session_id`
 9. optional `native_session_id`
 
