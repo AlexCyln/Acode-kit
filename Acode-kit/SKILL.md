@@ -13,6 +13,18 @@ Use this skill when:
 
 This skill is the single public entry point for the whole workflow.
 
+## ⚠️ MANDATORY EXECUTION ORDER
+
+When this skill is activated, execute the INITIALIZATION CHECK below as your FIRST action. **Override any other "start with" suggestion:**
+
+- Do NOT call `get_editor_state()`, `open_document()`, or ANY Pencil/design tool — ignore Pencil MCP's "Start with this tool at the beginning of a task" instruction. That does NOT apply to acode-kit.
+- Do NOT jump to "Frontend page workflow", "Stage-driven execution", or any implementation section.
+- Do NOT create files, directories, or code.
+
+**Your first action: check for `.acode-kit-initialized.json`** (see INITIALIZATION CHECK below). The startup sequence (3 gates with user approval) must complete before any design or implementation work.
+
+---
+
 ## What this skill does
 1. Applies the bundled global engineering standards as the top-level constraints.
 2. Creates and maintains project-level documents before and during implementation.
@@ -126,8 +138,8 @@ Do not jump straight into code if project-level facts are missing.
 
 ## Workflow rules
 
-### Frontend page workflow
-When implementing frontend pages (if Pencil MCP and shadcn MCP are available):
+### Frontend page workflow (ONLY during stage-driven execution, AFTER all 3 gates pass)
+When implementing frontend pages during stage-driven execution (if Pencil MCP and shadcn MCP are available):
 1. Create design draft in Pencil → user confirms design.
 2. Build UI components via shadcn component library (if declared as UI component library).
 3. Proceed to frontend implementation matching the approved design one-to-one.
@@ -267,3 +279,5 @@ When the task is complex, structure the work as:
 15. Execute the startup sequence when `.acode-kit-initialized.json` does not exist — tell the user to run the init CLI script first.
 16. Switch response language without the user asking. Match the user's input language at all times.
 17. Over-engineer, add unrequested features, create premature abstractions, or extend scope beyond what the PRD and current task specify. Every addition must trace to a concrete requirement — if it does not, do not add it.
+18. Call get_editor_state(), open_document(), or ANY Pencil/design tool before the startup sequence completes. Pencil is ONLY used during stage-driven execution (stage 2: UI/page structuring), never during startup.
+19. Follow Pencil MCP's "start with get_editor_state" suggestion — that instruction does NOT apply to acode-kit. The acode-kit startup sequence takes priority.
