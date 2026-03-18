@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 
-const DEFAULT_REPO = "AlexCyln/Acode-kit";
+const DEFAULT_REPO = "AlexCyln/Acode-kit-Plus";
 const DEFAULT_SKILL_PATH = "Acode-kit";
 const DEFAULT_LOCAL_ROOT = path.join(process.cwd(), "agent-skills");
 

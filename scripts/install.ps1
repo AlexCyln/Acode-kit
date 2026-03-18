@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 $ErrorActionPreference = "Stop"
 
-$REPO = if ($env:REPO) { $env:REPO } else { "AlexCyln/Acode-kit" }
+$REPO = if ($env:REPO) { $env:REPO } else { "AlexCyln/Acode-kit-Plus" }
 $REF = if ($env:REF) { $env:REF } else { "main" }
 $SKILL_PATH = if ($env:SKILL_PATH) { $env:SKILL_PATH } else { "Acode-kit" }
 $AGENT = if ($env:AGENT) { $env:AGENT } else { "auto" }

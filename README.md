@@ -117,7 +117,7 @@ Step 5: 持续实施     → 8 阶段闭环 × TDD × 小垂直切片
 #### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | bash
 ```
 
 自动检测已安装的 Agent，未检测到时安装为本地便携包。
@@ -126,16 +126,16 @@ curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/ins
 
 ```bash
 # Codex
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=codex bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | AGENT=codex bash
 
 # Claude 用户级
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=user bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | AGENT=claude SCOPE=user bash
 
 # Claude 项目级
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=project bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | AGENT=claude SCOPE=project bash
 
 # 本地便携包
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=local bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | AGENT=local bash
 ```
 
 > 注意：环境变量必须写在 `bash` 一侧，而非 `curl` 前面。
@@ -143,26 +143,26 @@ curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/ins
 #### Windows PowerShell
 
 ```powershell
-irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
 ```
 
 ```powershell
 $env:AGENT = "codex"
-irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
 ```
 
 #### Node 安装器
 
 ```bash
 node ./scripts/install.mjs --source-dir "$(pwd)/Acode-kit" --agent local --dest-dir /tmp/agent-skills
-node ./scripts/install.mjs --repo AlexCyln/Acode-kit --agent claude --scope user
+node ./scripts/install.mjs --repo AlexCyln/Acode-kit-Plus --agent claude --scope user
 ```
 
 #### Codex 内置安装器
 
 ```bash
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
-  --repo AlexCyln/Acode-kit \
+  --repo AlexCyln/Acode-kit-Plus \
   --path Acode-kit
 ```
 
@@ -422,7 +422,7 @@ Step 5: Continuous Delivery   → 8-stage loop × TDD × small vertical slices
 #### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | bash
 ```
 
 Auto-detects installed agents. Falls back to local portable install if none found.
@@ -431,13 +431,13 @@ Specify target:
 
 ```bash
 # Codex only
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=codex bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | AGENT=codex bash
 
 # Claude user-level
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=user bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | AGENT=claude SCOPE=user bash
 
 # Claude project-level
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | AGENT=claude SCOPE=project bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | AGENT=claude SCOPE=project bash
 ```
 
 > Note: Environment variables must be passed to `bash`, not before `curl`.
@@ -445,20 +445,20 @@ curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/ins
 #### Windows PowerShell
 
 ```powershell
-irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
 ```
 
 #### Node installer
 
 ```bash
-node ./scripts/install.mjs --repo AlexCyln/Acode-kit --agent claude --scope user
+node ./scripts/install.mjs --repo AlexCyln/Acode-kit-Plus --agent claude --scope user
 ```
 
 #### Codex built-in installer
 
 ```bash
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
-  --repo AlexCyln/Acode-kit --path Acode-kit
+  --repo AlexCyln/Acode-kit-Plus --path Acode-kit
 ```
 
 ### Support Matrix

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="${REPO:-AlexCyln/Acode-kit}"
+REPO="${REPO:-AlexCyln/Acode-kit-Plus}"
 REF="${REF:-main}"
 SKILL_PATH="${SKILL_PATH:-Acode-kit}"
 AGENT="${AGENT:-auto}"
