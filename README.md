@@ -1,6 +1,7 @@
 # Acode-kit
 
-**Tech-stack-agnostic, TDD-driven project delivery framework for AI coding agents.**
+> 🚀 A structured project-delivery framework for AI coding agents  
+> 以规范化、可追踪、工程化的方式，让 AI 更稳定地参与真实项目交付
 
 中文 | [English](#english)
 
@@ -8,762 +9,658 @@
 
 ## 中文
 
-### 项目简介
+### ✨ Acode-kit 是什么
 
-`Acode-kit` 是一个面向 AI 编码代理（Codex、Claude Code）的**技术栈无关**项目交付框架。它不是一个提示词模板，而是一套完整的工程方法论 + 工作流引擎 + 工具链集成：
+`Acode-kit` 不是“再多一套 prompt”，也不是“自动生成一切”的魔法工具。  
+它是一个面向 AI 编码代理的 **项目交付框架**，核心目标是把：
 
-- **技术栈无关**：不绑定任何固定框架。iOS、Android、小程序、Web、桌面——项目初始化时声明技术栈，框架自动适配。
-- **TDD 驱动**：红-绿-重构循环作为宪法级开发方法论，贯穿每个实现切片。
-- **MCP 工具集成**：自动扫描和管理 Pencil（设计稿）、NotebookLM（需求分析）、shadcn（UI 组件）、Chrome DevTools（调试）四大工具。
-- **智能模型路由**：按任务阶段、类型、难度自动选择最优模型版本，内置降级策略与 token 预算控制。
-- **结构化交付**：4 门控启动 + 7 阶段执行（含按模块 MVP 迭代），双层进度追踪，文档驱动、可追踪、可交接。
+- 需求梳理
+- PRD 与项目骨架
+- 架构与设计
+- 模块迭代
+- 测试与 review
+- 部署与上线
 
-### 核心创新
+串成一条 **有门禁、有规范、有文档状态、有回归验证** 的可控 workflow。
 
-#### 1. 技术栈决策框架
+它帮助个人或团队把 AI 从“零散帮写代码”提升到“参与真实产品交付”，但仍然坚持：  
+**需求判断、工程思维、架构设计能力、prompt 质量，始终比工具本身更重要。**
 
-告别硬编码技术栈。Acode-kit 定义了一个分类决策框架：
+---
 
-| 分类 | 说明 | 示例 |
-|------|------|------|
-| 项目类型 | Web / 移动 / 小程序 / 桌面 | iOS App、SaaS Web |
-| 前端框架 | 按项目类型选择 | React、Vue、SwiftUI、Flutter |
-| UI 组件库 | 按前端框架生态选择 | shadcn/ui、Element Plus、Ant Design |
-| 后端运行时 | 按团队能力和业务需求选择 | Node.js、Spring Boot、Go |
-| ORM/数据访问 | 按后端运行时选择 | Prisma、MyBatis、GORM |
-| 数据库 | 按数据模型选择 | PostgreSQL、MySQL、MongoDB |
-| 缓存 | 按性能需求选择（可选） | Redis、Memcached |
-| 认证方案 | 按安全需求选择 | JWT、OAuth 2.0、Session |
-| 部署平台 | 按运维能力选择 | Docker、Vercel、AWS |
-| 设计工具 | 按团队偏好选择 | Pencil、Figma |
+### 🌟 为什么它重要
 
-每个项目通过 `PROJECT_OVERRIDES.md` 声明技术栈，全部 31 份工程规范自动适配。
+#### 1. 让不会编程的人也能真正使用 AI 做产品
 
-#### 2. TDD 宪法条款
+过去很多 AI coding 工具，本质上仍然默认使用者会编程、会调试、会搭架构。  
+Acode-kit 想解决的是另一类更大的真实问题：
 
-每个垂直切片必须遵循：
+- 很懂业务的人，往往不会写代码
+- 会写代码的人，未必真正理解业务
+- 产品想法与真正落地之间，总是隔着一层“实现门槛”
 
-```
-红（Red）    → 写一个描述预期行为的失败测试
-绿（Green）  → 写最小量实现使测试通过
-重构（Refactor） → 在测试保护下优化代码结构
-```
+Acode-kit 的目标，就是让**业务第一人**更有机会直接推动产品落地。
 
-TDD 不是建议，是门禁——不写失败测试就不允许写生产代码。
+#### 2. 让“懂业务的人”第一次真正拥有软件构建能力
 
-#### 3. MCP 工具自动化
+你不一定需要先成为资深工程师，才有资格构建产品。  
+如果你已经具备这些能力：
 
-项目启动时自动扫描并管理四大 MCP 工具：
+- 基本的需求判断
+- 基本的工程思维
+- 基本的架构设计意识
+- 持续学习能力
+- 合格的 prompt 质量
 
-| 工具 | 用途 | 缺位降级 |
-|------|------|----------|
-| **Pencil MCP** | UI/UX 设计稿 | AI 生成文字布局描述 |
-| **NotebookLM MCP** | 需求分析与项目骨架 | AI 直接分析 |
-| **shadcn MCP** | UI 组件库集成 | 手动组件搭建 |
-| **Chrome DevTools MCP** | 前端调试 | 传统日志调试 |
+再借助 Acode-kit，你就有机会打造出一款真正意义上的软件产品，而不是停留在 demo、原型或一次性脚本。
 
-工具状态三态管理：`installed` → `missing` → `degraded`，每个工具都有完整的降级方案。
+#### 3. 它强调的是“规范化放大”，不是“无脑代替”
 
-#### 4. 智能模型路由
+Acode-kit 不是在告诉你“AI 会替你想清楚一切”。  
+它强调的是：
 
-```
-用户下达任务
-    ↓
-关键词分类 → 阶段(需求/设计/实现/测试/上线) + 难度(low/medium/high)
-    ↓
-模型映射 → 按 provider(Codex/Claude) + 难度 选择模型版本
-    ↓
-预算检查 → 阶段 token 硬上限 + 任务软上限
-    ↓
-执行 → 成功返回 | 触发降级(error → timeout → quality_low → budget_exceeded)
-    ↓
-输出 → selectedModel / finalModel / fallbackTriggered / token usage
-```
+- 用严谨框架约束 agent 发散
+- 用规范化 workflow 提高稳定性
+- 用工程方法把创意变成可交付物
 
-单入口 `acode-run`，用户无感完成模型选择、降级、会话承接。
+这意味着它既有足够的约束力，又保留了足够的泛化性，支持你的业务创意继续延伸。
 
-#### 5. 四门控启动 + 模块驱动执行
+---
 
-```
-初始化（CLI）   → acode-kit init → MCP 工具扫描/安装 + NotebookLM 认证 → 写入状态文件
+### 🧭 核心思路与方法论
 
-Gate 1: 环境报告   → 读取状态文件 + 工作区检查 → 输出报告 → ⛔ 等待用户确认
-Gate 2: 需求分析   → NotebookLM 深化分析 → 输出项目骨架 → ⛔ 等待用户确认
-Gate 3: PRD 审批   → 技术栈固化 + PRD + 进度计划 + 需求矩阵 → ⛔ 等待用户确认
-Gate 4: 项目搭建   → 目录结构 + 项目文档 + 依赖安装 + 环境配置 → ⛔ 等待用户确认
+Acode-kit 的基本思想很简单：
 
-架构阶段（执行一次）
-  Stage 1: 需求结构化 + 模块拆分（输出模块优先级 + 依赖关系）
-  Stage 2: 整体 UI 架构（页面清单、导航、布局框架）
-  Stage 3: 整体数据模型 + API 框架（ER 图级别）
-  Stage 4: 项目脚手架搭建
+1. 先把项目事实讲清楚，再进入实现
+2. 先把规则分层管理，再让 AI 按需读取
+3. 先冻结边界和文档状态，再让模块迭代展开
+4. 让 AI 帮你标准化、结构化、提效，而不是替你思考业务本身
 
-模块迭代（按优先级逐模块执行）
-  Stage 5: 对每个模块 →
-    5a 模块需求细化 → 用户确认
-    5b 模块 UI 设计（Pencil）→ 用户确认
-    5c 模块数据/API 详设 → 用户确认
-    5d 模块 TDD 实现（含跨模块回归测试）
-    5e 模块测试 + review → 用户确认
-    → 更新进度追踪 → 下一个模块
+同时它明确采用：
 
-集成与部署（执行一次）
-  Stage 6: 集成测试 + 跨模块 review
-  Stage 7: 部署上线
-```
+1. **TDD 驱动思想**：先验证行为，再实现，再重构
+2. **Spec coding 思想**：先规范和边界，再进入生成与实现
+3. **工程化交付思想**：需求、设计、数据、测试、发布一体化推进
+4. **前沿但克制的 AI 协作思想**：让 agent 发挥能力，但不允许脱离约束自由漂移
 
-每个 Gate 要求用户明确确认后才能继续，不允许 AI 自行跳过。Pencil 设计工具仅在 Stage 2（整体 UI 架构）和 Step 5b（模块 UI 详设）允许使用。
+它的价值不在“写更多代码”，而在：
 
-#### 6. 双层进度追踪 + AI 会话定位
+- 减少上下文污染
+- 降低 workflow 漂移
+- 提高需求到交付的一致性
+- 让使用者更专注于真实业务问题
 
-**TRACEABILITY_MATRIX 双层结构：**
+---
 
-```
-上层 — 模块总览（看整体进度）
-| 模块编号 | 模块名称 | 优先级 | 依赖模块 | 状态         |
-|---------|---------|--------|---------|-------------|
-| MOD-001 | 用户认证 | P0     | —       | 完成         |
-| MOD-002 | 任务管理 | P0     | MOD-001 | 实现中(5d)   |
-| MOD-003 | 仪表盘   | P1     | MOD-001 | 未开始       |
+### 🏗️ 核心架构
 
-下层 — 当前模块明细（看 TDD 切片进度）
-| Slice    | 需求描述      | 实现状态     |
-|----------|-------------|-------------|
-| MOD-002-S01 | 任务 CRUD  | 绿(passing) |
-| MOD-002-S02 | 任务筛选    | 红(failing) |
-| MOD-002-S03 | 任务排序    | 未开始       |
+当前 Acode-kit 采用“轻核入口 + 分层装载 + 内部路由”的结构。
+
+| 层级 | 作用 | 代表内容 |
+|---|---|---|
+| 核心入口层 | 总调度、门禁、阶段推进 | `Acode-kit/SKILL.md` |
+| 共享工作流内核 | 提供 provider 无关的核心 workflow 合同 | `Acode-kit/integrations/shared/WORKFLOW_CORE.md` |
+| Provider 适配层 | 适配 Codex / Claude 的运行语义 | `Acode-kit/integrations/codex/*.md`、`Acode-kit/integrations/claude/*.md` |
+| 工作流层 | Gate / Stage / Step 的执行规则 | `Acode-kit/workflows/*.md` |
+| 装载与委派层 | 决定何时读什么、何时委派子代理 | `references/load-rules/*.md` |
+| 规范内容层 | 提供真正的工程约束 | `global / scenario / stack standards` |
+| 项目激活层 | 声明当前项目真正生效的规则组合 | `PROJECT_OVERRIDES.md`、`ACTIVE_STANDARDS.md` |
+| 内部路由层 | 给具体子任务选择模型与 fallback | `acode-run`、router config |
+
+这种架构的重点不是“拆文件”，而是：
+
+- 对内：降低上下文负载
+- 对外：提高交付一致性
+
+---
+
+### 🔁 Workflow 逻辑
+
+Acode-kit 的 workflow 分两段：
+
+#### 1. 启动门禁段
+
+```text
+Step 1 Workspace Status
+→ Gate 1
+→ Step 2 Requirements Analysis + Project Skeleton
+→ Gate 2
+→ Step 3 PRD + Progress Plan
+→ Gate 3
+→ Gate 3.5 LMS Tier Confirmation
+→ Step 4 Project Environment Setup
+→ Gate 4
 ```
 
-**SESSION_HANDOFF 定位光标：**
+#### 2. 阶段执行段
 
-AI 恢复会话时第一眼就知道自己在哪：
-
-```markdown
-## 📍 Current Position
-- Phase: 模块迭代(Stage 5)
-- Module: 任务管理
-- Step: 5d
-- Slice: 2/5
-- Next Action: 实现任务筛选 API
+```text
+Stage 1 Requirements Structuring + Module Decomposition
+→ Stage 2 Overall UI Architecture
+→ Stage 3 Overall Data Model + API Framework
+→ Stage 4 Project Scaffold Initialization
+→ Stage 5 Module Iteration (5a → 5b → 5c → 5d → 5e)
+→ Stage 6 Integration Testing + Cross-module Review
+→ Stage 7 Deployment and Go-live
 ```
 
-### 工作流规则
+这个 workflow 的重点不是“步骤多”，而是：
 
-**前端页面**（模块迭代 Step 5b + 5d）：
-1. Step 5b: Pencil 设计当前模块页面 → 用户确认 → shadcn 组件构建
-2. Step 5d: 按设计稿 1:1 还原实现
+1. 在实现前把需求、边界、规模、环境先冻结
+2. 在实现中按模块稳定推进，而不是一次性全量生成
+3. 在发布前强制经过测试、review、集成和上线治理
 
-**大规模需求变更**（影响 > 30% 模块）：
-1. 重走 NotebookLM 分析 → 输出变更骨架 → 用户确认
-2. 更新 PRD、需求矩阵、决策日志后再实施
+---
 
-### 支持矩阵
+### 🧩 核心功能
 
-| 目标 | 安装结果 |
-|------|----------|
-| Codex | `~/.codex/skills/Acode-kit` |
-| Claude Code（用户级） | `~/.claude/Acode-kit` + `~/.claude/agents/acode-kit.md` + `acode-run.md` |
-| Claude Code（项目级） | `./.claude/Acode-kit` + `./.claude/agents/acode-kit.md` + `acode-run.md` |
-| 本地便携包 | `./agent-skills/Acode-kit` + Claude 适配文件 |
+| 功能 | 说明 |
+|---|---|
+| Gate-driven workflow | 把需求、PRD、项目环境、阶段推进都纳入门禁控制 |
+| Progressive loading | 不再一开始读完整个体系，而是按节点逐级加载 |
+| Scenario standards | 用场景包体现系统类型差异 |
+| Stack standards | 用技术栈包体现实现方式差异 |
+| Extension modules | 支持按规范接入外部 markdown / skill 能力包，并提供接入前安全扫描与项目级卸载 |
+| Active standards | 用项目激活层明确当前项目真正生效的约束 |
+| Router & fallback | 用内部路由层为不同任务选择模型和 fallback 策略 |
+| Regression validation | 用仓库级回归验证 workflow、router、entry、init 的稳定性 |
 
-### 快速安装
+---
 
-> **当前仓库为 Private**：`curl | bash` 远程安装方式暂不可用。请使用下方「本地安装」方式。仓库公开后远程安装命令将自动生效。
+### 🚀 与常见 vibe coding / spec coding 方式相比的差异
 
-#### 本地安装（Private 阶段推荐）
+下面的对比是**方法论、交付模型与治理方式**层面的对比，不针对任何单一产品做绝对优劣判断，也不声称“所有同类工具都如此”。
 
-先克隆仓库，然后用 `--source-dir` 从本地安装。安装完成后 clone 目录可删除。
+更准确地说，这里对比的是一类常见使用方式：
 
-**用户级安装（推荐）** — 装一次，任意目录可用：
+1. 以快速生成和即时对话为主的 vibe coding 工作流
+2. 以规格驱动为主、但项目状态与阶段治理较弱的 spec coding 工作流
 
-```bash
-git clone https://github.com/AlexCyln/Acode-kit-Plus.git
-cd Acode-kit-Plus
-node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope user
-cd ..
-rm -rf Acode-kit-Plus  # clone 目录已无用，可删除
-```
+| 对比项 | 常见 vibe coding / spec coding 工具 | Acode-kit |
+|---|---|---|
+| 目标重心 | 更偏向快速探索、快速生成、快速试错 | 更偏向把探索收敛为可持续交付流程 |
+| 需求入口 | 往往可以直接进入生成 | 强调先骨架、PRD、门禁，再推进实现 |
+| Agent 行为控制 | 更依赖即时对话和使用者临场控制 | 用 workflow、load-rules 和标准体系约束行为边界 |
+| 规范承载方式 | 常集中在 prompt、对话约定或少量规则文件 | 采用母规范、场景包、技术栈包、激活层的分层结构 |
+| 工程方法 | 有些工作流强调结果优先，工程治理依赖使用者补足 | 明确强调 TDD、spec-first、review、回归和 go-live 治理 |
+| 项目状态管理 | 常依赖会话上下文、临时文件或人工记忆 | 强调文档即状态，持续回写和冻结版本 |
+| 适合产出 | 更适合快速原型、局部功能或早期探索 | 更适合逐步逼近真实软件产品交付 |
+| 稳定性验证 | 回归与验证链往往需要使用者自行补足 | 内置 init、router、workflow、phase9 回归链路 |
 
-安装后在任意空文件夹启动项目即可：
+---
 
-```bash
-mkdir my-project && cd my-project
-# 告诉 AI agent: "Use Acode-kit to build ..."
-```
+### 🎯 面向的场景
 
-**项目级安装** — 仅在指定项目目录生效，**自动执行初始化**（MCP 扫描 + 安装 + NotebookLM 配置 + 写入状态文件）：
+Acode-kit 适合这些场景：
 
-```bash
-git clone https://github.com/AlexCyln/Acode-kit-Plus.git
-cd Acode-kit-Plus
-node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope project --dest-dir /path/to/my-project/.claude
-cd ..
-rm -rf Acode-kit-Plus
-```
+- 希望让 AI 参与真实项目交付，而不是只写几个文件
+- 业务负责人、产品负责人、创业者希望更直接地推动产品落地
+- 需要规范化 spec coding、PRD、traceability、review、go-live 流程
+- 需要同时兼顾业务推进和工程治理
+- 需要把不同项目类型、不同技术栈纳入统一框架
+- 单人 + AI 或小团队 + AI 的工程化协作
 
-> 项目级安装完成后，init 已自动执行，无需再手动运行。如需跳过自动初始化，加 `--skip-init`。
+典型项目类型包括：
 
-**其他 Agent：**
+- B/S 后台管理系统
+- SaaS 平台类项目
+- API 平台
+- 商业 Web 应用
+- 多端融合项目
+- 需要明确文档、测试、上线治理的中小型真实项目
 
-```bash
-# Codex
-node scripts/install.mjs --source-dir ./Acode-kit --agent codex
+---
 
-# 本地便携包
-node scripts/install.mjs --source-dir ./Acode-kit --agent local
-```
+### 📦 安装方式
 
-#### 远程安装（仓库公开后可用）
+#### GitHub + curl 一键安装
 
-##### macOS / Linux
+适合直接从 GitHub 下载并自动安装。
+
+macOS / Linux:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | bash
 ```
 
-自动检测已安装的 Agent，未检测到时安装为本地便携包。
-
-指定目标：
-
-```bash
-# Codex
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | AGENT=codex bash
-
-# Claude 用户级
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | AGENT=claude SCOPE=user bash
-
-# Claude 项目级
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | AGENT=claude SCOPE=project bash
-
-# 本地便携包
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | AGENT=local bash
-```
-
-> 注意：环境变量必须写在 `bash` 一侧，而非 `curl` 前面。
-
-##### Windows PowerShell
+Windows PowerShell:
 
 ```powershell
 irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
 ```
 
+指定 agent / scope 示例：
+
+macOS / Linux:
+
+```bash
+AGENT=codex SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | bash
+```
+
+Windows PowerShell:
+
 ```powershell
-$env:AGENT = "codex"
-irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
+$env:AGENT="claude"; $env:SCOPE="user"; irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
 ```
 
-##### Codex 内置安装器
+#### npm 直接安装
 
 ```bash
-python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
-  --repo AlexCyln/Acode-kit-Plus \
-  --path Acode-kit
+npm install -g github:AlexCyln/Acode-kit-Plus
+acode-kit bootstrap
 ```
 
-### 安装模式
-
-| 参数 | 说明 |
-|------|------|
-| `--agent auto` | 自动检测，同时安装到已有 Agent |
-| `--agent codex` | 仅 Codex |
-| `--agent claude` | 仅 Claude |
-| `--agent local` | 本地便携包 |
-| `--agent both` | Codex + Claude |
-| `--scope user\|project` | Claude 用户级 / 项目级（项目级自动执行 init） |
-| `--dest-dir PATH` | 自定义目标目录 |
-| `--yes` | 跳过确认提示（安装和 init 均适用） |
-| `--skip-init` | 项目级安装时跳过自动初始化 |
-
-### 初始化
-
-初始化负责扫描 MCP 工具、安装缺失工具、配置 NotebookLM 认证，最终写入 `.acode-kit-initialized.json` 状态文件。**未初始化时 AI 会提示先运行 init，无法进入工作流。**
-
-#### 哪种安装需要手动初始化？
-
-| 安装方式 | 是否需要手动 init |
-|----------|------------------|
-| `--scope project`（项目级） | **不需要** — 安装时已自动执行 |
-| `--scope user`（用户级） | **需要** — 每个新项目目录首次使用前运行一次 |
-| 远程安装 (`curl \| bash`) | **需要** — 同用户级 |
-
-#### 手动初始化命令
+#### 本地仓库一键 bootstrap
 
 ```bash
-# Claude 用户级安装后，在项目目录运行
-node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs
-
-# Codex
-node ~/.codex/skills/Acode-kit/scripts/acode-kit-init.mjs
-
-# 指定参数
-node <安装路径>/scripts/acode-kit-init.mjs --provider claude --yes
+node scripts/acode-kit.mjs bootstrap
+# or
+npm run bootstrap
 ```
 
-#### 初始化流程（6 步，CLI 自动执行，无需 AI 参与）
+#### 终端快捷命令
 
-1. 检查项目文件夹状态（空 / 已有项目）
-2. 扫描 4 个 MCP 工具的安装状态
-3. 询问是否安装缺失工具（可跳过，加 `--yes` 自动安装）
-4. 验证安装结果
-5. 配置 NotebookLM 认证（提示用户在 AI Agent 中完成浏览器认证）
-6. 写入 `.acode-kit-initialized.json` 状态文件
+```bash
+acode-kit -status
+acode-kit -add <path>
+acode-kit -scan <path>
+acode-kit -remove <name>
+acode-kit -help
+```
 
-| 参数 | 说明 |
-|------|------|
-| `--cwd PATH` | 指定工作目录（默认当前目录） |
-| `--provider codex\|claude` | 指定 provider（默认自动检测） |
-| `--yes` | 跳过确认提示，自动安装缺失工具 |
-| `--force` | 强制重新初始化（覆盖已有状态文件） |
+说明：
 
-### 使用方法
+1. `-status`：查看当前 Acode-kit 状态，包括当前 agent 基础、当前工作区扫描到的已初始化项目、当前项目已启用扩展、四个 MCP 工具状态
+2. `-add <path>`：识别指定文件或目录是否为合法第三方扩展；自动执行准入扫描；全部通过后自动安装到 `Acode-kit/extensions/packs/`
+3. `-scan <path>`：对指定文件或目录执行扩展准入扫描
+4. `-remove <name>`：移除指定名字的已安装第三方扩展包
+5. `-help`：查看 CLI 帮助
 
-#### 在 AI Agent 中使用（推荐）
+#### 用户级安装
 
-安装并初始化后，在项目目录打开 AI Agent，直接告诉它：
+适合“一次安装，多项目复用”：
+
+```bash
+node scripts/install.mjs --source-dir ./Acode-kit --agent codex --scope user
+```
+
+#### 项目级安装
+
+适合把工作流和项目骨架直接装进指定项目目录：
+
+```bash
+node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope project --dest-dir /path/to/my-project/.claude
+```
+
+#### 初始化
+
+初始化会：
+
+1. 扫描 MCP 工具
+2. 同步 NotebookLM 认证状态
+3. 写入 `.acode-kit-initialized.json`
+4. 同步用户级全局状态缓存
+
+NotebookLM 认证触发口令固定为：
 
 ```text
-使用 Acode-kit，帮我从 0 开始规划并启动一个移动端 App 项目。
+Log me in to NotebookLM
 ```
 
-```text
-Use Acode-kit to continue the current project, review PRD and traceability matrix first.
-```
+#### 自定义扩展模块
 
-AI 会自动执行四门控启动流程：
-1. **Gate 1**：读取 `.acode-kit-initialized.json`，输出工作区状态报告 → 等你确认
-2. **Gate 2**：调用 NotebookLM 深化需求分析，输出项目骨架 → 等你确认
-3. **Gate 3**：生成 PRD + 进度计划 + 需求矩阵 → 等你确认
-4. **Gate 4**：创建项目目录结构 + 安装依赖 + 填充 9 份项目文档（含 PROJECT_SKELETON） → 等你确认
-5. 全部门控通过后，进入架构阶段（Stage 1-4）建立整体框架
-6. 然后进入模块迭代（Stage 5），按优先级逐模块执行：需求细化 → UI 设计 → 数据/API → TDD 实现 → 测试
-7. 最后集成测试（Stage 6）+ 部署上线（Stage 7）
+Acode-kit 支持以受控方式接入自定义扩展模块，用于增强特定领域知识、专项 review 或局部 workflow 能力。
 
-#### 模型路由 CLI（高级 / 调试用）
+支持两类扩展：
 
-`acode-run` 是内部模型路由层，由 AI 工作流自动调用。也可手动测试路由：
+- `markdown` 扩展：提供额外规范、领域知识、专项检查清单
+- `skill` 扩展：提供可委派的局部能力，但不能接管主 workflow
+
+编写与声明要求：
+
+1. 按 `Acode-kit/extensions/registry/EXTENSION_MANIFEST_SPEC.md` 编写 manifest
+2. 为扩展声明 `id`、`type`、`entry`、`description`、`load_at`、`priority`、`mode`
+3. `mode` 仅允许 `reference-only`、`workflow-helper`、`delegated-capability`
+4. 扩展只能增强节点，不能修改 Gate 数量、Stage 顺序或审批边界
+
+导入与使用方式：
+
+1. 将扩展文件放入 `Acode-kit/extensions/packs/<your-pack>/`
+2. 在 `Acode-kit/extensions/registry/EXTENSIONS_INDEX.md` 中登记
+3. 启用前先执行安全扫描
+4. 在项目级 `PROJECT_EXTENSIONS.md` 或 `ACTIVE_STANDARDS.md` 中显式激活
+5. 主 skill 仅在命中 `load_at` 节点时按 `EXTENSION_LOADING_RULES.md` 受控读取或委派
+
+这意味着：
+
+- 注册不等于激活
+- 激活不等于全程加载
+- 主 `Acode-kit` 仍然是唯一 orchestrator
+
+安全与卸载要求：
+
+1. 自定义扩展在首次启用前必须先做安全扫描
+2. 推荐执行：`acode-kit extension-scan --manifest <manifest-path>`
+3. 扫描不仅检查恶意注入和数据风险，也检查是否试图破坏主 workflow 或接管主架构
+4. 只要发现扩展自带主流程、试图重定义 Gate / Stage 或替代主 orchestrator，就不能放行
+5. 只有安全状态和 workflow 兼容状态都为 `pass` 的扩展才应标记为 `已启用`
+6. 已启用扩展应优先通过项目级停用来卸载，而不是直接删除包文件
+7. 推荐执行：`acode-kit extension-uninstall --id <extension-id> --project-extensions <path> --active-standards <path>`
+
+推荐顺序：
+
+1. 编写扩展包与 manifest
+2. 执行 `acode-kit -scan <path>` 或 `acode-kit extension-scan --manifest <manifest-path>`
+3. 扫描通过后再写入 `PROJECT_EXTENSIONS.md` / `ACTIVE_STANDARDS.md`
+4. 若需要自动导入扩展包，可直接执行 `acode-kit -add <path>`
+5. 如需停用或移除，执行 `acode-kit extension-uninstall ...` 或 `acode-kit -remove <name>`
+
+---
+
+### ▶️ 使用方式
+
+1. 先完成安装与初始化
+2. 在项目目录启动 AI Agent，并明确要求使用 `Acode-kit`
+3. 按 Gate 顺序推进，不跳步
+4. 进入 Stage 1-7 后，按阶段和模块迭代执行
+5. 当节点命中对应工具时，按 workflow 使用 NotebookLM、Pencil、shadcn 或 Chrome DevTools
+6. 若项目接入自定义扩展，先做安全扫描，再显式激活
+7. 把更多注意力放在需求判断、业务建模、边界定义和 prompt 质量上，而不是期待工具替你做所有决定
+
+---
+
+### ⚠️ 注意事项
+
+#### 1. 它是辅助工具，不是替代品
+
+Acode-kit 能做的是：
+
+- 规范化
+- 结构化
+- 标准化
+- 提效
+- 降低 AI 漂移
+
+它不能替代：
+
+- 你对业务的理解
+- 你对需求边界的判断
+- 你的工程化思维
+- 你的架构设计能力
+- 你的 prompt 设计能力
+
+#### 2. 使用者能力仍然是上限
+
+如果需求本身混乱、架构思路模糊、prompt 含糊，工具不会神奇地把项目变好。  
+相反，Acode-kit 的价值更体现在：
+
+- 帮你把已有思考沉淀成稳定流程
+- 帮你把项目约束显式化
+- 帮你把 AI 输出拉回到工程轨道
+
+#### 3. 不要把它当成“自动生成器”
+
+它更适合被理解为：
+
+> 一个让 AI 更像“受控项目成员”而不是“随机代码生成器”的框架
+
+---
+
+### ✅ 当前状态
+
+当前仓库已经完成本轮主线重构，并完成仓库级 `Phase 9` 回归。
+
+建议阅读：
+当前 README 已足以对外理解产品定位、方法论和使用方式；仓库内另有更详细的工程文档可供深入查看。
+
+回归命令：
 
 ```bash
-node ./scripts/acode-run.mjs \
-  --project-id my-project \
-  --prompt "从零开始构建一个 SaaS 订单管理系统" \
-  --provider codex
-
-# 验证路由（不执行模型调用）
-node ./scripts/acode-run.mjs \
-  --project-id my-project \
-  --prompt "扫描工具并安装缺失的 MCP 工具" \
-  --dry-run true
+npm run test:phase9
 ```
 
-### 项目结构
+---
 
-```text
-.
-├── Acode-kit/
-│   ├── SKILL.md                          # 核心工作流定义
-│   ├── extensions/
-│   │   └── router/                       # 模型路由引擎
-│   │       ├── config/
-│   │       │   ├── model-map.json        # 阶段→模型映射
-│   │       │   ├── task-classifier.json   # 关键词分类规则
-│   │       │   └── policy.json           # token 预算与降级策略
-│   │       ├── SKILL.md
-│   │       └── README.md
-│   ├── integrations/
-│   │   └── claude/                       # Claude 子代理适配
-│   │       ├── acode-kit.md
-│   │       ├── acode-run.md
-│   │       └── (init handled by CLI script, no adapter needed)
-│   ├── assets/
-│   │   └── project-doc-templates/        # 9 份项目文档模板（含 PROJECT_SKELETON）
-│   └── references/
-│       └── global-engineering-standards/  # 31 份全局工程规范
-├── scripts/
-│   ├── acode-kit.mjs                     # 统一 CLI 分发器 (acode-kit init/scan/run)
-│   ├── acode-kit-init.mjs                # 初始化命令
-│   ├── acode-run.mjs                     # 模型路由入口
-│   ├── router-exec.mjs                   # 路由执行引擎
-│   ├── agent-execute.mjs                 # Provider 适配层
-│   ├── mcp-tool-scan.mjs                 # MCP 工具扫描与安装
-│   ├── install.sh / install.mjs / install.ps1  # 三平台安装器
-│   └── test-*.mjs                        # 测试脚本
-├── package.json
-├── README.md
-└── LICENSE
-```
-
-### 工程规范体系
-
-31 份全局规范覆盖完整开发生命周期：
-
-| 编号 | 领域 | 说明 |
-|------|------|------|
-| 00 | 工程宪法 | 技术栈决策框架 + TDD 宪法条款 |
-| 01 | 需求 | PRD 结构、需求分级、验收口径 |
-| 02 | 设计 | 信息架构、设计交付、页面还原 |
-| 03-07 | 架构 | 前端、后端、API、数据库、缓存（全部技术栈无关） |
-| 08-12 | 协作 | 代码风格、Git 工作流、Review、测试、排障 |
-| 13-14 | 交付 | 部署、CI/CD |
-| 15-18 | 运维 | AI 协作、安全、可观测性、环境配置 |
-| 19-30 | 复用 | 多项目目录、数据建模、Prompt 指南、单人项目运行等 |
-| 31 | 工具 | 第三方 MCP 工具注册、安装、追踪与降级 |
-
-### 测试
+### 🧪 测试
 
 ```bash
-npm run test:router    # 路由映射与降级测试
-npm run test:entry     # 统一入口分类与路由测试
-npm run test:mcp       # MCP 工具扫描测试
-npm run test:init      # 初始化命令测试
+npm run test:router
+npm run test:entry
+npm run test:mcp
+npm run test:init
+npm run test:extensions
+npm run test:workflow
+npm run test:phase9
 ```
-
-### 分发说明
-
-- 安装脚本会同步拷贝 `Acode-kit/` + `scripts/` 到目标目录
-- `package.json` 的 `files` 字段保证 GitHub Release / npm 包含所有必要文件
-- 重新运行安装命令即可升级到最新版本
 
 ---
 
 ## English
 
-### Overview
+### ✨ What Acode-kit is
 
-`Acode-kit` is a **tech-stack-agnostic, TDD-driven** project delivery framework for AI coding agents (Codex, Claude Code). It is not a prompt template — it is a complete engineering methodology + workflow engine + toolchain integration:
+`Acode-kit` is a structured project-delivery framework for AI coding agents.  
+It is not just another prompt pack, and it is not a magic auto-builder.
 
-- **Tech-stack agnostic**: No hardcoded frameworks. iOS, Android, mini-programs, Web, desktop — declare your stack at project init, the framework adapts.
-- **TDD-driven**: Red-Green-Refactor cycle as a constitutional development methodology, enforced across every implementation slice.
-- **MCP tool integration**: Auto-scan and manage Pencil (design), NotebookLM (requirements analysis), shadcn (UI components), Chrome DevTools (debugging).
-- **Smart model routing**: Automatic model version selection by task phase, type, and difficulty, with built-in fallback and token budget control.
-- **Structured delivery**: 4-gate startup + 7-stage execution (with per-module MVP iteration), dual-layer progress tracking, document-driven, traceable, handoff-ready.
+It helps turn AI from “ad-hoc code assistance” into a more controlled participant in real project delivery through:
 
-### Key Innovations
+- gated workflow
+- structured specs and project documents
+- progressive loading
+- scenario and stack standards
+- internal routing and fallback
+- regression validation
 
-#### 1. Tech Stack Decision Framework
+More importantly, it is designed to help people who understand the business, but are not necessarily strong programmers yet, get much closer to shipping real software products.
 
-No more hardcoded tech stacks. Acode-kit defines a category-based decision framework:
+### 🌟 Why it matters
 
-| Category | Description | Examples |
-|----------|-------------|----------|
-| Project type | Web / Mobile / Mini-program / Desktop | iOS App, SaaS Web |
-| Frontend framework | Per project type | React, Vue, SwiftUI, Flutter |
-| UI component library | Per frontend ecosystem | shadcn/ui, Element Plus, Ant Design |
-| Backend runtime | Per team capability | Node.js, Spring Boot, Go |
-| ORM / data access | Per backend runtime | Prisma, MyBatis, GORM |
-| Database | Per data model | PostgreSQL, MySQL, MongoDB |
-| Cache | Per performance needs (optional) | Redis, Memcached |
-| Auth scheme | Per security requirements | JWT, OAuth 2.0, Session |
-| Deployment | Per ops capability | Docker, Vercel, AWS |
-| Design tool | Per team preference | Pencil, Figma |
+Many AI coding tools still assume the user already knows how to code, debug, and structure a system well.
 
-Each project declares its stack in `PROJECT_OVERRIDES.md`. All 31 engineering specs adapt automatically.
+Acode-kit is built around a different reality:
 
-#### 2. TDD Constitutional Clause
+- the people who understand the business often do not code deeply
+- the people who code deeply do not always understand the business best
+- there is often a real gap between product intent and software delivery
 
-Every vertical slice must follow:
+Acode-kit is meant to narrow that gap.
 
-```
-Red     → Write a failing test describing expected behavior
-Green   → Write minimal implementation to make it pass
-Refactor → Optimize under test protection
-```
+If you are the person closest to the business and you can combine:
 
-TDD is a gate, not a suggestion — no failing test, no production code.
+- sound requirement judgment
+- basic engineering thinking
+- architectural awareness
+- solid prompting
+- willingness to learn
 
-#### 3. MCP Tool Automation
+then Acode-kit is designed to help you turn that into a real product workflow, not just scattered AI output.
 
-Four MCP tools are auto-scanned and managed at project startup:
+### 🧭 Core methodology
 
-| Tool | Purpose | Degradation |
-|------|---------|-------------|
-| **Pencil MCP** | UI/UX design drafts | AI-generated text layout descriptions |
-| **NotebookLM MCP** | Requirements analysis & project skeleton | Direct AI analysis |
-| **shadcn MCP** | UI component library integration | Manual component building |
-| **Chrome DevTools MCP** | Frontend debugging | Traditional log debugging |
+Acode-kit is built on a few principles:
 
-Three-state tracking: `installed` → `missing` → `degraded`. Every tool has a complete fallback strategy.
+1. clarify the project facts before implementation
+2. load rules progressively instead of dumping everything into context
+3. freeze boundaries before module iteration
+4. let AI amplify structure and speed, not replace thinking
 
-#### 4. Smart Model Routing
+It also explicitly emphasizes:
 
-```
-User submits task
-    ↓
-Keyword classification → Phase (requirements/design/implementation/testing/go-live) + Difficulty
-    ↓
-Model mapping → Select model version by provider (Codex/Claude) + difficulty
-    ↓
-Budget check → Phase token hard cap + task soft cap
-    ↓
-Execute → Success | Trigger fallback (error → timeout → quality_low → budget_exceeded)
-    ↓
-Output → selectedModel / finalModel / fallbackTriggered / token usage
-```
+1. **TDD-driven execution**
+2. **spec-first delivery**
+3. **professional engineering discipline**
+4. **controlled AI behavior with room for creative extension**
 
-Single entry `acode-run` — model selection, fallback, and session continuity are transparent to the user.
+### 🏗️ Core architecture
 
-#### 5. Four-Gate Startup + Module-Driven Execution
+| Layer | Role |
+|---|---|
+| Core entry | workflow orchestration and gate control |
+| Shared workflow core | provider-agnostic workflow contract |
+| Provider adapters | Codex / Claude runtime adaptation |
+| Workflow layer | gate / stage / step execution rules |
+| Loading layer | what to load, when to stop loading, when to delegate |
+| Extension layer | controlled external markdown / skill enhancement packs |
+| Standards layer | global, scenario, and stack-level constraints |
+| Project activation layer | project-specific active standards |
+| Internal router | model selection, budget control, fallback |
 
-```
-Init (CLI)     → acode-kit init → MCP tool scan/install + NotebookLM auth → write status file
+### 🚀 How it differs from common vibe coding / spec coding approaches
 
-Gate 1: Status Report  → Read status file + workspace check → output report → ⛔ wait for user
-Gate 2: Requirements   → NotebookLM deep analysis → project skeleton → ⛔ wait for user
-Gate 3: PRD Approval   → Lock tech stack + PRD + progress plan + traceability → ⛔ wait for user
-Gate 4: Project Setup  → Directory structure + project docs + dependencies + env → ⛔ wait for user
+The comparison below is intentionally limited to **workflow model, delivery discipline, and governance style**. It is not a claim that every tool in the category works the same way, and it is not meant as a blanket superiority statement.
 
-Architecture Stages (execute once)
-  Stage 1: Requirements structuring + module decomposition (output priorities + dependencies)
-  Stage 2: Overall UI architecture (page inventory, navigation, layout framework)
-  Stage 3: Overall data model + API framework (ER-diagram level)
-  Stage 4: Project scaffold initialization
+| Dimension | Typical tools | Acode-kit |
+|---|---|---|
+| Primary emphasis | fast exploration and generation | controlled progression toward deliverable software |
+| Path from idea to code | often allows immediate generation | gated, staged, and review-driven |
+| Agent behavior | often steered mostly by live conversation | constrained by workflow, loading rules, and standards |
+| Engineering method | varies widely and may depend on the user to impose structure | explicitly TDD-driven, spec-first, and governance-aware |
+| State management | often conversation-heavy or memory-heavy | project documents act as persistent workflow state |
+| Best-fit output | prototypes, experiments, rapid iteration | product-grade delivery with stronger consistency |
+| Validation model | verification is often added manually by the user | includes init, router, workflow, and regression validation paths |
 
-Module Iteration (per module by priority)
-  Stage 5: For each module →
-    5a Module requirements detail → user confirms
-    5b Module UI design (Pencil) → user confirms
-    5c Module data/API detail design → user confirms
-    5d Module TDD implementation (with cross-module regression tests)
-    5e Module test + review → user confirms
-    → Update progress tracking → next module
+### 🎯 Best-fit scenarios
 
-Integration & Deployment (execute once)
-  Stage 6: Integration testing + cross-module review
-  Stage 7: Deployment and go-live
-```
+Acode-kit is designed for:
 
-Each gate requires explicit user confirmation. The AI cannot skip gates. Pencil design tools are only allowed at Stage 2 (overall UI architecture) and Step 5b (module UI detail design).
+- real software projects, not one-off snippets
+- business-led product building
+- solo + AI or small-team + AI workflows
+- projects that need specs, traceability, review, testing, and go-live discipline
+- teams that want AI to improve engineering consistency, not replace engineering judgment
 
-#### 6. Dual-Layer Progress Tracking + AI Session Orientation
+### ⚠️ Important note
 
-**TRACEABILITY_MATRIX dual-layer structure:**
+This is an enabling framework, not a substitute for:
 
-```
-Upper layer — Module overview (see overall progress)
-| Module   | Priority | Dependencies | Status       |
-|----------|----------|-------------|-------------|
-| MOD-001  | P0       | —           | Complete     |
-| MOD-002  | P0       | MOD-001     | Impl (5d)   |
-| MOD-003  | P1       | MOD-001     | Not started  |
+- requirement clarity
+- engineering thinking
+- architecture capability
+- good prompting
 
-Lower layer — Current module detail (see TDD slice progress)
-| Slice       | Requirement     | Status         |
-|-------------|----------------|----------------|
-| MOD-002-S01 | Task CRUD      | Green (passing)|
-| MOD-002-S02 | Task filtering | Red (failing)  |
-| MOD-002-S03 | Task sorting   | Not started    |
-```
+The better those inputs are, the more value Acode-kit can provide.
 
-**SESSION_HANDOFF position cursor:**
+### 📦 Install
 
-AI instantly knows where it is when resuming a session:
+### GitHub + curl
 
-```markdown
-## 📍 Current Position
-- Phase: Module Iteration (Stage 5)
-- Module: Task Management
-- Step: 5d
-- Slice: 2/5
-- Next Action: Implement task filtering API
-```
+Install directly from GitHub and let the installer fetch and place the bundle automatically.
 
-### Quick Install
-
-> **This repo is currently Private.** The `curl | bash` remote install method is unavailable. Use the "Local Install" method below. Remote install commands will work automatically once the repo is made public.
-
-#### Local Install (Recommended while Private)
-
-Clone the repo first, then install from the local copy using `--source-dir`. The clone directory can be deleted after installation.
-
-**User-level install (Recommended)** — install once, use from any directory:
-
-```bash
-git clone https://github.com/AlexCyln/Acode-kit-Plus.git
-cd Acode-kit-Plus
-node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope user
-cd ..
-rm -rf Acode-kit-Plus  # clone directory no longer needed
-```
-
-Then start a project from any empty folder:
-
-```bash
-mkdir my-project && cd my-project
-# Tell your AI agent: "Use Acode-kit to build ..."
-```
-
-**Project-level install** — scoped to a specific project directory, **auto-runs initialization** (MCP scan + install + NotebookLM config + status file):
-
-```bash
-git clone https://github.com/AlexCyln/Acode-kit-Plus.git
-cd Acode-kit-Plus
-node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope project --dest-dir /path/to/my-project/.claude
-cd ..
-rm -rf Acode-kit-Plus
-```
-
-> Project-level install auto-runs init after copying files. No need to run init manually. Use `--skip-init` to skip auto-initialization.
-
-**Other agents:**
-
-```bash
-# Codex
-node scripts/install.mjs --source-dir ./Acode-kit --agent codex
-
-# Local portable
-node scripts/install.mjs --source-dir ./Acode-kit --agent local
-```
-
-#### Remote Install (Available after repo is public)
-
-##### macOS / Linux
+macOS / Linux:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | bash
 ```
 
-Auto-detects installed agents. Falls back to local portable install if none found.
-
-Specify target:
-
-```bash
-# Codex only
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | AGENT=codex bash
-
-# Claude user-level
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | AGENT=claude SCOPE=user bash
-
-# Claude project-level
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | AGENT=claude SCOPE=project bash
-```
-
-> Note: Environment variables must be passed to `bash`, not before `curl`.
-
-##### Windows PowerShell
+Windows PowerShell:
 
 ```powershell
 irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
 ```
 
-##### Codex built-in installer
+With explicit agent / scope:
+
+macOS / Linux:
 
 ```bash
-python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
-  --repo AlexCyln/Acode-kit-Plus --path Acode-kit
+AGENT=codex SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | bash
 ```
 
-### Support Matrix
+Windows PowerShell:
 
-| Target | Installation result |
-|--------|-------------------|
-| Codex | `~/.codex/skills/Acode-kit` |
-| Claude Code (user) | `~/.claude/Acode-kit` + subagent adapters |
-| Claude Code (project) | `./.claude/Acode-kit` + subagent adapters |
-| Local / no agent | `./agent-skills/Acode-kit` + portable Claude adapters |
+```powershell
+$env:AGENT="claude"; $env:SCOPE="user"; irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
+```
 
-### Initialization
-
-Initialization scans MCP tools, installs missing ones, configures NotebookLM authentication, and writes the `.acode-kit-initialized.json` status file. **The AI will refuse to proceed without this file.**
-
-#### Which install method needs manual init?
-
-| Install method | Manual init needed? |
-|----------------|-------------------|
-| `--scope project` (project-level) | **No** — auto-runs during install |
-| `--scope user` (user-level) | **Yes** — run once per new project directory |
-| Remote install (`curl \| bash`) | **Yes** — same as user-level |
-
-#### Manual init command
+### npm direct install
 
 ```bash
-# Claude user-level: run in your project directory
-node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs
-
-# Codex
-node ~/.codex/skills/Acode-kit/scripts/acode-kit-init.mjs
-
-# With options
-node <install-path>/scripts/acode-kit-init.mjs --provider claude --yes
+npm install -g github:AlexCyln/Acode-kit-Plus
+acode-kit bootstrap
 ```
 
-#### Init flow (6 steps, CLI-driven, no AI involvement)
-
-1. Check project folder state (empty / existing)
-2. Scan 4 MCP tools for installation status
-3. Prompt to install missing tools (skippable, use `--yes` to auto-install)
-4. Verify installation results
-5. Configure NotebookLM authentication (prompts user to complete browser auth in AI Agent)
-6. Write `.acode-kit-initialized.json` status file
-
-| Flag | Description |
-|------|-------------|
-| `--cwd PATH` | Working directory (defaults to cwd) |
-| `--provider codex\|claude` | Target provider (auto-detected if omitted) |
-| `--yes` | Skip confirmation prompts, auto-install missing tools |
-| `--force` | Force re-initialization (overwrite existing status file) |
-
-### Usage
-
-#### In your AI Agent (Recommended)
-
-After installation and initialization, open your AI Agent in the project directory and tell it:
-
-```text
-Use Acode-kit to plan and start a mobile app project from scratch.
-```
-
-```text
-Use Acode-kit to continue the current project. Review PRD and traceability matrix first.
-```
-
-The AI will automatically execute the four-gate startup workflow:
-1. **Gate 1**: Read `.acode-kit-initialized.json`, output workspace status report → waits for your confirmation
-2. **Gate 2**: Call NotebookLM for requirements analysis, output project skeleton → waits for your confirmation
-3. **Gate 3**: Generate PRD + progress plan + traceability matrix → waits for your confirmation
-4. **Gate 4**: Create project directory, install dependencies, populate 9 project docs (incl. PROJECT_SKELETON) → waits for your confirmation
-5. After all gates pass, enters architecture stages (Stage 1-4) to establish the overall framework
-6. Then enters module iteration (Stage 5) — executes each module by priority: requirements → UI design → data/API → TDD implementation → test
-7. Finally integration testing (Stage 6) + deployment (Stage 7)
-
-#### Model Routing CLI (Advanced / Debugging)
-
-`acode-run` is the internal model routing layer, called automatically by the AI workflow. You can also test routing manually:
+### Local bootstrap
 
 ```bash
-node ./scripts/acode-run.mjs \
-  --project-id my-project \
-  --prompt "Build a SaaS order management system from scratch" \
-  --provider codex
-
-# Verify routing without executing model calls
-node ./scripts/acode-run.mjs \
-  --project-id my-project \
-  --prompt "Scan tools and install missing MCP tools" \
-  --dry-run true
+node scripts/acode-kit.mjs bootstrap
+# or
+npm run bootstrap
 ```
 
-### Install Modes
-
-| Flag | Description |
-|------|-------------|
-| `--agent auto` | Auto-detect, install to all found agents |
-| `--agent codex` | Codex only |
-| `--agent claude` | Claude only |
-| `--agent local` | Local portable package |
-| `--agent both` | Both Codex and Claude |
-| `--scope user\|project` | Claude user-level or project-level (project auto-runs init) |
-| `--dest-dir PATH` | Custom destination directory |
-| `--yes` | Skip confirmation prompts (applies to both install and init) |
-| `--skip-init` | Skip auto-initialization for project-level install |
-
-### Testing
+### ⌨️ Quick CLI flags
 
 ```bash
-npm run test:router    # Router mapping and fallback tests
-npm run test:entry     # Entry point classification and routing tests
-npm run test:mcp       # MCP tool scan tests
-npm run test:init      # Initialization command tests
+acode-kit -status
+acode-kit -add <path>
+acode-kit -scan <path>
+acode-kit -remove <name>
+acode-kit -help
 ```
 
-### License
+Meaning:
 
-MIT
+1. `-status`: show current agent basis, initialized projects discovered in the current workspace tree, enabled third-party extensions, and the four MCP tool states
+2. `-add <path>`: detect whether the target is a valid `.md` or skill-style extension, run admission scan automatically, and install it if all checks pass
+3. `-scan <path>`: run extension admission scan for a file or directory
+4. `-remove <name>`: remove an installed third-party extension pack by name
+5. `-help`: show CLI help
+
+### 🔌 Custom extensions
+
+Acode-kit also supports controlled custom extensions for domain knowledge, specialized review, or bounded delegated capabilities.
+
+Supported extension types:
+
+- `markdown`: extra standards, playbooks, or review checklists
+- `skill`: bounded capability packs that can be delegated by the main skill
+
+Authoring and declaration rules:
+
+1. follow `Acode-kit/extensions/registry/EXTENSION_MANIFEST_SPEC.md`
+2. declare `id`, `type`, `entry`, `description`, `load_at`, `priority`, and `mode`
+3. use only `reference-only`, `workflow-helper`, or `delegated-capability`
+4. extensions may enhance workflow nodes, but may not alter the gate graph, approval boundaries, or replace the main orchestrator
+
+Import and activation flow:
+
+1. place the pack under `Acode-kit/extensions/packs/<your-pack>/`
+2. register it in `Acode-kit/extensions/registry/EXTENSIONS_INDEX.md`
+3. run a security scan before activation
+4. activate it at project level through `PROJECT_EXTENSIONS.md` or `ACTIVE_STANDARDS.md`
+5. let the main skill load or delegate it only when the current node matches the manifest `load_at` rules
+
+This keeps extension power high without giving up workflow control.
+
+Security and unload requirements:
+
+1. every custom extension should be security-scanned before first activation
+2. recommended command: `acode-kit extension-scan --manifest <manifest-path>`
+3. the scan checks both security risk and workflow / architecture compatibility
+4. if the extension tries to own the main workflow, redefine Gate / Stage logic, or replace the orchestrator, it must be blocked
+5. only extensions with both security and compatibility status set to `pass` should be marked active
+6. already activated extensions should be unloaded by project-level deactivation first, not by silently deleting pack files
+7. recommended command: `acode-kit extension-uninstall --id <extension-id> --project-extensions <path> --active-standards <path>`
+
+Recommended flow:
+
+1. author the pack and manifest
+2. run `acode-kit -scan <path>` or `acode-kit extension-scan --manifest <manifest-path>`
+3. activate only after a `pass` result
+4. use `acode-kit -add <path>` for detect-scan-install in one step when appropriate
+5. unload through `acode-kit extension-uninstall ...` or `acode-kit -remove <name>` when the project no longer needs it
+
+### ▶️ Use
+
+1. Install and initialize first
+2. Start your AI agent in the project directory
+3. Tell it explicitly to use `Acode-kit`
+4. Follow the gate sequence in order
+5. Continue stage-by-stage without skipping
+6. Keep your focus on business judgment, architecture, and prompting quality instead of expecting the framework to replace them
+
+### 🧪 Tests
+
+```bash
+npm run test:extensions
+npm run test:phase9
+```

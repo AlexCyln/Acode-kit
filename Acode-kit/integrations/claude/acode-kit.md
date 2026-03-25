@@ -1,6 +1,6 @@
 ---
 name: acode-kit
-description: "FIRST ACTION: Read .acode-kit-initialized.json — do NOT call Pencil, design tools, or get_editor_state() first. Gate-driven workflow: Steps 1→2→3→4, each a SEPARATE invocation with user approval gate. After Gate 3 → Step 4 (project setup, NOT design). After Gate 4 → Stages 1→2→...→7. CALLER: present full gate output to user, WAIT for reply, resume with NEXT step only. Do NOT combine steps, skip to design, or send 'design and build' after Gate 3."
+description: "FIRST ACTION: Read .acode-kit-initialized.json — do NOT call Pencil, design tools, or get_editor_state() first. Gate-driven workflow: Steps 1→2→3→3.5→4, each a SEPARATE invocation with user approval gate. After Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4 (project setup, NOT design). After Gate 4 → Stages 1→2→...→7. CALLER: present full gate output to user, WAIT for reply, resume with NEXT step only. Do NOT combine steps, skip to design, or send 'design and build' after Gate 3."
 ---
 
 ## ⚠️ YOUR FIRST TOOL CALL — READ THIS BEFORE DOING ANYTHING
@@ -14,7 +14,11 @@ Your VERY FIRST tool call must be: **Read `.acode-kit-initialized.json`** from t
 - Your ONLY first action: **Read `.acode-kit-initialized.json`**.
 
 After reading:
-- **File NOT found** → Tell the user: "Acode-kit has not been initialized. Please run: `node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs`" — then STOP.
+- **File NOT found** → First check the user-level global MCP cache for the active provider:
+  - `~/.codex/acode-kit/.acode-kit-global.json`
+  - `~/.claude/acode-kit/.acode-kit-global.json`
+  If the global cache exists, use it as the environment baseline so you do not reinstall MCP tools or re-authenticate NotebookLM.
+  If neither the workspace file nor the global cache exists, tell the user: "Acode-kit has not been initialized. Please run the init CLI from your installed bundle. Common examples: `node ~/.claude/Acode-kit/scripts/acode-kit-init.mjs` or `node ~/.codex/skills/Acode-kit/scripts/acode-kit-init.mjs`." — then STOP.
 - **File found** → Continue to STEP 1 below.
 
 ---
@@ -28,7 +32,7 @@ You run as a sub-agent. Each STEP is a **separate invocation**:
 2. Output the gate result.
 3. End your output with the `⛔ USER DECISION REQUIRED` block (template below).
 4. **TERMINATE** — stop all tool calls, stop generating text. Your invocation is done.
-5. **DO NOT combine steps.** Gate 3 → Step 4 (project setup ONLY). Gate 4 → Stage 1 (requirements structuring). Design (Stage 2) is never the immediate next step after any gate.
+5. **DO NOT combine steps.** Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4 (project setup ONLY). Gate 4 → Stage 1 (requirements structuring). Design (Stage 2) is never the immediate next step after any gate.
 
 The parent agent will show your output to the user, collect their reply, and **resume** you for the NEXT step only — not multiple steps combined.
 
@@ -51,7 +55,7 @@ CALLER: Present the FULL content above to the user. WAIT for their explicit repl
 2. **TERMINATE AT EVERY GATE.** After outputting the gate result and the `⛔ USER DECISION REQUIRED` block, stop all tool calls and stop generating text. Do NOT continue to the next step.
 3. **NO TASK PLANS.** Do NOT use TaskCreate, TodoWrite, or any task/todo system to plan the startup sequence.
 4. **NO FILES BEFORE GATE 3. NO DESIGN BEFORE GATE 4.** You may NOT create any file or directory until the user approves the PRD at GATE 3. You may NOT open Pencil or create designs until the user approves the project setup at GATE 4 and you reach Stage 2 (overall UI architecture) or Step 5b (module UI detail design).
-5. **SKILL.md is the reference document, NOT your execution script.** Steps 1-4 are embedded below. Read SKILL.md for stage-specific references and implementation rules during stage-driven execution.
+5. **SKILL.md is the reference document, NOT your execution script.** Steps 1-4 are embedded below. Read `integrations/shared/WORKFLOW_CORE.md` for invariant workflow boundaries, then read `SKILL.md` for stage-specific references and implementation rules during stage-driven execution.
 6. **MATCH USER LANGUAGE.** Respond in the same language the user uses. Chinese input → Chinese output. English input → English output. Never switch languages on your own.
 7. **NO OVER-ENGINEERING.** Implement only what is requested or specified in the approved PRD.
 8. **MANDATORY STAGE ORDER.** During stage-driven execution (after Gate 4), stages run in strict sequence 1→2→3→4→5→6→7. Pencil/design tools are ONLY allowed at Stage 2 (overall UI architecture) and Step 5b (module UI detail design). Within Stage 5, each module follows the 5a→5b→5c→5d→5e sequence. Do NOT skip stages or jump to design because the user said "design first" at Gate 3.
@@ -70,6 +74,7 @@ CALLER: Present the FULL content above to the user. WAIT for their explicit repl
 2. Read `.acode-kit-initialized.json` and extract:
    - Tool status list (which MCP tools are installed/missing)
    - `notebookLM.configured`, `notebookLM.authCompleted`, `notebookLM.notebookUrl`
+   - If the workspace file is missing, read the global cache file for the active provider instead and use that as the environment baseline.
 3. Locate the Acode-kit bundle directory (check `~/.claude/Acode-kit/` then `./.claude/Acode-kit/`). Remember this path as `BUNDLE_PATH` for later use.
 4. **Discover NotebookLM MCP tools:** Search your available tool list for any tool whose name contains "notebooklm" (case-insensitive). If found, **record the exact tool name(s)** — you will call them in Step 2. Also check if `notebookLM.authCompleted` is true in the status file.
 5. Output a workspace status report:
@@ -77,6 +82,7 @@ CALLER: Present the FULL content above to the user. WAIT for their explicit repl
    - MCP tool status (from saved data)
    - NotebookLM status: MCP tool found? (list exact tool name) / authenticated? / notebook URL
    - Acode-kit bundle path
+   - If NotebookLM is installed but unauthenticated: tell the user they can authenticate now by entering the exact text `Log me in to NotebookLM`
 
 6. End your output with:
 ```
@@ -86,6 +92,8 @@ CALLER: Present the FULL content above to the user. WAIT for their explicit repl
 2. Are all MCP tools properly configured?
 3. Is NotebookLM authenticated? (required for requirements deepening)
 4. Any adjustments needed before I proceed to requirements analysis?
+
+If the user chooses NotebookLM authentication and their reply is exactly `Log me in to NotebookLM`, do NOT reinterpret it as gate approval. CALLER must pass that exact input through to the top-level agent unchanged so the agent can handle NotebookLM login directly. After login handling, resume from the workspace status step.
 
 CALLER: Present the FULL status report above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
 NEXT STEP: Step 2 (Requirements Analysis + Project Skeleton). Resume with Step 2 ONLY.
@@ -115,8 +123,11 @@ Do NOT start this step until you receive the user's explicit reply to the GATE 1
      c. Call the NotebookLM MCP tool (use the exact tool name you recorded in Step 1) with this combined prompt.
      d. Use NotebookLM's response to enrich your analysis.
      e. If the call fails, fall back to direct analysis and note the failure in your output.
-   - **If NotebookLM MCP tool was found but `authCompleted` is false:**
-     Tell the user NotebookLM requires authentication. They can authenticate by typing "Log me in to NotebookLM" in a separate session, then re-run init with `--force`. For now, proceed with direct analysis.
+- **If NotebookLM MCP tool was found but `authCompleted` is false:**
+    a. Read `notebookLM.authPrompt` from the status file. If missing, default to `Log me in to NotebookLM`.
+    b. Tell the user NotebookLM is not authenticated and remind them they may authenticate by entering that exact text from Gate 1.
+    c. If they do not authenticate or auth is still unavailable, proceed with direct analysis and note the fallback.
+    d. Once authentication succeeds, persist the auth state into the global cache so future sessions do not ask again.
    - **If NotebookLM MCP tool was NOT found:**
      Perform the analysis directly without NotebookLM.
 4. The skeleton MUST include: recommended tech stack, core business logic summary, system modules, UI/UX style direction, scope boundaries.
@@ -162,17 +173,48 @@ Do NOT start this step until you receive the user's explicit approval of the pro
 5. Any changes needed before I start creating project files?
 
 CALLER: Present the FULL PRD and progress plan above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
-NEXT STEP: Step 4 — Project Environment Setup (create directories, project documents, install dependencies). This is NOT the design phase. Do NOT resume with "design", "build", or "Pencil" — design happens at Stage 2, AFTER Gate 4 passes AND Stage 1 completes. Resume with Step 4 ONLY.
+NEXT STEP: Gate 3.5 — LMS tier analysis and confirmation. Do NOT move to Step 4 until the LMS tier is confirmed.
 ---
 ```
 
-**IMPORTANT: Do NOT mention "Pencil" or "design phase" in Gate 3 questions.** Gate 3 leads to Step 4 (project setup). If you need to ask about UI preferences, frame them as "noted for the UI design stage (which comes later)."
+## GATE 3.5 — LMS tier analysis and confirmation
+
+**Do not start Step 4 yet.** After the user approves the PRD at Gate 3, you must first present an LMS tier recommendation.
+
+**Actions:**
+1. Analyze the approved PRD draft and project skeleton.
+2. Infer a recommended LMS tier (`S`, `M`, or `L`) from:
+   - architecture scope
+   - module structure and dependency breadth
+   - page / screen breadth
+   - API surface and integration density
+3. Present the recommendation with rationale and governance tradeoffs.
+4. Ask the user to confirm or revise the tier.
+5. If the user changes the tier, incorporate the change and re-present.
+6. Proceed to Step 4 only after the tier is explicitly confirmed.
+
+**Important:** The LMS decision is derived from the PRD draft and project skeleton. Do not use a fixed numeric threshold table in the workflow text.
+
+**Gate 3.5 output block:**
+```
+---
+⛔ USER DECISION REQUIRED
+1. Is the recommended LMS tier acceptable?
+2. Any changes to the tier or its rationale?
+3. Confirm the final tier before project setup starts.
+
+CALLER: Present the FULL LMS recommendation above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
+NEXT STEP: Step 4 — Project Environment Setup.
+---
+```
+
+**IMPORTANT: Do NOT mention "Pencil" or "design phase" in Gate 3 questions.** Gate 3 leads to Gate 3.5 (LMS tier confirmation), then Step 4 (project setup). If you need to ask about UI preferences, frame them as "noted for the UI design stage (which comes later)."
 
 **>>> GATE 3: After outputting the PRD, plan, and the ⛔ block, TERMINATE. Do NOT call any more tools. Do NOT generate any more text. Your invocation is COMPLETE. <<<**
 
 ---
 
-## STEP 4 — ONLY AFTER USER APPROVES PRD AT GATE 3
+## STEP 4 — ONLY AFTER USER APPROVES PRD AT GATE 3 AND THE LMS TIER AT GATE 3.5
 
 This is the FIRST point where you may create files and directories. **This step is PROJECT SETUP — do NOT open Pencil, create designs, or write application code.**
 
@@ -455,7 +497,7 @@ acode-run returns JSON with routing metadata (`selectedModel`, `finalModel`, `fa
 4. If the call fails, fall back to direct AI analysis and note the failure.
 
 **When NOT to call NotebookLM:**
-- `authCompleted` is false in the status file → tell user to authenticate first
+- `authCompleted` is false in the status file → remind the user of the Gate 1 authentication path (`Log me in to NotebookLM`), then fall back if auth is still unavailable
 - NotebookLM MCP tool not found in your tool list → skip, use direct analysis
 
 ---

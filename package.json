@@ -6,8 +6,14 @@
   "scripts": {
     "test:router": "node ./scripts/test-router.mjs",
     "test:entry": "node ./scripts/test-acode-run.mjs",
+    "test:cli": "node ./scripts/test-acode-kit-cli.mjs",
     "test:mcp": "node ./scripts/test-mcp-tool-scan.mjs",
     "test:init": "node ./scripts/test-acode-kit-init.mjs",
+    "test:extensions": "node ./scripts/test-extension-loading-smoke.mjs && node ./scripts/test-extension-governance.mjs",
+    "test:contracts": "node ./scripts/validate-workflow-contracts.mjs",
+    "test:workflow": "node ./scripts/validate-workflow-contracts.mjs && node ./scripts/test-workflow-simulation.mjs",
+    "test:phase9": "node ./scripts/test-acode-kit-init.mjs && node ./scripts/test-router.mjs && node ./scripts/test-acode-run.mjs && node ./scripts/test-acode-kit-cli.mjs && node ./scripts/test-extension-loading-smoke.mjs && node ./scripts/test-extension-governance.mjs && node ./scripts/validate-workflow-contracts.mjs && node ./scripts/test-workflow-simulation.mjs",
+    "bootstrap": "node ./scripts/acode-kit.mjs bootstrap",
     "install:win": "powershell -ExecutionPolicy Bypass -File ./scripts/install.ps1"
   },
   "bin": {

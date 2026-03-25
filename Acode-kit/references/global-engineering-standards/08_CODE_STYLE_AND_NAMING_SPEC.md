@@ -2,78 +2,78 @@
 `08_CODE_STYLE_AND_NAMING_SPEC.md`
 
 # 文件定位
-跨语言代码风格、命名与基础实现约束。
+跨语言代码风格、命名、复杂度控制与基础实现约束。
 
 # 适用范围
-适用于项目中使用的所有编程语言、SQL、配置文件的命名与编码风格。具体语言由 `PROJECT_OVERRIDES.md` 中的已声明技术栈确定。
+适用于项目中使用的所有编程语言、SQL、配置文件、脚本与测试代码。具体语言由 `PROJECT_OVERRIDES.md` 中的已声明技术栈确定。
 
 # 与其他文件的关系
-本文件服务于 `03_FRONTEND_ARCHITECTURE_SPEC.md`、`04_BACKEND_ARCHITECTURE_SPEC.md`、`10_CODE_REVIEW_SPEC.md`，是所有代码审查的基础依据。
+本文件服务于 `03_FRONTEND_ARCHITECTURE_SPEC.md`、`04_BACKEND_ARCHITECTURE_SPEC.md`、`10_CODE_REVIEW_SPEC.md`、`11_TESTING_AND_QA_SPEC.md`，是所有代码审查和静态检查的基础依据。
 
 # 编写目的
-统一多语言代码风格、命名与注释规则，降低不同项目、不同成员、不同 AI 输出之间的风格漂移。
+统一多语言项目中的命名、风格、复杂度和分层边界，降低不同项目、不同成员、不同 AI 输出之间的风格漂移和可维护性风险。
 
 ## 1. 通用原则
-1. 代码应优先表达意图，而非炫技。
-2. 命名必须体现业务语义，避免缩写堆叠。
+1. 代码优先表达业务意图，而非炫技。
+2. 命名必须体现业务语义，避免缩写堆叠与模糊词。
 3. 一个函数只做一件主要事情。
 4. 禁止无来源的魔法值。
 5. 注释用于解释“为什么”，不是翻译代码。
+6. 业务规则不得散落在控制层、路由层、Mapper、页面模板等边界层。
+7. 错误处理、权限判断、日志记录应通过统一机制落地，不得每处自由发挥。
 
-## 2. 前端 / TypeScript / JavaScript 风格
-若项目使用 TypeScript 或 JavaScript 系前端框架：
+## 2. 命名总规范
+1. 类、接口、模块、函数、常量命名要遵循语言惯例，但语义必须统一。
+2. 对象名应能直接回答“它是什么”“它服务什么业务”。
+3. 禁止出现 `data1`、`tmpObj`、`handler2`、`processData` 这类缺乏上下文的名称。
+4. 同一业务概念在同一项目中只能有一套主命名，不允许一处叫 `status` 一处叫 `state` 一处叫 `flag`。
+
+## 3. 前端 / TypeScript / JavaScript 风格
 1. 组件名使用 PascalCase。
 2. 文件名与主导出保持一致。
-3. 复用逻辑钩子使用 `use` 前缀，如 `useOrderDetailPage`。
+3. hook 使用 `use` 前缀，如 `useOrderDetailPage`。
 4. 类型名使用 PascalCase，如 `UserListQuery`、`OrderStatus`。
 5. 常量使用 `UPPER_SNAKE_CASE`。
 6. 不使用 `any` 规避类型问题，必要时使用 `unknown` 后再收窄。
 
-## 3. Java / Kotlin / C# 风格
-若项目使用 Java、Kotlin 或 C# 等语言：
+## 4. Java / Kotlin / C# 风格
 1. 包名/命名空间全小写。
 2. 类名使用 PascalCase。
 3. 方法名、变量名使用 lowerCamelCase。
 4. 常量使用 `UPPER_SNAKE_CASE`。
 5. 枚举类使用 `XxxEnum`，枚举值使用 `UPPER_SNAKE_CASE`。
 
-## 4. Python / Go / Rust 风格
-若项目使用 Python：
-1. 模块、函数、变量使用 `snake_case`。
-2. 类使用 PascalCase。
-3. 常量使用 `UPPER_SNAKE_CASE`。
-4. 脚本入口统一使用 `if __name__ == "__main__":`。
+## 5. Python / Go / Rust 风格
+1. Python 模块、函数、变量使用 `snake_case`，类使用 PascalCase。
+2. Python 脚本入口统一使用 `if __name__ == "__main__":`。
+3. Go、Rust 等语言按社区主流命名约定执行，但仍须保持业务语义一致。
 
-若项目使用 Go、Rust 等语言，按语言社区惯例执行命名风格。
-
-## 5. DTO / VO / Entity / BO 命名规范
+## 6. DTO / VO / Entity / BO 命名规范
 1. 入参对象使用 `XxxCreateDTO`、`XxxUpdateDTO`、`XxxQueryDTO`。
 2. 出参对象使用 `XxxVO`、`XxxDetailVO`、`XxxPageVO`。
 3. 数据库实体使用 `XxxEntity`。
 4. 业务编排对象可使用 `XxxBO`，但应谨慎，不得泛滥。
 
-## 6. 前端组件命名规范
+## 7. 前端组件 / hooks / store 命名规范
 1. 页面容器组件使用业务名称，如 `UserListPage`。
 2. 纯通用组件使用中性命名，如 `BaseTable`。
 3. 业务组件用业务语义命名，如 `OrderStatusTag`、`AuditTimeline`。
-4. 禁止无业务语义的入口文件满项目泛滥，除目录入口页外不推荐。
-5. 文件扩展名按已声明前端框架惯例使用。
+4. hook 名称体现场景，如 `useLoginForm`、`useOrderTableColumns`。
+5. store 文件建议 `useXxxStore`，store ID 使用稳定字符串，如 `user`、`permission`、`dict`。
 
-## 7. hooks / composables 命名规范
-1. 使用 `use` 前缀。
-2. 名称体现场景，如 `useLoginForm`、`useOrderTableColumns`。
-3. 不同页面不可复制粘贴同名不同义的 hook。
-
-## 8. store 命名规范
-1. 文件名建议 `useXxxStore` 加已声明语言的扩展名。
-2. store ID 使用稳定字符串，如 `user`, `permission`, `dict`。
-3. store 只承载共享状态，不承载页面模板逻辑。
-
-## 9. 注释规范
+## 8. 注释规范
 1. 类、接口、公共方法应写业务语义注释。
 2. 复杂算法、边界逻辑、兼容性处理需要简短注释。
 3. TODO 必须包含责任人或任务编号，不得永久悬挂。
 4. 禁止注释与代码实际行为不一致。
+
+## 9. 复杂度控制规范
+1. 单个函数中的控制流嵌套深度原则上不超过 2 层；超过 3 层时必须评估拆分。
+2. 连续 `if/else if`、多重 `switch`、深层循环嵌套、回调地狱式逻辑都视为复杂度风险。
+3. 优先使用 early return、guard clause、函数拆分、策略映射、状态对象、策略模式降低复杂度。
+4. 若一个函数同时处理参数校验、权限判断、事务、状态流转、通知、日志、持久化，必须拆分职责。
+5. 审批流、状态机、规则引擎等天然复杂逻辑，应显式建模，不得写成一长串条件拼接。
+6. 复杂度控制目标不是追求短代码，而是让每个分支可解释、可测试、可维护。
 
 ## 10. 函数长度与类职责
 1. 单个函数超过 80 行需评估拆分。
@@ -91,46 +91,28 @@
 2. 复杂查询可使用框架提供的原生查询机制。
 3. 复杂查询若内联在代码中可读性差，则应提取到独立配置或查询文件。
 4. 查询方法名与业务语义需一致。
+5. 数据访问代码必须与当前 schema 和 migration 版本保持一致。
 
-## 13. 命名反例
-1. `data1`, `temp`, `obj`, `handler2`。
-2. `UserManageManageService` 这类重复语义。
-3. `getInfo`, `process`, `doTask` 这类缺少上下文的方法名。
+## 13. 分层与边界规范
+1. Controller / Route 层只负责协议适配、参数接收、权限入口和响应转换。
+2. Application / Service 层负责用例编排、事务边界、权限协调和审计触发。
+3. Domain 层负责核心业务规则和状态流转。
+4. Infrastructure / Repository / Mapper 层负责外部系统、数据库、缓存等技术实现。
+5. 不得在表现层直接访问数据层，不得在数据层承载业务流程编排。
 
-## 14. 推荐示例
-```ts
-const DEFAULT_PAGE_SIZE = 20
-
-interface UserPageQuery {
-  pageNum: number
-  pageSize: number
-  keyword?: string
-  status?: string
-}
-```
-
-```java
-public class OrderApproveDTO {
-    @NotNull
-    private Long orderId;
-
-    @NotBlank
-    private String auditRemark;
-}
-```
-
-## 15. 自检清单
+## 14. 自检清单
 1. 命名是否表达业务意图。
 2. 是否存在魔法值。
 3. 注释是否解释了关键原因。
 4. 类型、DTO、VO、Entity 是否混用。
 5. 文件长度与职责是否可控。
+6. 分层边界是否被破坏。
+7. 是否把权限、日志、事务、错误处理散落在多处重复实现。
+8. 控制流嵌套是否过深。
+9. 是否可以通过 early return、拆函数、策略化降低复杂度。
 
 ## 本文件使用建议
-在项目初始化时即接入格式化、Lint、静态检查工具，并将本文件作为人工 Review 的命名与风格依据。
+在项目初始化时即接入格式化、Lint、静态检查工具，并将本文件作为人工 Review 的命名、复杂度和分层依据。
 
 ## AI 调用建议
-AI 在生成任何代码文件时都应先遵守本文件的命名与分层命名规则，避免不同语言风格互相污染。
-
-## 后续可扩展点
-可补充 ESLint、Prettier、Checkstyle、Spotless、Ruff、Black 的具体配置模板。
+AI 在生成任何代码文件时都应先遵守本文件的命名、复杂度控制和分层规则，避免不同语言风格互相污染。

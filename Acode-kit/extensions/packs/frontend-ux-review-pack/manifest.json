@@ -1,0 +1,14 @@
+{
+  "id": "frontend-ux-review-pack",
+  "type": "markdown",
+  "entry": "Acode-kit/extensions/packs/frontend-ux-review-pack/frontend-ux-review-pack.md",
+  "description": "Frontend UX review enhancement pack for admin-console style products.",
+  "triggers": ["ui review", "ux", "table", "form", "admin console", "dashboard"],
+  "load_at": ["Stage 2", "Step 5b", "Step 5e"],
+  "priority": 80,
+  "mode": "reference-only",
+  "requires": {
+    "scenario": ["bs-admin-console", "bs-platform-ecosystem"],
+    "stack": ["react-shadcn", "b2b-saas-admin"]
+  }
+}

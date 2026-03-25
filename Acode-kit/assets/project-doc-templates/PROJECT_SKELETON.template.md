@@ -2,6 +2,12 @@
 
 > Approved at Gate 2. This document records the project skeleton produced during requirements analysis (Step 2) as a persistent reference for all subsequent stages.
 
+## 文档信息
+- 版本：
+- 状态：草案 / 已确认 / 已归档
+- 更新时间：
+- 审阅阶段：Gate 2
+
 ## Recommended Tech Stack
 
 | Layer | Technology | Rationale |

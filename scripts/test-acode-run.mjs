@@ -55,6 +55,18 @@ function main() {
   const payload2 = parseRouterPayload(case2.output);
   assert.equal(payload2.selectedModel, "gpt-5.4-codex");
 
+  // Case 3: review prompt should classify to testing/review flow, not generic document flow.
+  const case3 = runEntry([
+    ...common,
+    "--prompt", "请做代码审查并整理测试报告"
+  ], repoRoot);
+  assert.equal(case3.proc.status, 0, case3.proc.stderr);
+  assert.ok(case3.output, "case3 envelope parse failed");
+  assert.equal(case3.output.route.phase, "测试");
+  assert.equal(case3.output.route.taskType, "编码审查");
+  const payload3 = parseRouterPayload(case3.output);
+  assert.equal(payload3.selectedModel, "gpt-5.3-codex");
+
   console.log("entry tests passed");
 }
 

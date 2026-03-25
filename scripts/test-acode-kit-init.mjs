@@ -20,6 +20,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const initScript = path.join(__dirname, "acode-kit-init.mjs");
 const STATUS_FILE = ".acode-kit-initialized.json";
+const GLOBAL_STATUS_FILE = ".acode-kit-global.json";
 
 let passed = 0;
 let failed = 0;
@@ -37,11 +38,16 @@ function createTempDir(prefix) {
   return fs.mkdtempSync(path.join(os.tmpdir(), `acode-init-test-${prefix}-`));
 }
 
-function runInit(cwd, extraArgs = []) {
+function runInit(cwd, extraArgs = [], env = {}) {
   return spawnSync("node", [initScript, "--cwd", cwd, "--provider", "codex", "--yes", ...extraArgs], {
     encoding: "utf8",
-    timeout: 60_000
+    timeout: 60_000,
+    env: { ...process.env, ...env }
   });
+}
+
+function getGlobalStatusPath(homeDir) {
+  return path.join(homeDir, ".codex", "acode-kit", GLOBAL_STATUS_FILE);
 }
 
 // ---------------------------------------------------------------------------
@@ -49,9 +55,10 @@ function runInit(cwd, extraArgs = []) {
 // ---------------------------------------------------------------------------
 {
   const tmpDir = createTempDir("empty");
+  const homeDir = createTempDir("home-empty");
 
   try {
-    const result = runInit(tmpDir);
+    const result = runInit(tmpDir, [], { HOME: homeDir });
     assert(result.status === 0, "Empty folder init exits with code 0");
 
     const statusPath = path.join(tmpDir, STATUS_FILE);
@@ -59,12 +66,19 @@ function runInit(cwd, extraArgs = []) {
 
     const status = JSON.parse(fs.readFileSync(statusPath, "utf8"));
     assert(status.version === "1.0.0", "Status file has version 1.0.0");
+    assert(status.scope === "workspace", "Workspace status file is marked as workspace");
     assert(status.projectFolder.wasEmpty === true, "wasEmpty is true for empty folder");
     assert(status.projectFolder.path === tmpDir, "projectFolder.path matches cwd");
     assert(typeof status.initializedAt === "string", "Has initializedAt timestamp");
     assert(typeof status.provider === "string", "Has provider field");
+
+    const globalPath = getGlobalStatusPath(homeDir);
+    assert(fs.existsSync(globalPath), "Global MCP cache is created");
+    const globalStatus = JSON.parse(fs.readFileSync(globalPath, "utf8"));
+    assert(globalStatus.scope === "global", "Global status file is marked as global");
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(homeDir, { recursive: true, force: true });
   }
 }
 
@@ -73,11 +87,12 @@ function runInit(cwd, extraArgs = []) {
 // ---------------------------------------------------------------------------
 {
   const tmpDir = createTempDir("nonempty");
+  const homeDir = createTempDir("home-nonempty");
   // Create a file to make it non-empty
   fs.writeFileSync(path.join(tmpDir, "existing-file.txt"), "hello");
 
   try {
-    const result = runInit(tmpDir);
+    const result = runInit(tmpDir, [], { HOME: homeDir });
     assert(result.status === 0, "Non-empty folder init exits with code 0");
 
     const statusPath = path.join(tmpDir, STATUS_FILE);
@@ -87,6 +102,7 @@ function runInit(cwd, extraArgs = []) {
     assert(status.projectFolder.wasEmpty === false, "wasEmpty is false for non-empty folder");
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(homeDir, { recursive: true, force: true });
   }
 }
 
@@ -95,21 +111,23 @@ function runInit(cwd, extraArgs = []) {
 // ---------------------------------------------------------------------------
 {
   const tmpDir = createTempDir("duplicate");
+  const homeDir = createTempDir("home-duplicate");
 
   try {
     // First init
-    const first = runInit(tmpDir);
+    const first = runInit(tmpDir, [], { HOME: homeDir });
     assert(first.status === 0, "First init succeeds");
 
     const statusPath = path.join(tmpDir, STATUS_FILE);
     assert(fs.existsSync(statusPath), "Status file exists after first init");
+    assert(fs.existsSync(getGlobalStatusPath(homeDir)), "Global status file exists after first init");
 
     // Save original timestamp
     const originalStatus = JSON.parse(fs.readFileSync(statusPath, "utf8"));
     const originalTime = originalStatus.initializedAt;
 
     // Second init without --force
-    const second = runInit(tmpDir);
+    const second = runInit(tmpDir, [], { HOME: homeDir });
     assert(second.status === 0, "Duplicate init exits with code 0");
     assert(
       second.stdout.includes("already initialized"),
@@ -124,6 +142,7 @@ function runInit(cwd, extraArgs = []) {
     );
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(homeDir, { recursive: true, force: true });
   }
 }
 
@@ -132,10 +151,11 @@ function runInit(cwd, extraArgs = []) {
 // ---------------------------------------------------------------------------
 {
   const tmpDir = createTempDir("force");
+  const homeDir = createTempDir("home-force");
 
   try {
     // First init
-    const first = runInit(tmpDir);
+    const first = runInit(tmpDir, [], { HOME: homeDir });
     assert(first.status === 0, "First init for force test succeeds");
 
     const statusPath = path.join(tmpDir, STATUS_FILE);
@@ -147,7 +167,7 @@ function runInit(cwd, extraArgs = []) {
     while (Date.now() - start < 50) { /* busy wait */ }
 
     // Re-init with --force
-    const forced = runInit(tmpDir, ["--force"]);
+    const forced = runInit(tmpDir, ["--force"], { HOME: homeDir });
     assert(forced.status === 0, "--force re-init exits with code 0");
 
     const newStatus = JSON.parse(fs.readFileSync(statusPath, "utf8"));
@@ -157,6 +177,7 @@ function runInit(cwd, extraArgs = []) {
     );
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(homeDir, { recursive: true, force: true });
   }
 }
 
@@ -165,9 +186,10 @@ function runInit(cwd, extraArgs = []) {
 // ---------------------------------------------------------------------------
 {
   const tmpDir = createTempDir("structure");
+  const homeDir = createTempDir("home-structure");
 
   try {
-    runInit(tmpDir);
+    runInit(tmpDir, [], { HOME: homeDir });
 
     const statusPath = path.join(tmpDir, STATUS_FILE);
     const status = JSON.parse(fs.readFileSync(statusPath, "utf8"));
@@ -196,12 +218,18 @@ function runInit(cwd, extraArgs = []) {
     assert(typeof status.notebookLM.configured === "boolean", "notebookLM has configured field");
     assert(typeof status.notebookLM.authCompleted === "boolean", "notebookLM has authCompleted field");
     assert(typeof status.notebookLM.notebookUrl === "string", "notebookLM has notebookUrl");
+    assert(typeof status.notebookLM.authPrompt === "string", "notebookLM has authPrompt");
+    assert(status.notebookLM.authPrompt === "Log me in to NotebookLM", "authPrompt matches expected trigger");
     assert(
       status.notebookLM.notebookUrl.includes("notebooklm.google.com"),
       "notebookUrl contains expected domain"
     );
+
+    const globalStatus = JSON.parse(fs.readFileSync(getGlobalStatusPath(homeDir), "utf8"));
+    assert(globalStatus.notebookLM.authCompleted === false, "Global auth state starts as false");
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(homeDir, { recursive: true, force: true });
   }
 }
 
@@ -210,11 +238,12 @@ function runInit(cwd, extraArgs = []) {
 // ---------------------------------------------------------------------------
 {
   const tmpDir = path.join(os.tmpdir(), `acode-init-test-newdir-${Date.now()}`);
+  const homeDir = createTempDir("home-newdir");
 
   try {
     assert(!fs.existsSync(tmpDir), "Target dir does not exist before init");
 
-    const result = runInit(tmpDir);
+    const result = runInit(tmpDir, [], { HOME: homeDir });
     assert(result.status === 0, "Init with non-existent cwd exits with code 0");
     assert(fs.existsSync(tmpDir), "Target dir was created by init");
     assert(
@@ -223,6 +252,37 @@ function runInit(cwd, extraArgs = []) {
     );
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(homeDir, { recursive: true, force: true });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Test 7: NotebookLM auth state can be persisted globally and reused
+// ---------------------------------------------------------------------------
+{
+  const tmpDir = createTempDir("auth-persist");
+  const homeDir = createTempDir("home-auth-persist");
+
+  try {
+    const first = runInit(tmpDir, ["--notebooklm-auth-completed"], { HOME: homeDir });
+    assert(first.status === 0, "Init with NotebookLM auth flag exits with code 0");
+
+    const statusPath = path.join(tmpDir, STATUS_FILE);
+    const status = JSON.parse(fs.readFileSync(statusPath, "utf8"));
+    assert(status.notebookLM.authCompleted === true, "Workspace status records NotebookLM auth as completed");
+
+    const globalPath = getGlobalStatusPath(homeDir);
+    const globalStatus = JSON.parse(fs.readFileSync(globalPath, "utf8"));
+    assert(globalStatus.notebookLM.authCompleted === true, "Global status records NotebookLM auth as completed");
+
+    const second = runInit(tmpDir, ["--force"], { HOME: homeDir });
+    assert(second.status === 0, "Force rerun after auth still exits with code 0");
+
+    const rerunStatus = JSON.parse(fs.readFileSync(statusPath, "utf8"));
+    assert(rerunStatus.notebookLM.authCompleted === true, "Force rerun preserves NotebookLM auth state from global cache");
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(homeDir, { recursive: true, force: true });
   }
 }
 

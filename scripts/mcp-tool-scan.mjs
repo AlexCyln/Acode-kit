@@ -22,6 +22,12 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { createInterface } from "node:readline";
 
+const VERSION = "1.0.0";
+const WORKSPACE_STATUS_FILE = ".acode-kit-initialized.json";
+const GLOBAL_STATUS_FILE = ".acode-kit-global.json";
+const DEFAULT_NOTEBOOK_URL = "https://notebooklm.google.com/notebook/7ec4ec07-abb3-478e-99aa-f8946e103499";
+const DEFAULT_AUTH_PROMPT = "Log me in to NotebookLM";
+
 // ---------------------------------------------------------------------------
 // Tool registry (mirrors 31_THIRD_PARTY_TOOLS_MANAGEMENT_SPEC.md)
 // ---------------------------------------------------------------------------
@@ -92,6 +98,31 @@ function spawnCrossPlatform(cmd, args, opts = {}) {
     shell: IS_WIN,
     windowsHide: true
   });
+}
+
+function readJsonIfExists(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch (_) {
+    return null;
+  }
+}
+
+function writeJsonFile(filePath, data) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+}
+
+function resolveGlobalStateDir(provider) {
+  const baseHome = provider === "claude"
+    ? (process.env.CLAUDE_HOME || path.join(os.homedir(), ".claude"))
+    : (process.env.CODEX_HOME || path.join(os.homedir(), ".codex"));
+  return path.join(baseHome, "acode-kit");
+}
+
+function resolveGlobalStatusPath(provider) {
+  return path.join(resolveGlobalStateDir(provider), GLOBAL_STATUS_FILE);
 }
 
 // ---------------------------------------------------------------------------
@@ -181,6 +212,52 @@ function detectChromeDevTools(provider) {
   if (provider === "codex") return codexHasMcpServer("chrome-devtools");
   if (provider === "claude") return claudeHasMcpServer("chrome-devtools");
   return codexHasMcpServer("chrome-devtools") || claudeHasMcpServer("chrome-devtools");
+}
+
+function loadGlobalCache(provider) {
+  if (!provider || provider === "both") return null;
+  return readJsonIfExists(resolveGlobalStatusPath(provider));
+}
+
+function loadWorkspaceStatus(cwd) {
+  return readJsonIfExists(path.join(cwd, WORKSPACE_STATUS_FILE));
+}
+
+function buildGlobalCache(provider, scanResults, previousGlobalCache = null, workspaceStatus = null) {
+  const notebookTool = scanResults.find((tool) => tool.id === "notebooklm");
+  const notebookPreviouslyAuthenticated = Boolean(
+    previousGlobalCache?.notebookLM?.authCompleted || workspaceStatus?.notebookLM?.authCompleted
+  );
+
+  return {
+    version: VERSION,
+    updatedAt: new Date().toISOString(),
+    provider,
+    tools: scanResults.map((tool) => ({
+      id: tool.id,
+      name: tool.name,
+      status: tool.status
+    })),
+    notebookLM: {
+      configured: Boolean(notebookTool && notebookTool.status === "installed"),
+      authCompleted: notebookPreviouslyAuthenticated,
+      notebookUrl: previousGlobalCache?.notebookLM?.notebookUrl
+        || workspaceStatus?.notebookLM?.notebookUrl
+        || DEFAULT_NOTEBOOK_URL,
+      authPrompt: previousGlobalCache?.notebookLM?.authPrompt
+        || workspaceStatus?.notebookLM?.authPrompt
+        || DEFAULT_AUTH_PROMPT
+    }
+  };
+}
+
+function syncGlobalCache(provider, scanResults, cwd = process.cwd()) {
+  if (!provider || provider === "both") return null;
+  const previous = loadGlobalCache(provider);
+  const workspaceStatus = loadWorkspaceStatus(cwd);
+  const next = buildGlobalCache(provider, scanResults, previous, workspaceStatus);
+  writeJsonFile(resolveGlobalStatusPath(provider), next);
+  return next;
 }
 
 // ---------------------------------------------------------------------------
@@ -292,7 +369,7 @@ async function installTool(suggestion, provider, tmpDir) {
 // Step 7: Record results
 // ---------------------------------------------------------------------------
 
-function formatReport(scanResults, provider) {
+function formatReport(scanResults, provider, globalCache = null) {
   const lines = [
     "## MCP Tool Status",
     "",
@@ -305,6 +382,10 @@ function formatReport(scanResults, provider) {
   }
   lines.push("");
   lines.push(`Provider: ${provider || "unknown"}`);
+  if (globalCache) {
+    lines.push(`Global cache: ${resolveGlobalStatusPath(provider)}`);
+    lines.push(`NotebookLM auth remembered: ${globalCache.notebookLM?.authCompleted ? "yes" : "no"}`);
+  }
   lines.push(`Scan time: ${new Date().toISOString()}`);
   return lines.join("\n");
 }
@@ -360,8 +441,16 @@ async function main() {
     process.exit(1);
   }
 
+  if (doInstall && provider === "both") {
+    console.error("Auto-install is ambiguous when both Codex and Claude are detected. Re-run with --provider codex or --provider claude.");
+    process.exit(1);
+  }
+
   // Step 1 & 2: Scan
   let scanResults = scanTools(provider);
+  const globalCache = provider && provider !== "both"
+    ? syncGlobalCache(provider, scanResults, process.cwd())
+    : null;
 
   const missing = scanResults.filter((r) => r.status === "missing");
 
@@ -444,11 +533,18 @@ async function main() {
 
   // Step 7: Output
   if (outputJson) {
-    console.log(formatJson(scanResults, provider));
+    const payload = JSON.parse(formatJson(scanResults, provider));
+    if (globalCache) {
+      payload.globalCache = {
+        path: resolveGlobalStatusPath(provider),
+        notebookLM: globalCache.notebookLM
+      };
+    }
+    console.log(JSON.stringify(payload, null, 2));
   }
 
   if (outputPath) {
-    const report = formatReport(scanResults, provider);
+    const report = formatReport(scanResults, provider, globalCache);
     fs.writeFileSync(outputPath, report, "utf8");
     if (!outputJson) console.log(`Report written to ${outputPath}`);
   }

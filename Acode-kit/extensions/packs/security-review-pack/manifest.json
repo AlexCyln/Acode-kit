@@ -1,0 +1,14 @@
+{
+  "id": "security-review-pack",
+  "type": "skill",
+  "entry": "Acode-kit/extensions/packs/security-review-pack/SKILL.md",
+  "description": "Security-focused bounded review pack for auth, permission, tenant, export, callback, and upload risks.",
+  "triggers": ["security", "auth", "permission", "tenant", "export", "callback", "upload"],
+  "load_at": ["Step 5e", "Stage 6"],
+  "priority": 90,
+  "mode": "delegated-capability",
+  "requires": {
+    "scenario": ["bs-admin-console", "bs-platform-ecosystem", "bs-api-platform"],
+    "stack": ["spring-boot", "react-shadcn"]
+  }
+}

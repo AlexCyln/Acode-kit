@@ -13,6 +13,12 @@
       "difficulty": "medium"
     },
     {
+      "keywords": ["代码审查", "code review", "审查", "review"],
+      "phase": "测试",
+      "task_type": "编码审查",
+      "difficulty": "medium"
+    },
+    {
       "keywords": ["文档", "报告", "总结", "handoff", "prd"],
       "phase": "文档",
       "task_type": "文档撰写",
@@ -37,7 +43,7 @@
       "difficulty": "high"
     },
     {
-      "keywords": ["审查", "review", "测试编写", "test case"],
+      "keywords": ["测试编写", "test case"],
       "phase": "测试",
       "task_type": "编码审查",
       "difficulty": "medium"

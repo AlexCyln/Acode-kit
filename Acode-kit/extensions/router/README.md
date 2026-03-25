@@ -2,6 +2,13 @@
 
 This extension adds model-version routing for Acode-kit.
 
+## Current position
+
+- This is the internal routing layer used by `acode-run`.
+- It is not a user-facing entry point.
+- It maps task phase, difficulty, and provider to the most suitable model.
+- It preserves logical session continuity and reuses native sessions when possible.
+
 ## Components
 1. `SKILL.md`: Router skill contract and boundaries.
 2. `config/model-map.json`: task-to-model mapping per phase/provider.
@@ -38,3 +45,8 @@ node scripts/router-exec.mjs \
 1. Logical session id: `project_id:phase` (or custom input)
 2. Native session id: returned from provider run
 3. Router maps logical to native id and reuses native id automatically
+
+## Operational notes
+1. Keep router config aligned with the main Acode-kit workflow docs.
+2. Update model mapping when stage or phase semantics change.
+3. If a fallback is triggered, record the reason in the execution log so later sessions can reuse the same routing state.

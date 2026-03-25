@@ -29,6 +29,10 @@ function exists(targetPath) {
   return fs.existsSync(targetPath);
 }
 
+function isRetryableCopyError(error) {
+  return ["EIO", "EPERM", "EBUSY", "ENOTEMPTY", "EACCES"].includes(error?.code);
+}
+
 function ensureSkill(sourceDir) {
   const skillFile = path.join(sourceDir, "SKILL.md");
   if (!exists(skillFile)) {
@@ -36,10 +40,53 @@ function ensureSkill(sourceDir) {
   }
 }
 
+function copyDirFallback(sourceDir, destDir) {
+  const stat = fs.lstatSync(sourceDir);
+  if (!stat.isDirectory()) {
+    throw new Error(`Expected directory source: ${sourceDir}`);
+  }
+
+  fs.mkdirSync(destDir, { recursive: true });
+  for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
+    const sourcePath = path.join(sourceDir, entry.name);
+    const destPath = path.join(destDir, entry.name);
+
+    if (entry.isDirectory()) {
+      copyDirFallback(sourcePath, destPath);
+      continue;
+    }
+
+    if (entry.isSymbolicLink()) {
+      const linkTarget = fs.readlinkSync(sourcePath);
+      try {
+        fs.symlinkSync(linkTarget, destPath);
+      } catch {
+        fs.copyFileSync(sourcePath, destPath);
+      }
+      continue;
+    }
+
+    fs.copyFileSync(sourcePath, destPath);
+  }
+}
+
 function copyDir(sourceDir, destDir) {
-  fs.rmSync(destDir, { recursive: true, force: true });
+  fs.rmSync(destDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
   fs.mkdirSync(path.dirname(destDir), { recursive: true });
-  fs.cpSync(sourceDir, destDir, { recursive: true });
+  try {
+    fs.cpSync(sourceDir, destDir, {
+      recursive: true,
+      force: true,
+      dereference: false,
+      preserveTimestamps: true,
+      verbatimSymlinks: false
+    });
+  } catch (error) {
+    if (!isRetryableCopyError(error)) throw error;
+    fs.rmSync(destDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    fs.mkdirSync(destDir, { recursive: true });
+    copyDirFallback(sourceDir, destDir);
+  }
 }
 
 function copyFile(sourceFile, destFile) {
@@ -53,6 +100,16 @@ function copyBundleScripts(sourceDir, bundleDir) {
   if (!exists(scriptsDir)) return;
   const targetScriptsDir = path.join(bundleDir, "scripts");
   copyDir(scriptsDir, targetScriptsDir);
+}
+
+function resolveGlobalStateRoot(agent) {
+  if (agent === "claude") {
+    return path.join(process.env.CLAUDE_HOME || path.join(os.homedir(), ".claude"), "acode-kit");
+  }
+  if (agent === "codex") {
+    return path.join(process.env.CODEX_HOME || path.join(os.homedir(), ".codex"), "acode-kit");
+  }
+  return path.join(DEFAULT_LOCAL_ROOT, ".acode-kit-state");
 }
 
 function detectAgentMode() {
@@ -161,28 +218,40 @@ function installClaude(sourceDir, destRoot) {
 function installLocal(sourceDir, destRoot) {
   ensureSkill(sourceDir);
   const bundleDir = path.join(destRoot, path.basename(sourceDir));
-  const adapterTemplate = path.join(sourceDir, "integrations", "claude", "acode-kit.md");
-  const routerAdapterTemplate = path.join(sourceDir, "integrations", "claude", "acode-run.md");
+  const claudeAdapterTemplate = path.join(sourceDir, "integrations", "claude", "acode-kit.md");
+  const claudeRouterAdapterTemplate = path.join(sourceDir, "integrations", "claude", "acode-run.md");
+  const codexAdapterTemplate = path.join(sourceDir, "integrations", "codex", "acode-kit.md");
+  const codexRouterAdapterTemplate = path.join(sourceDir, "integrations", "codex", "acode-run.md");
   const portableClaudeFile = path.join(destRoot, "claude", "acode-kit.md");
   const portableRouterFile = path.join(destRoot, "claude", "acode-run.md");
+  const portableCodexFile = path.join(destRoot, "codex", "acode-kit.md");
+  const portableCodexRouterFile = path.join(destRoot, "codex", "acode-run.md");
 
   copyDir(sourceDir, bundleDir);
   copyBundleScripts(sourceDir, bundleDir);
   const lines = [`Installed portable bundle to ${bundleDir}`];
   const result = { lines, bundleDir };
 
-  if (exists(adapterTemplate)) {
-    copyFile(adapterTemplate, portableClaudeFile);
+  if (exists(claudeAdapterTemplate)) {
+    copyFile(claudeAdapterTemplate, portableClaudeFile);
     lines.push(`Saved portable Claude adapter to ${portableClaudeFile}`);
   }
-  if (exists(routerAdapterTemplate)) {
-    copyFile(routerAdapterTemplate, portableRouterFile);
+  if (exists(claudeRouterAdapterTemplate)) {
+    copyFile(claudeRouterAdapterTemplate, portableRouterFile);
     lines.push(`Saved portable Claude unified entry to ${portableRouterFile}`);
+  }
+  if (exists(codexAdapterTemplate)) {
+    copyFile(codexAdapterTemplate, portableCodexFile);
+    lines.push(`Saved portable Codex runtime guide to ${portableCodexFile}`);
+  }
+  if (exists(codexRouterAdapterTemplate)) {
+    copyFile(codexRouterAdapterTemplate, portableCodexRouterFile);
+    lines.push(`Saved portable Codex routing guide to ${portableCodexRouterFile}`);
   }
 
   lines.push("Manual next step:");
-  lines.push("- Codex: copy the Acode-kit folder into ~/.codex/skills/");
-  lines.push("- Claude Code: copy the Acode-kit folder into ~/.claude/ and copy claude/*.md into ~/.claude/agents/");
+  lines.push("- Codex: copy the Acode-kit folder into ~/.codex/skills/ and use codex/*.md as runtime supplements if you need standalone references.");
+  lines.push("- Claude Code: copy the Acode-kit folder into ~/.claude/ and copy claude/*.md into ~/.claude/agents/.");
   return result;
 }
 
@@ -244,6 +313,17 @@ function main() {
           : installLocal(prepared.sourceDir, job.destRoot);
       for (const line of result.lines) console.log(line);
       lastBundleDir = result.bundleDir;
+
+      if (!skipInit && lastBundleDir) {
+        if (scope === "user") {
+          runInit(lastBundleDir, resolveGlobalStateRoot(job.agent), args);
+        } else if (scope === "project" && job.agent === "claude") {
+          const projectRoot = args["dest-dir"]
+            ? path.dirname(path.resolve(args["dest-dir"]))
+            : process.cwd();
+          runInit(lastBundleDir, projectRoot, args);
+        }
+      }
     }
   } finally {
     if (prepared.cleanup) prepared.cleanup();
@@ -251,16 +331,20 @@ function main() {
 
   console.log("");
   console.log("Restart your target AI agent after installation.");
+  console.log("");
+  console.log("Quick CLI flags after install:");
+  console.log("  acode-kit -status");
+  console.log("  acode-kit -add <path>");
+  console.log("  acode-kit -scan <path>");
+  console.log("  acode-kit -remove <name>");
+  console.log("  acode-kit -help");
 
-  // For project-level installs, auto-run init to complete the full setup
-  if (scope === "project" && !skipInit && lastBundleDir) {
-    // Derive project root: dest-dir points to .claude/ (or similar), project root is its parent
-    const destDir = args["dest-dir"];
-    const projectRoot = destDir
-      ? path.dirname(path.resolve(destDir))
-      : process.cwd();
-
-    runInit(lastBundleDir, projectRoot, args);
+  if (skipInit || !lastBundleDir || scope === "project" || scope === "user") {
+    if (skipInit || !lastBundleDir) {
+      console.log("");
+      console.log("To complete first-time setup, run this in your terminal:");
+      console.log(`  node ${lastBundleDir}/scripts/acode-kit-init.mjs`);
+    }
   } else {
     console.log("");
     console.log("To complete first-time setup, run this in your terminal:");

@@ -6,6 +6,7 @@ REF="${REF:-main}"
 SKILL_PATH="${SKILL_PATH:-Acode-kit}"
 AGENT="${AGENT:-auto}"
 SCOPE="${SCOPE:-user}"
+SKIP_INIT="${SKIP_INIT:-false}"
 CODEX_ROOT_DEFAULT="${CODEX_HOME:-$HOME/.codex}/skills"
 CLAUDE_ROOT_DEFAULT="${CLAUDE_HOME:-$HOME/.claude}"
 LOCAL_ROOT_DEFAULT="${PWD}/agent-skills"
@@ -58,6 +59,15 @@ resolve_dest_root() {
       echo "Unsupported agent: $agent" >&2
       exit 1
       ;;
+  esac
+}
+
+resolve_global_state_root() {
+  local agent="$1"
+  case "$agent" in
+    codex) echo "${CODEX_HOME:-$HOME/.codex}/acode-kit" ;;
+    claude) echo "${CLAUDE_HOME:-$HOME/.claude}/acode-kit" ;;
+    *) echo "${LOCAL_ROOT_DEFAULT}/.acode-kit-state" ;;
   esac
 }
 
@@ -116,6 +126,7 @@ install_agent() {
       ;;
     local)
       mkdir -p "$dest_root/claude"
+      mkdir -p "$dest_root/codex"
       if [[ -f "$source_dir/integrations/claude/acode-kit.md" ]]; then
         cp "$source_dir/integrations/claude/acode-kit.md" "$dest_root/claude/acode-kit.md"
         echo "Saved portable Claude adapter to $dest_root/claude/acode-kit.md"
@@ -124,12 +135,46 @@ install_agent() {
         cp "$source_dir/integrations/claude/acode-run.md" "$dest_root/claude/acode-run.md"
         echo "Saved portable Claude unified entry to $dest_root/claude/acode-run.md"
       fi
+      if [[ -f "$source_dir/integrations/codex/acode-kit.md" ]]; then
+        cp "$source_dir/integrations/codex/acode-kit.md" "$dest_root/codex/acode-kit.md"
+        echo "Saved portable Codex runtime guide to $dest_root/codex/acode-kit.md"
+      fi
+      if [[ -f "$source_dir/integrations/codex/acode-run.md" ]]; then
+        cp "$source_dir/integrations/codex/acode-run.md" "$dest_root/codex/acode-run.md"
+        echo "Saved portable Codex routing guide to $dest_root/codex/acode-run.md"
+      fi
       echo "Installed portable bundle to $target_dir"
       echo "Manual next step:"
-      echo "- Codex: copy the Acode-kit folder into ~/.codex/skills/"
+      echo "- Codex: copy the Acode-kit folder into ~/.codex/skills/ and use codex/*.md as runtime supplements if needed."
       echo "- Claude Code: copy the Acode-kit folder into ~/.claude/ and copy claude/acode-kit.md and claude/acode-run.md into ~/.claude/agents/"
       ;;
   esac
+}
+
+run_init() {
+  local bundle_dir="$1"
+  local project_root="$2"
+  local agent="$3"
+  local init_script="$bundle_dir/scripts/acode-kit-init.mjs"
+
+  if [[ ! -f "$init_script" ]]; then
+    echo "Init script not found at expected location. Run manually:" >&2
+    echo "  node $init_script --cwd $project_root" >&2
+    return 1
+  fi
+
+  echo ""
+  echo "Running initialization..."
+  echo "========================"
+  local init_args=(--cwd "$project_root" --force)
+  if [[ "$agent" == "claude" || "$agent" == "codex" ]]; then
+    init_args+=(--provider "$agent")
+  fi
+  if [[ "$SCOPE" == "user" || "$SCOPE" == "project" ]]; then
+    init_args+=(--yes)
+  fi
+
+  node "$init_script" "${init_args[@]}"
 }
 
 LAST_BUNDLE_DIR=""
@@ -160,6 +205,9 @@ echo "- requested agent: $REQUESTED_AGENT"
 echo "- resolved agent: $AGENT"
 echo "- scope: $SCOPE"
 echo "- destination: $RESOLVED_DEST_INFO"
+if [[ "$SCOPE" == "user" ]]; then
+  echo "- note: user-level installs are intended to populate a persistent global MCP cache for future sessions"
+fi
 if [[ "$REQUESTED_AGENT" == "auto" ]]; then
   echo "- note: variables like AGENT=local must be passed to bash, not only to curl"
 fi
@@ -190,13 +238,51 @@ fi
 
 if [[ "$AGENT" == "both" ]]; then
   install_agent "$SOURCE_DIR" codex
+  if [[ "$SKIP_INIT" != "true" && "$SCOPE" == "user" ]]; then
+    run_init "$LAST_BUNDLE_DIR" "$(resolve_global_state_root codex)" codex || true
+  fi
   install_agent "$SOURCE_DIR" claude
+  if [[ "$SKIP_INIT" != "true" ]]; then
+    case "$SCOPE" in
+      user)
+        run_init "$LAST_BUNDLE_DIR" "$(resolve_global_state_root claude)" claude || true
+        ;;
+      project)
+        PROJECT_ROOT="$(dirname "$(resolve_dest_root claude)")"
+        run_init "$LAST_BUNDLE_DIR" "$PROJECT_ROOT" claude || true
+        ;;
+    esac
+  fi
 else
   install_agent "$SOURCE_DIR" "$AGENT"
+  if [[ "$SKIP_INIT" != "true" ]]; then
+    case "$SCOPE" in
+      user)
+        run_init "$LAST_BUNDLE_DIR" "$(resolve_global_state_root "$AGENT")" "$AGENT" || true
+        ;;
+      project)
+        if [[ "$AGENT" == "claude" ]]; then
+          PROJECT_ROOT="$(dirname "$(resolve_dest_root claude)")"
+          run_init "$LAST_BUNDLE_DIR" "$PROJECT_ROOT" "$AGENT" || true
+        fi
+        ;;
+    esac
+  fi
 fi
 
 echo ""
 echo "Restart your target AI agent after installation."
 echo ""
-echo "To complete first-time setup, run this in your terminal:"
-echo "  node $LAST_BUNDLE_DIR/scripts/acode-kit-init.mjs"
+echo "Quick CLI flags after install:"
+echo "  acode-kit -status"
+echo "  acode-kit -add <path>"
+echo "  acode-kit -scan <path>"
+echo "  acode-kit -remove <name>"
+echo "  acode-kit -help"
+echo ""
+if [[ "$SKIP_INIT" == "true" ]]; then
+  echo "To complete first-time setup and populate the global cache, run this in your terminal:"
+  echo "  node $LAST_BUNDLE_DIR/scripts/acode-kit-init.mjs"
+else
+  echo "Initialization finished and the global cache was synced for the user environment."
+fi

@@ -14,6 +14,7 @@
  *   --provider codex|claude  Target provider (auto-detected if omitted)
  *   --yes                 Skip confirmation prompts (auto-approve installs)
  *   --force               Re-initialize even if already initialized
+ *   --notebooklm-auth-completed  Persist NotebookLM auth as completed in the global cache
  */
 import fs from "node:fs";
 import os from "node:os";
@@ -25,6 +26,7 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const STATUS_FILE = ".acode-kit-initialized.json";
+const GLOBAL_STATUS_FILE = ".acode-kit-global.json";
 const VERSION = "1.0.0";
 const IS_WIN = os.platform() === "win32";
 
@@ -76,6 +78,38 @@ function isFolderEmpty(dir) {
   if (!fs.existsSync(dir)) return true;
   const entries = fs.readdirSync(dir).filter((e) => !e.startsWith("."));
   return entries.length === 0;
+}
+
+function readJsonIfExists(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch (_) {
+    return null;
+  }
+}
+
+function resolveGlobalStateDir(provider) {
+  const homeDir = provider === "claude"
+    ? (process.env.CLAUDE_HOME || path.join(os.homedir(), ".claude"))
+    : (process.env.CODEX_HOME || path.join(os.homedir(), ".codex"));
+  return path.join(homeDir, "acode-kit");
+}
+
+function resolveGlobalStatusPath(provider) {
+  return path.join(resolveGlobalStateDir(provider), GLOBAL_STATUS_FILE);
+}
+
+function writeJsonFile(filePath, data) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+}
+
+function inferProviderFromBundlePath() {
+  const normalizedDir = __dirname.replace(/\\/g, "/");
+  if (normalizedDir.includes("/.codex/")) return "codex";
+  if (normalizedDir.includes("/.claude/")) return "claude";
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -180,9 +214,13 @@ function verifyScan(provider) {
 // Step 5: Configure NotebookLM
 // ---------------------------------------------------------------------------
 
-function configureNotebookLM(scanResult) {
+function configureNotebookLM(scanResult, options = {}) {
+  const existingGlobalStatus = options.existingGlobalStatus || null;
+  const authCompletedOverride = options.authCompletedOverride === true;
   const notebookLM = scanResult.tools.find((t) => t.id === "notebooklm");
   const notebookUrl = "https://notebooklm.google.com/notebook/7ec4ec07-abb3-478e-99aa-f8946e103499";
+  const authPrompt = "Log me in to NotebookLM";
+  const rememberedAuthCompleted = Boolean(existingGlobalStatus?.notebookLM?.authCompleted);
 
   if (!notebookLM || notebookLM.status !== "installed") {
     console.log("\nNotebookLM MCP is not installed. Skipping authentication setup.");
@@ -190,7 +228,24 @@ function configureNotebookLM(scanResult) {
     return {
       configured: false,
       authCompleted: false,
-      notebookUrl
+      notebookUrl,
+      authPrompt
+    };
+  }
+
+  if (authCompletedOverride || rememberedAuthCompleted) {
+    if (authCompletedOverride && !rememberedAuthCompleted) {
+      console.log("\nNotebookLM authentication status marked as completed.");
+      console.log("This will be persisted in the global MCP cache.");
+    } else if (rememberedAuthCompleted) {
+      console.log("\nNotebookLM authentication status restored from the global MCP cache.");
+    }
+
+    return {
+      configured: true,
+      authCompleted: true,
+      notebookUrl,
+      authPrompt
     };
   }
 
@@ -199,10 +254,11 @@ function configureNotebookLM(scanResult) {
   console.log("──────────────────────────────────────────────");
   console.log("NotebookLM MCP is installed but requires browser authentication.");
   console.log("");
-  console.log("  1. Open your AI agent (Claude Code / Codex)");
-  console.log('  2. Type: Log me in to NotebookLM');
-  console.log("  3. A browser window will open — complete the Google sign-in");
-  console.log("  4. Return to the agent and confirm authentication is done");
+  console.log("  1. Start Acode-kit and enter the workspace status report step");
+  console.log(`  2. If prompted to authenticate NotebookLM, type exactly: ${authPrompt}`);
+  console.log("  3. The runtime should pass that input through to the agent without interception");
+  console.log("  4. Complete the Google sign-in and notebook binding");
+  console.log("  5. Return here and re-run init with --force to refresh auth state");
   console.log("");
   console.log(`NotebookLM URL: ${notebookUrl}`);
   console.log("──────────────────────────────────────────────");
@@ -210,26 +266,37 @@ function configureNotebookLM(scanResult) {
   return {
     configured: true,
     authCompleted: false,
-    notebookUrl
+    notebookUrl,
+    authPrompt
   };
 }
 
-// ---------------------------------------------------------------------------
-// Step 6: Write status file
-// ---------------------------------------------------------------------------
-
-function writeStatusFile(cwd, data) {
-  const statusPath = path.join(cwd, STATUS_FILE);
+function buildStatusRecord(data, scope) {
   const status = {
     version: VERSION,
     initializedAt: new Date().toISOString(),
+    scope,
     provider: data.provider,
     projectFolder: data.projectFolder,
     tools: data.tools,
     notebookLM: data.notebookLM
   };
-  fs.writeFileSync(statusPath, JSON.stringify(status, null, 2), "utf8");
+  return status;
+}
+
+function writeStatusFile(cwd, data) {
+  const statusPath = path.join(cwd, STATUS_FILE);
+  const status = buildStatusRecord(data, "workspace");
+  writeJsonFile(statusPath, status);
   console.log(`\nStatus file written to ${statusPath}`);
+  return status;
+}
+
+function writeGlobalStatusFile(provider, data) {
+  const globalStatusPath = resolveGlobalStatusPath(provider);
+  const status = buildStatusRecord(data, "global");
+  writeJsonFile(globalStatusPath, status);
+  console.log(`Global MCP state synced to ${globalStatusPath}`);
   return status;
 }
 
@@ -240,15 +307,24 @@ function writeStatusFile(cwd, data) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const cwd = path.resolve(args.cwd || process.cwd());
-  const provider = args.provider || null;
+  const provider = args.provider || inferProviderFromBundlePath() || null;
   const autoYes = args.yes === "true";
   const force = args.force === "true";
+  const notebookLmAuthCompleted = args["notebooklm-auth-completed"] === "true";
 
   // Check if already initialized
   const statusPath = path.join(cwd, STATUS_FILE);
+  const globalStatusPath = provider ? resolveGlobalStatusPath(provider) : null;
   if (fs.existsSync(statusPath) && !force) {
+    const existingStatus = readJsonIfExists(statusPath);
+    if (provider && existingStatus && globalStatusPath && !fs.existsSync(globalStatusPath)) {
+      writeGlobalStatusFile(provider, existingStatus);
+    }
     console.log("Acode-kit is already initialized in this directory.");
     console.log(`Status file: ${statusPath}`);
+    if (globalStatusPath) {
+      console.log(`Global MCP cache: ${globalStatusPath}`);
+    }
     console.log("Use --force to re-initialize.");
     process.exit(0);
   }
@@ -273,6 +349,10 @@ async function main() {
   }
 
   const resolvedProvider = initialScan.provider;
+  if (resolvedProvider === "both") {
+    console.error("Multiple providers detected (codex and claude). Please re-run init with --provider codex or --provider claude.");
+    process.exit(1);
+  }
   console.log(`Provider: ${resolvedProvider}`);
   for (const t of initialScan.tools) {
     const icon = t.status === "installed" ? "[OK]" : "[--]";
@@ -286,7 +366,11 @@ async function main() {
   const finalScan = verifyScan(resolvedProvider) || initialScan;
 
   // Step 5: Configure NotebookLM
-  const notebookLMConfig = configureNotebookLM(finalScan);
+  const existingGlobalStatus = provider && globalStatusPath ? readJsonIfExists(globalStatusPath) : null;
+  const notebookLMConfig = configureNotebookLM(finalScan, {
+    existingGlobalStatus,
+    authCompletedOverride: notebookLmAuthCompleted
+  });
 
   // Step 6: Write status file
   const toolsSummary = finalScan.tools.map((t) => ({
@@ -301,6 +385,15 @@ async function main() {
     tools: toolsSummary,
     notebookLM: notebookLMConfig
   });
+
+  if (resolvedProvider) {
+    writeGlobalStatusFile(resolvedProvider, {
+      provider: resolvedProvider,
+      projectFolder,
+      tools: toolsSummary,
+      notebookLM: notebookLMConfig
+    });
+  }
 
   console.log("\nInitialization complete!");
   console.log("You can now use Acode-kit to start a project:");
