@@ -39,6 +39,14 @@ function write(filePath, content) {
   fs.writeFileSync(filePath, content, "utf8");
 }
 
+function backupFileIfExists(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const backupPath = `${filePath}.${stamp}.bak`;
+  fs.copyFileSync(filePath, backupPath);
+  return backupPath;
+}
+
 function ensureProjectDocFromTemplate(projectRoot, fileName) {
   const targetPath = path.join(projectRoot, "docs", "project", fileName);
   if (fs.existsSync(targetPath)) {
@@ -128,15 +136,19 @@ function main() {
   let projectExtensions = read(projectExtensionsPath);
   projectExtensions = upsertProjectExtensions(projectExtensions, manifest, reason);
   projectExtensions = appendChangeRecord(projectExtensions, manifest, reason);
+  const projectExtensionsBackup = backupFileIfExists(projectExtensionsPath);
   write(projectExtensionsPath, projectExtensions);
 
   let activeStandards = read(activeStandardsPath);
   activeStandards = activateInActiveStandards(activeStandards, manifest);
+  const activeStandardsBackup = backupFileIfExists(activeStandardsPath);
   write(activeStandardsPath, activeStandards);
 
   console.log(`extension activated at project level: ${manifest.id}`);
   console.log(`project extensions: ${projectExtensionsPath}`);
   console.log(`active standards: ${activeStandardsPath}`);
+  if (projectExtensionsBackup) console.log(`project extensions backup: ${projectExtensionsBackup}`);
+  if (activeStandardsBackup) console.log(`active standards backup: ${activeStandardsBackup}`);
 }
 
 main();

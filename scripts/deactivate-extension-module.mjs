@@ -31,6 +31,14 @@ function write(filePath, content) {
   fs.writeFileSync(filePath, content, "utf8");
 }
 
+function backupFileIfExists(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const backupPath = `${filePath}.${stamp}.bak`;
+  fs.copyFileSync(filePath, backupPath);
+  return backupPath;
+}
+
 function removeFromBacktickList(line, id) {
   const matches = [...line.matchAll(/`([^`]+)`/g)].map((match) => match[1]).filter((item) => item !== id);
   return `${line.split("：")[0]}：${matches.length ? matches.map((item) => `\`${item}\``).join("、") : "无"}`;
@@ -95,12 +103,16 @@ function main() {
     `- 当前扩展装载摘要：已停用 \`${args.id}\`，后续命中节点不再装载该扩展`
   );
 
+  const projectExtensionsBackup = backupFileIfExists(projectExtensionsPath);
+  const activeStandardsBackup = backupFileIfExists(activeStandardsPath);
   write(projectExtensionsPath, projectExtensions);
   write(activeStandardsPath, activeStandards);
 
   console.log(`extension deactivated at project level: ${args.id}`);
   console.log(`project extensions: ${projectExtensionsPath}`);
   console.log(`active standards: ${activeStandardsPath}`);
+  if (projectExtensionsBackup) console.log(`project extensions backup: ${projectExtensionsBackup}`);
+  if (activeStandardsBackup) console.log(`active standards backup: ${activeStandardsBackup}`);
 }
 
 main();
