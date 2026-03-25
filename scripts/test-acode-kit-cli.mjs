@@ -25,6 +25,8 @@ function main() {
   assert.equal(help.status, 0, help.stderr);
   assert.match(help.stdout, /acode-kit -status/, "help should list -status");
   assert.match(help.stdout, /acode-kit -add/, "help should list -add");
+  assert.match(help.stdout, /acode-kit -enable/, "help should list -enable");
+  assert.match(help.stdout, /acode-kit -disable/, "help should list -disable");
   assert.match(help.stdout, /acode-kit -scan/, "help should list -scan");
   assert.match(help.stdout, /acode-kit -remove/, "help should list -remove");
 
@@ -56,6 +58,23 @@ function main() {
     fs.existsSync(path.join(repoRoot, "Acode-kit", "extensions", "packs", "demo-third-party-extension")),
     "installed extension pack should exist"
   );
+
+  const enable = runCli(["-enable", "demo-third-party-extension"], sandboxWorkspace);
+  assert.equal(enable.status, 0, enable.stderr || enable.stdout);
+  assert.match(enable.stdout, /extension activated at project level: demo-third-party-extension/, "enable should activate extension");
+  const projectExtensions = fs.readFileSync(path.join(sandboxWorkspace, "docs", "project", "PROJECT_EXTENSIONS.md"), "utf8");
+  const activeStandards = fs.readFileSync(path.join(sandboxWorkspace, "docs", "project", "ACTIVE_STANDARDS.md"), "utf8");
+  assert.match(projectExtensions, /`demo-third-party-extension`/, "project extensions should include extension row");
+  assert.match(projectExtensions, /已启用/, "project extensions should mark extension enabled");
+  assert.match(activeStandards, /`demo-third-party-extension`/, "active standards should include extension");
+
+  const disable = runCli(["-disable", "demo-third-party-extension"], sandboxWorkspace);
+  assert.equal(disable.status, 0, disable.stderr || disable.stdout);
+  assert.match(disable.stdout, /extension deactivated at project level: demo-third-party-extension/, "disable should deactivate extension");
+  const projectExtensionsAfterDisable = fs.readFileSync(path.join(sandboxWorkspace, "docs", "project", "PROJECT_EXTENSIONS.md"), "utf8");
+  const activeStandardsAfterDisable = fs.readFileSync(path.join(sandboxWorkspace, "docs", "project", "ACTIVE_STANDARDS.md"), "utf8");
+  assert.match(projectExtensionsAfterDisable, /已停用/, "project extensions should mark extension disabled");
+  assert.doesNotMatch(activeStandardsAfterDisable, /当前启用扩展：.*`demo-third-party-extension`/, "active standards should remove extension from enabled list");
 
   const remove = runCli(["-remove", "demo-third-party-extension"], sandboxWorkspace);
   assert.equal(remove.status, 0, remove.stderr || remove.stdout);

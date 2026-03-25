@@ -8,9 +8,13 @@
  *   acode-kit bootstrap → install.mjs (user-level install + init)
  *   acode-kit run     → acode-run.mjs
  *   acode-kit extension-scan → scan-extension-module.mjs
+ *   acode-kit extension-activate → activate-extension-module.mjs
+ *   acode-kit extension-deactivate → deactivate-extension-module.mjs
  *   acode-kit extension-uninstall → uninstall-extension-module.mjs
  *   acode-kit -status → acode-kit-status.mjs
  *   acode-kit -add <path> → add-extension-module.mjs
+ *   acode-kit -enable <name> → activate-extension-module.mjs
+ *   acode-kit -disable <name> → deactivate-extension-module.mjs
  *   acode-kit -scan <path> → scan-extension-module.mjs
  *   acode-kit -remove <name> → remove-extension-package.mjs
  *
@@ -35,12 +39,16 @@ const COMMANDS = {
   bootstrap: { script: "install.mjs", description: "Install Acode-kit to the user environment and initialize it" },
   run: { script: "acode-run.mjs", description: "Execute task via model router" },
   "extension-scan": { script: "scan-extension-module.mjs", description: "Security-scan a custom extension before activation" },
+  "extension-activate": { script: "activate-extension-module.mjs", description: "Activate an installed extension for the current project" },
+  "extension-deactivate": { script: "deactivate-extension-module.mjs", description: "Deactivate an installed extension for the current project" },
   "extension-uninstall": { script: "uninstall-extension-module.mjs", description: "Deactivate an extension at project level" }
 };
 
 const FLAG_COMMANDS = {
   "-status": { script: "acode-kit-status.mjs", mapArgs: () => [] },
   "-add": { script: "add-extension-module.mjs", mapArgs: (argv) => ["--path", argv[3]] },
+  "-enable": { script: "activate-extension-module.mjs", mapArgs: (argv) => ["--id", argv[3]] },
+  "-disable": { script: "deactivate-extension-module.mjs", mapArgs: (argv) => ["--id", argv[3]] },
   "-scan": { script: "scan-extension-module.mjs", mapArgs: (argv) => ["--path", argv[3]] },
   "-remove": { script: "remove-extension-package.mjs", mapArgs: (argv) => ["--id", argv[3]] },
   "-help": { help: true }
@@ -60,11 +68,15 @@ function printUsage() {
   console.log("  acode-kit scan --json                   # Check MCP tool status");
   console.log("  acode-kit run --project-id my-proj      # Route a task");
   console.log("  acode-kit extension-scan --manifest Acode-kit/extensions/packs/foo/manifest.json");
+  console.log("  acode-kit extension-activate --id foo");
+  console.log("  acode-kit extension-deactivate --id foo");
   console.log("  acode-kit extension-uninstall --id foo --project-extensions docs/project/PROJECT_EXTENSIONS.md --active-standards docs/project/ACTIVE_STANDARDS.md");
   console.log("");
   console.log("Quick flags:");
   console.log("  acode-kit -status                       # Show agent basis, active projects, extensions, MCP status");
   console.log("  acode-kit -add ./path/to/ext            # Detect, scan, and install a third-party extension");
+  console.log("  acode-kit -enable ext-name              # Activate an installed extension for the current project");
+  console.log("  acode-kit -disable ext-name             # Deactivate an installed extension for the current project");
   console.log("  acode-kit -scan ./path/to/ext           # Scan a third-party extension");
   console.log("  acode-kit -remove ext-name              # Remove an installed third-party extension");
   console.log("  acode-kit -help                         # Show help");

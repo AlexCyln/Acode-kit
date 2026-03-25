@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-function resolveSkillRoot(baseRoot) {
+export function resolveSkillRoot(baseRoot) {
   const directSkill = path.join(baseRoot, "SKILL.md");
   if (fs.existsSync(directSkill)) {
     return baseRoot;
