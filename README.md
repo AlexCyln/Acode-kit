@@ -416,6 +416,26 @@ Acode-kit 能做的是：
 
 > 一个让 AI 更像“受控项目成员”而不是“随机代码生成器”的框架
 
+#### 4. 不要与同类总 workflow skill 并列作为入口
+
+如果你的 AI 环境里已经安装了其他“项目总控型 / workflow 总入口型” skill：
+
+- 不要把它们和 `Acode-kit` 并列当作同一个项目的入口
+- 一个项目只应有一个总 orchestrator
+- 对于 Acode-kit 管理的项目，应明确让 `Acode-kit` 成为唯一入口
+
+否则会出现：
+
+- 明明指定了 `Acode-kit`，却被另一个同类 skill 抢占
+- 启动路径混乱
+- workflow 边界冲突
+- 项目状态文档与实际执行链路不一致
+
+更合理的做法是：
+
+- 保留 `Acode-kit` 作为总入口
+- 把其他同类 skill 视为参考能力或局部能力，而不是并列主入口
+
 ---
 
 ### ✅ 当前状态
@@ -552,6 +572,12 @@ This is an enabling framework, not a substitute for:
 
 The better those inputs are, the more value Acode-kit can provide.
 
+Do not use Acode-kit in parallel with another top-level workflow-orchestrator skill for the same project.
+
+- one project should have one main orchestrator
+- if the project is Acode-kit-managed, `Acode-kit` should be the only workflow entry
+- other similar skills should be treated as reference-only or bounded local capabilities, not parallel owners of the same workflow
+
 ### 📦 Install
 
 ### GitHub + curl
@@ -678,7 +704,8 @@ Recommended flow:
 3. Tell it explicitly to use `Acode-kit`
 4. Follow the gate sequence in order
 5. Continue stage-by-stage without skipping
-6. Keep your focus on business judgment, architecture, and prompting quality instead of expecting the framework to replace them
+6. If the project is already managed by Acode-kit, keep Acode-kit as the only top-level workflow entry
+7. Keep your focus on business judgment, architecture, and prompting quality instead of expecting the framework to replace them
 
 ### 🧪 Tests
 

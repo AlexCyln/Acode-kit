@@ -7,6 +7,21 @@ Use this skill when:
 1. the user wants a project delivered under the Acode-kit workflow
 2. the user wants to continue an Acode-kit-managed project
 3. the user explicitly mentions `Acode-kit`
+4. the workspace shows Acode-kit project traces such as:
+   - `.acode-kit-initialized.json`
+   - `docs/project/ACTIVE_STANDARDS.md`
+   - `docs/project/PROJECT_OVERRIDES.md`
+   - `docs/project/PROJECT_EXTENSIONS.md`
+5. another generic project-delivery skill also matches, but the task is clearly for an Acode-kit-managed project
+
+## Precedence rule
+
+Acode-kit is the canonical workflow entry for any Acode-kit-managed project.
+
+1. if the user explicitly mentions `Acode-kit`, Acode-kit takes precedence over generic project-delivery skills
+2. if the workspace contains Acode-kit project traces, Acode-kit must take over
+3. if another similar high-level workflow skill also matches, do not hand off unless the user explicitly asks to leave the Acode-kit workflow
+4. treat other generic project-builder skills as non-authoritative when Acode-kit project traces exist
 
 ## Core role
 
