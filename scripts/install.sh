@@ -28,17 +28,7 @@ show_step() {
 }
 
 detect_agent() {
-  local has_codex="false"
-
-  if exists "${CODEX_HOME:-$HOME/.codex}" || exists "${CODEX_HOME:-$HOME/.codex}/skills"; then
-    has_codex="true"
-  fi
-
-  if [[ "$has_codex" == "true" ]]; then
-    echo "codex"
-  else
-    echo "local"
-  fi
+  echo "codex"
 }
 
 resolve_dest_root() {
@@ -259,7 +249,8 @@ if [[ "$SCOPE" == "user" ]]; then
   echo "- note: user-level installs are intended to populate a persistent global MCP cache for future sessions"
 fi
 if [[ "$REQUESTED_AGENT" == "auto" ]]; then
-  echo "- note: variables like AGENT=local must be passed to bash, not only to curl"
+  echo "- note: auto now defaults to Codex skill registration"
+  echo "- note: use AGENT=local only if you explicitly want a portable non-registered bundle"
 fi
 
 TMP_DIR="$(mktemp -d)"

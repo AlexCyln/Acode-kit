@@ -233,6 +233,8 @@ irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps
 - Windows：写入 `%USERPROFILE%\\.acode-kit\\bin\\acode-kit.cmd`，并加入用户 `PATH`
 - macOS / Linux：写入 `~/.acode-kit/bin/acode-kit`，并加入当前 shell 的 PATH 配置
 - 如果当前终端还没有识别到命令，重新打开一个终端窗口后执行 `acode-kit -help`
+- 默认安装目标是 Codex skill 目录：`~/.codex/skills/Acode-kit`
+- 只有显式指定 `AGENT=local` 时，才会走便携本地 bundle 模式
 
 指定 agent / scope 示例：
 
@@ -600,6 +602,8 @@ The installer also creates an `acode-kit` launcher automatically:
 - Windows: `%USERPROFILE%\\.acode-kit\\bin\\acode-kit.cmd` and adds that directory to the user `PATH`
 - macOS / Linux: `~/.acode-kit/bin/acode-kit` and updates the current shell PATH config
 - If the command is not recognized in the current shell, open a new terminal and run `acode-kit -help`
+- The default install target is the Codex skill directory: `~/.codex/skills/Acode-kit`
+- Only an explicit `AGENT=local` switches the installer into portable local-bundle mode
 
 With explicit agent / scope:
 

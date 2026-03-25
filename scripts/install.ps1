@@ -51,12 +51,7 @@ function Show-Step {
 }
 
 function Detect-Agent {
-  $codexBase = Get-BaseHome "codex"
-
-  $hasCodex = (Test-PathExists $codexBase) -or (Test-PathExists (Join-Path $codexBase "skills"))
-
-  if ($hasCodex) { return "codex" }
-  return "local"
+  return "codex"
 }
 
 function Resolve-DestRoot {
@@ -169,7 +164,9 @@ function Write-InstallSummary {
   }
 
   if ($RequestedAgent -eq "auto") {
-    Write-InstallNote "set AGENT, SCOPE, or DEST_ROOT before invoking this script to override the defaults"
+    Write-InstallNote "auto now defaults to Codex skill registration"
+    Write-InstallNote "set AGENT=local only if you explicitly want a portable non-registered bundle"
+    Write-InstallNote "set SCOPE or DEST_ROOT before invoking this script to override install paths"
   }
 }
 

@@ -118,10 +118,7 @@ function resolveGlobalStateRoot(agent) {
 }
 
 function detectAgentMode() {
-  const codexBase = process.env.CODEX_HOME || path.join(os.homedir(), ".codex");
-  const hasCodex = exists(codexBase) || exists(path.join(codexBase, "skills"));
-  if (hasCodex) return "codex";
-  return "local";
+  return "codex";
 }
 
 function createJobs(args) {
