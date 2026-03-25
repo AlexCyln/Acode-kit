@@ -154,14 +154,14 @@ function main() {
     }
 
     const entryRaw = manifest.entry || "";
-    const allowedRoot = tempDir ? manifestDir : repoRoot;
+    const allowedRoot = manifestDir;
+    const manifestRelativeEntryPath = path.resolve(manifestDir, entryRaw);
+    const repoRelativeEntryPath = path.resolve(repoRoot, entryRaw);
     const entryPath = path.isAbsolute(entryRaw)
       ? entryRaw
-      : tempDir
-        ? path.resolve(manifestDir, entryRaw)
-        : fs.existsSync(path.resolve(manifestDir, entryRaw))
-          ? path.resolve(manifestDir, entryRaw)
-          : path.resolve(repoRoot, entryRaw);
+      : fs.existsSync(manifestRelativeEntryPath)
+        ? manifestRelativeEntryPath
+        : repoRelativeEntryPath;
     if (!entryPath.startsWith(allowedRoot)) {
       pushFinding(securityFindings, { level: "fail", file: manifestPath, rule: "entry-boundary", message: "Entry path escapes repository boundary." });
     } else if (!fs.existsSync(entryPath)) {

@@ -30,6 +30,34 @@ function main() {
   assert.equal(passPayload.security_status, "pass", "trusted pack security should pass");
   assert.equal(passPayload.architecture_status, "pass", "trusted pack architecture should pass");
 
+  const externalRoot = fs.mkdtempSync(path.join(os.tmpdir(), "acode-ext-external-"));
+  const externalPack = path.join(externalRoot, "external-good-pack");
+  fs.mkdirSync(externalPack, { recursive: true });
+  fs.writeFileSync(
+    path.join(externalPack, "manifest.json"),
+    JSON.stringify({
+      id: "external-good-pack",
+      type: "markdown",
+      entry: "pack.md",
+      description: "external test pack",
+      load_at: ["Step 5e"],
+      priority: 60,
+      mode: "reference-only"
+    }, null, 2)
+  );
+  fs.writeFileSync(path.join(externalPack, "pack.md"), "# External good pack\n\nThis is a bounded extension.");
+
+  const externalScan = runNode(
+    "scripts/scan-extension-module.mjs",
+    ["--manifest", path.join(externalPack, "manifest.json"), "--json"],
+    repoRoot
+  );
+  assert.equal(externalScan.status, 0, externalScan.stderr);
+  const externalPayload = JSON.parse(externalScan.stdout);
+  assert.equal(externalPayload.status, "pass", "external valid pack should pass");
+  assert.equal(externalPayload.security_status, "pass", "external valid pack security should pass");
+  assert.equal(externalPayload.architecture_status, "pass", "external valid pack architecture should pass");
+
   const maliciousRoot = fs.mkdtempSync(path.join(os.tmpdir(), "acode-ext-malicious-"));
   const maliciousPack = path.join(maliciousRoot, "evil-pack");
   fs.mkdirSync(maliciousPack, { recursive: true });
