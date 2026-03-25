@@ -44,6 +44,20 @@ function removeFromBacktickList(line, id) {
   return `${line.split("：")[0]}：${matches.length ? matches.map((item) => `\`${item}\``).join("、") : "无"}`;
 }
 
+function extractEnabledExtensions(content) {
+  const enabledLine = /^- 当前启用扩展：.*$/m.exec(content)?.[0] || "- 当前启用扩展：";
+  return [...enabledLine.matchAll(/`([^`]+)`/g)].map((match) => match[1]);
+}
+
+function upsertLine(content, prefix, value) {
+  const pattern = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}.*$`, "m");
+  const line = `${prefix}${value}`;
+  if (pattern.test(content)) {
+    return content.replace(pattern, line);
+  }
+  return `${content.trim()}\n${line}\n`;
+}
+
 function appendDisableRecord(content, id, reason) {
   const stamp = new Date().toISOString().slice(0, 10);
   const block = `- 日期：\`${stamp}\`\n- 变更内容：停用扩展 \`${id}\`\n- 影响范围：该扩展关联节点不再装载\n- 审批状态：自动停用\n- 停用原因：${reason}\n\n`;
@@ -94,13 +108,27 @@ function main() {
     );
   }
 
+  const remaining = extractEnabledExtensions(activeStandards).filter((item) => item !== args.id);
   activeStandards = activeStandards.replace(
     /^- 当前启用扩展：.*$/m,
     (line) => removeFromBacktickList(line, args.id)
   );
-  activeStandards = activeStandards.replace(
-    /^- 当前扩展装载摘要：.*$/m,
-    `- 当前扩展装载摘要：已停用 \`${args.id}\`，后续命中节点不再装载该扩展`
+  activeStandards = upsertLine(
+    activeStandards,
+    "- 当前启用扩展数量：",
+    String(remaining.length)
+  );
+  activeStandards = upsertLine(
+    activeStandards,
+    "- 扩展模块清单：",
+    "见 `PROJECT_EXTENSIONS.md`"
+  );
+  activeStandards = upsertLine(
+    activeStandards,
+    "- 当前扩展装载摘要：",
+    remaining.length
+      ? "按当前节点命中对应扩展，逐项装载明细见 `PROJECT_EXTENSIONS.md`"
+      : "当前无已启用扩展"
   );
 
   const projectExtensionsBackup = backupFileIfExists(projectExtensionsPath);

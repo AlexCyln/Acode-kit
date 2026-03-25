@@ -428,6 +428,28 @@ Acode-kit 能做的是：
 
 否则会出现：
 
+#### 5. 扩展激活必须在项目目录落地后执行
+
+`acode-kit -enable <extension-id>` 是项目级激活动作，不是全局安装动作。
+
+请在下面条件成立后再执行：
+
+- 当前项目目录已经确定
+- 项目初始化文档已经落下
+- `docs/project/` 下的项目控制文档已开始进入稳定维护
+
+原因是：
+
+- 扩展激活会增量更新 `docs/project/PROJECT_EXTENSIONS.md` 和 `docs/project/ACTIVE_STANDARDS.md`
+- 如果你在项目目录尚未落地、或项目初始化文档尚未生成前就启用扩展
+- 后续重新初始化项目文档时，扩展激活信息可能被模板覆盖，导致扩展状态失效
+
+推荐顺序：
+
+1. 先完成项目初始化
+2. 再安装扩展：`acode-kit -add <path>`
+3. 最后在项目根目录执行：`acode-kit -enable <extension-id>`
+
 - 明明指定了 `Acode-kit`，却被另一个同类 skill 抢占
 - 启动路径混乱
 - workflow 边界冲突
@@ -709,7 +731,9 @@ Recommended flow:
 4. Follow the gate sequence in order
 5. Continue stage-by-stage without skipping
 6. If the project is already managed by Acode-kit, keep Acode-kit as the only top-level workflow entry
-7. Keep your focus on business judgment, architecture, and prompting quality instead of expecting the framework to replace them
+7. Activate extensions only after the project directory and project docs are already in place
+8. Run `acode-kit -enable <extension-id>` from the project root, not before project initialization
+9. Keep your focus on business judgment, architecture, and prompting quality instead of expecting the framework to replace them
 
 ### 🧪 Tests
 

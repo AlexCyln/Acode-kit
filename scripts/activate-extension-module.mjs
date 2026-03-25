@@ -103,13 +103,20 @@ function activateInActiveStandards(content, manifest) {
   );
   next = upsertBacktickListLine(
     next,
+    "- 当前启用扩展数量：",
+    String(merged.length)
+  );
+  next = upsertBacktickListLine(
+    next,
     "- 扩展模块清单：",
     "见 `PROJECT_EXTENSIONS.md`"
   );
   next = upsertBacktickListLine(
     next,
     "- 当前扩展装载摘要：",
-    `${merged.map((item) => `\`${item}\``).join("、")} 将在 ${manifest.load_at.map((item) => `\`${item}\``).join("、")} 命中时按规则装载`
+    merged.length
+      ? "按当前节点命中对应扩展，逐项装载明细见 `PROJECT_EXTENSIONS.md`"
+      : "当前无已启用扩展"
   );
   return next;
 }
