@@ -1,6 +1,6 @@
 ---
 name: Acode-kit
-description: Lightweight workflow entry for Acode-kit. First action: check `.acode-kit-initialized.json` or the provider global cache. Keep the 4 startup gates + Gate 3.5 + 7 execution stages unchanged. Load workflow and standards progressively. Preserve gate control, stage order, and project-document governance.
+description: "Lightweight workflow entry for Acode-kit. First action: check `.acode-kit-initialized.json` or the provider global cache. Keep the 4 startup gates + Gate 3.5 + 7 execution stages unchanged. Load workflow and standards progressively. Preserve gate control, stage order, and project-document governance."
 ---
 # Acode-kit
 Use this skill when:
