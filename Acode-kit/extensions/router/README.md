@@ -10,7 +10,7 @@ This extension adds model-version routing for Acode-kit.
 - It preserves logical session continuity and reuses native sessions when possible.
 
 ## Components
-1. `SKILL.md`: Router skill contract and boundaries.
+1. `ROUTER_RUNTIME.md`: Router runtime contract and boundaries.
 2. `config/model-map.json`: task-to-model mapping per phase/provider.
 3. `config/task-classifier.json`: keyword-based task classification rules.
 4. `config/policy.json`: token/fallback/timeout policy.

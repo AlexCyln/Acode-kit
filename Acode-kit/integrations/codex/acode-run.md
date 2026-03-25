@@ -9,7 +9,7 @@ Use this file together with:
 
 1. `SKILL.md`
 2. `integrations/shared/WORKFLOW_CORE.md`
-3. `extensions/router/SKILL.md`
+3. `extensions/router/ROUTER_RUNTIME.md`
 
 This file does not change router behavior. It documents how Codex should treat `acode-run`.
 
