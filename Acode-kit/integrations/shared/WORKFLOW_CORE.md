@@ -52,6 +52,8 @@ Within Stage 5, the module sequence is fixed:
 5. Do not skip or merge gates.
 6. Do not skip stages when downstream outputs depend on them.
 7. Do not continue past any gate or stage review without explicit user approval.
+8. Do not invoke `acode-run` during startup Steps 1-4 or Gates 1-4.
+9. Do not use `acode-run` as a replacement for the public `Acode-kit` entry.
 
 ## Draft artifact contract
 

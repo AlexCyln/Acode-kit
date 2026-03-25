@@ -22,6 +22,16 @@ It does not replace:
 2. `acode-run` for internal routed execution
 3. standards packages for detailed rules
 
+## Entry guard
+
+When the user invokes `Acode-kit`, stay in the main workflow entry.
+
+1. Do not jump to `acode-run` on entry.
+2. Do not treat `acode-run` as the startup executor.
+3. Do not route Step 1, Step 2, Step 3, Gate 3.5, or Step 4 through `acode-run`.
+4. First complete the startup lane and wait at gates as required.
+5. Only consider `acode-run` after Gate 4, and only for a concrete routed subtask inside stage-driven execution.
+
 ## First action
 Before anything else:
 
@@ -116,6 +126,12 @@ Project-level activation lives in:
 1. `project_id`, `phase`, `task_type`, `difficulty`, `provider`, `prompt`
 2. optional `context_summary`, `logical_session_id`, `native_session_id`
 3. fallback order: `error -> timeout -> quality_low -> budget_exceeded`
+
+Hard boundary:
+1. never invoke `acode-run` during startup Steps 1-4 or Gates 1-4
+2. never invoke `acode-run` as a replacement for the main `Acode-kit` workflow entry
+3. invoke it only when the current stage already exists and the task is a bounded routed subtask
+4. final gate decisions, stage review outputs, and user-facing conclusions stay in `Acode-kit`
 
 Delegate bounded analysis only. Final gate decisions and final user-facing conclusions stay with the main agent.
 

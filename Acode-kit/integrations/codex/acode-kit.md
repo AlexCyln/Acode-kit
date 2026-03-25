@@ -49,6 +49,8 @@ Therefore:
 2. Do not start with design tools or editor-state tools.
 3. Keep the response in the user's language.
 4. Keep the shared gate/stage graph identical to `integrations/shared/WORKFLOW_CORE.md`.
+5. Do not invoke `acode-run` during startup or on initial entry into `Acode-kit`.
+6. `acode-run` is allowed only after Gate 4 and only for a bounded routed subtask inside stage-driven execution.
 
 ## NotebookLM authentication behavior
 

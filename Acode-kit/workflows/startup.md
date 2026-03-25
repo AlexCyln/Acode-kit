@@ -61,3 +61,5 @@ Defines the startup lane before stage-driven execution begins.
 3. NotebookLM auth trigger is the exact text `Log me in to NotebookLM`.
 4. If workspace status file is missing, the runtime may use the user-level global cache as baseline.
 5. Step 4 is setup only; it is not design or application implementation.
+6. Startup never invokes `acode-run`.
+7. `acode-run` may only appear later as a bounded routed subtask after Gate 4.
