@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { ACODE_KIT_VERSION } from "./acode-kit-version.mjs";
 import { findInitializedProjects, parseProjectExtensions, read } from "./extension-module-helpers.mjs";
 
 function readJsonIfExists(filePath) {
@@ -44,6 +45,7 @@ function main() {
   const mcpPayload = JSON.parse(scan.stdout || "{\"tools\":[]}");
 
   console.log("Acode-kit Status");
+  console.log(`version: ${ACODE_KIT_VERSION}`);
   console.log(`agent basis: ${inferAgentBundle(repoRoot)}`);
   console.log(`workspace initialized: ${workspaceStatus ? "yes" : "no"}`);
   console.log(`global cache: codex=${codexGlobal ? "yes" : "no"}, claude=${claudeGlobal ? "yes" : "no"}`);

@@ -205,7 +205,26 @@ export function parseProjectExtensions(projectExtensionsPath) {
 
 export function findInitializedProjects(rootDir, maxDepth = 4) {
   const results = [];
-  const ignored = new Set([".git", "node_modules", ".idea", ".vscode", "dist", "build"]);
+  const ignored = new Set([
+    ".git",
+    "node_modules",
+    ".idea",
+    ".vscode",
+    "dist",
+    "build",
+    "AppData",
+    "Application Data",
+    "Local Settings",
+    "Program Files",
+    "Program Files (x86)",
+    "ProgramData",
+    "$Recycle.Bin",
+    "System Volume Information"
+  ]);
+
+  function shouldIgnoreError(error) {
+    return ["EPERM", "EACCES", "EBUSY", "ENOTDIR", "UNKNOWN"].includes(error?.code);
+  }
 
   function walk(current, depth) {
     if (depth > maxDepth) return;
@@ -213,7 +232,16 @@ export function findInitializedProjects(rootDir, maxDepth = 4) {
     if (fs.existsSync(statusPath)) {
       results.push(current);
     }
-    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+
+    let entries = [];
+    try {
+      entries = fs.readdirSync(current, { withFileTypes: true });
+    } catch (error) {
+      if (shouldIgnoreError(error)) return;
+      throw error;
+    }
+
+    for (const entry of entries) {
       if (!entry.isDirectory() || ignored.has(entry.name)) continue;
       walk(path.join(current, entry.name), depth + 1);
     }

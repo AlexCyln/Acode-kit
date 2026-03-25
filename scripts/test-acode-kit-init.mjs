@@ -65,7 +65,7 @@ function getGlobalStatusPath(homeDir) {
     assert(fs.existsSync(statusPath), "Status file created in empty folder");
 
     const status = JSON.parse(fs.readFileSync(statusPath, "utf8"));
-    assert(status.version === "1.0.0", "Status file has version 1.0.0");
+    assert(status.version === "v2.0", "Status file has version v2.0");
     assert(status.scope === "workspace", "Workspace status file is marked as workspace");
     assert(status.projectFolder.wasEmpty === true, "wasEmpty is true for empty folder");
     assert(status.projectFolder.path === tmpDir, "projectFolder.path matches cwd");

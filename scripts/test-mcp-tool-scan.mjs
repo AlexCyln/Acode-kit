@@ -220,7 +220,7 @@ function getGlobalStatusPath(homeDir) {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "acode-mcp-workspace-"));
   const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), "acode-mcp-home-"));
   const workspaceStatus = {
-    version: "1.0.0",
+    version: "v2.0",
     initializedAt: new Date().toISOString(),
     scope: "workspace",
     provider: "codex",

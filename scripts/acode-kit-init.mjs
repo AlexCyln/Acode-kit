@@ -22,12 +22,12 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
+import { ACODE_KIT_VERSION } from "./acode-kit-version.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const STATUS_FILE = ".acode-kit-initialized.json";
 const GLOBAL_STATUS_FILE = ".acode-kit-global.json";
-const VERSION = "1.0.0";
 const IS_WIN = os.platform() === "win32";
 
 function quoteWindowsArg(value) {
@@ -284,7 +284,7 @@ function configureNotebookLM(scanResult, options = {}) {
 
 function buildStatusRecord(data, scope) {
   const status = {
-    version: VERSION,
+    version: ACODE_KIT_VERSION,
     initializedAt: new Date().toISOString(),
     scope,
     provider: data.provider,

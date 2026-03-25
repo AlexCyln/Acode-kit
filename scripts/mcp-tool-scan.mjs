@@ -21,8 +21,8 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { createInterface } from "node:readline";
+import { ACODE_KIT_VERSION } from "./acode-kit-version.mjs";
 
-const VERSION = "1.0.0";
 const WORKSPACE_STATUS_FILE = ".acode-kit-initialized.json";
 const GLOBAL_STATUS_FILE = ".acode-kit-global.json";
 const DEFAULT_NOTEBOOK_URL = "https://notebooklm.google.com/notebook/7ec4ec07-abb3-478e-99aa-f8946e103499";
@@ -262,7 +262,7 @@ function buildGlobalCache(provider, scanResults, previousGlobalCache = null, wor
   );
 
   return {
-    version: VERSION,
+    version: ACODE_KIT_VERSION,
     updatedAt: new Date().toISOString(),
     provider,
     tools: scanResults.map((tool) => ({
