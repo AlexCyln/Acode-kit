@@ -8,6 +8,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const bundleRoot = path.resolve(__dirname, "..");
 
+function resolveSkillRoot(baseRoot) {
+  if (fs.existsSync(path.join(baseRoot, "SKILL.md"))) {
+    return baseRoot;
+  }
+  return path.join(baseRoot, "Acode-kit");
+}
+
 function parseArgs(argv) {
   const args = {};
   for (let i = 2; i < argv.length; i += 1) {
@@ -32,7 +39,7 @@ function main() {
     process.exit(args.help ? 0 : 1);
   }
 
-  const packDir = path.join(bundleRoot, "Acode-kit", "extensions", "packs", args.id);
+  const packDir = path.join(resolveSkillRoot(bundleRoot), "extensions", "packs", args.id);
   if (!fs.existsSync(packDir)) {
     console.error(`Extension pack not found: ${args.id}`);
     process.exit(1);

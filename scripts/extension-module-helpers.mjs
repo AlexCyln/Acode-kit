@@ -2,6 +2,20 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+function resolveSkillRoot(baseRoot) {
+  const directSkill = path.join(baseRoot, "SKILL.md");
+  if (fs.existsSync(directSkill)) {
+    return baseRoot;
+  }
+
+  const nestedSkillRoot = path.join(baseRoot, "Acode-kit");
+  if (fs.existsSync(path.join(nestedSkillRoot, "SKILL.md"))) {
+    return nestedSkillRoot;
+  }
+
+  return path.join(baseRoot, "Acode-kit");
+}
+
 export function toKebabCase(input) {
   return input
     .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
@@ -144,7 +158,8 @@ export function createScanReadyPack(repoRoot, sourceInfo) {
 }
 
 export function installPreparedPack(repoRoot, sourceInfo, prepared) {
-  const targetDir = path.join(repoRoot, "Acode-kit", "extensions", "packs", sourceInfo.id);
+  const skillRoot = resolveSkillRoot(repoRoot);
+  const targetDir = path.join(skillRoot, "extensions", "packs", sourceInfo.id);
   fs.rmSync(targetDir, { recursive: true, force: true });
   fs.mkdirSync(path.dirname(targetDir), { recursive: true });
 
@@ -163,7 +178,8 @@ export function installPreparedPack(repoRoot, sourceInfo, prepared) {
 }
 
 export function updateExtensionsIndex(repoRoot, manifest) {
-  const indexPath = path.join(repoRoot, "Acode-kit", "extensions", "registry", "EXTENSIONS_INDEX.md");
+  const skillRoot = resolveSkillRoot(repoRoot);
+  const indexPath = path.join(skillRoot, "extensions", "registry", "EXTENSIONS_INDEX.md");
   let content = read(indexPath);
   const row = `| \`${manifest.id}\` | ${manifest.type} | \`${manifest.mode}\` | ${manifest.load_at.join(", ")} | pass | ${manifest.description} |`;
 
@@ -177,7 +193,8 @@ export function updateExtensionsIndex(repoRoot, manifest) {
 }
 
 export function removeFromExtensionsIndex(repoRoot, id) {
-  const indexPath = path.join(repoRoot, "Acode-kit", "extensions", "registry", "EXTENSIONS_INDEX.md");
+  const skillRoot = resolveSkillRoot(repoRoot);
+  const indexPath = path.join(skillRoot, "extensions", "registry", "EXTENSIONS_INDEX.md");
   let content = read(indexPath);
   const rowPattern = new RegExp(`^\\|\\s*\`${id.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}\`\\s*\\|.*\\n?`, "m");
   content = content.replace(rowPattern, "");
