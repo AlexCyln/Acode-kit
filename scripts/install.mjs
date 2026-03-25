@@ -7,6 +7,14 @@ import { execFileSync, spawnSync } from "node:child_process";
 const DEFAULT_REPO = "AlexCyln/Acode-kit";
 const DEFAULT_SKILL_PATH = "Acode-kit";
 const DEFAULT_LOCAL_ROOT = path.join(process.cwd(), "agent-skills");
+const TOTAL_STEPS = 6;
+
+function logStep(current, title, detail = "") {
+  console.log(`\n[${current}/${TOTAL_STEPS}] ${title}`);
+  if (detail) {
+    console.log(`  ${detail}`);
+  }
+}
 
 function parseArgs(argv) {
   const args = {};
@@ -168,7 +176,9 @@ function prepareSource(args) {
   fs.mkdirSync(extractDir, { recursive: true });
 
   const archiveUrl = `https://codeload.github.com/${repo}/tar.gz/refs/heads/${ref}`;
+  logStep(2, "Downloading repository bundle", archiveUrl);
   execFileSync("curl", ["-fsSL", archiveUrl, "-o", archiveFile], { stdio: "inherit" });
+  logStep(3, "Extracting bundle", "Unpacking the downloaded archive into a temporary workspace.");
   execFileSync("tar", ["-xzf", archiveFile, "-C", extractDir], { stdio: "inherit" });
 
   const [repoDirName] = fs.readdirSync(extractDir);
@@ -298,6 +308,7 @@ function runInit(bundleDir, projectRoot, args) {
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
+  logStep(1, "Preparing install plan", "Resolving source, target agent, and destination paths.");
   const jobs = createJobs(args);
   const prepared = prepareSource(args);
   const scope = args.scope || "user";
@@ -305,6 +316,7 @@ function main() {
 
   let lastBundleDir = "";
   try {
+    logStep(4, "Installing bundle files", "Copying Acode-kit and adapters into the target runtime directories.");
     for (const job of jobs) {
       const result = job.agent === "codex"
         ? installCodex(prepared.sourceDir, job.destRoot)
@@ -315,6 +327,7 @@ function main() {
       lastBundleDir = result.bundleDir;
 
       if (!skipInit && lastBundleDir) {
+        logStep(6, "Running initialization", "Refreshing MCP status and NotebookLM auth cache.");
         if (scope === "user") {
           runInit(lastBundleDir, resolveGlobalStateRoot(job.agent), args);
         } else if (scope === "project" && job.agent === "claude") {
@@ -324,6 +337,11 @@ function main() {
           runInit(lastBundleDir, projectRoot, args);
         }
       }
+    }
+
+    logStep(5, "Finalizing installation", "Writing the final install summary and next-step guidance.");
+    if (skipInit) {
+      logStep(6, "Skipping initialization", "skip-init=true was provided; initialization was intentionally skipped.");
     }
   } finally {
     if (prepared.cleanup) prepared.cleanup();

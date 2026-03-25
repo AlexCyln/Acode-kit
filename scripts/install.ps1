@@ -11,6 +11,7 @@ $CODEX_ROOT_DEFAULT = if ($env:CODEX_HOME) { Join-Path $env:CODEX_HOME "skills" 
 $CLAUDE_ROOT_DEFAULT = if ($env:CLAUDE_HOME) { $env:CLAUDE_HOME } else { Join-Path $HOME ".claude" }
 $LOCAL_ROOT_DEFAULT = Join-Path (Get-Location).Path "agent-skills"
 $DEST_ROOT = if ($env:DEST_ROOT) { $env:DEST_ROOT } else { "" }
+$TOTAL_STEPS = 6
 
 function Test-PathExists {
   param([string]$TargetPath)
@@ -33,6 +34,22 @@ function Get-BaseHome {
 function Write-InstallNote {
   param([string]$Message)
   Write-Host "- $Message"
+}
+
+function Show-Step {
+  param(
+    [int]$Current,
+    [string]$Title,
+    [string]$Detail = ""
+  )
+
+  $percent = [int](($Current / $TOTAL_STEPS) * 100)
+  Write-Host ""
+  Write-Host ("[{0}/{1}] {2}" -f $Current, $TOTAL_STEPS, $Title)
+  if ($Detail -ne "") {
+    Write-Host ("  {0}" -f $Detail)
+  }
+  Write-Progress -Activity "Installing Acode-kit" -Status $Title -PercentComplete $percent
 }
 
 function Detect-Agent {
@@ -74,6 +91,71 @@ function Resolve-GlobalStateRoot {
     "claude" { return Join-Path (Get-BaseHome "claude") "acode-kit" }
     default { return Join-Path $LOCAL_ROOT_DEFAULT ".acode-kit-state" }
   }
+}
+
+function Resolve-CommandBinDir {
+  if ($SCOPE -eq "project") {
+    return Join-Path (Get-Location).Path ".acode-kit\bin"
+  }
+  return Join-Path $HOME ".acode-kit\bin"
+}
+
+function Ensure-UserPathContains {
+  param([string]$BinDir)
+
+  $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+  $segments = @()
+  if ($userPath) {
+    $segments = $userPath.Split(";") | Where-Object { $_ -ne "" }
+  }
+
+  if ($segments -contains $BinDir) {
+    if (($env:Path.Split(";") | Where-Object { $_ -ne "" }) -notcontains $BinDir) {
+      $env:Path = "$BinDir;$env:Path"
+    }
+    return
+  }
+
+  $newUserPath = if ($userPath -and $userPath.Trim() -ne "") {
+    "$BinDir;$userPath"
+  } else {
+    $BinDir
+  }
+
+  [Environment]::SetEnvironmentVariable("Path", $newUserPath, "User")
+  $env:Path = "$BinDir;$env:Path"
+}
+
+function Install-CommandLauncher {
+  param([string]$BundleDir)
+
+  $binDir = Resolve-CommandBinDir
+  New-Item -ItemType Directory -Path $binDir -Force | Out-Null
+
+  $cliScript = Join-Path $BundleDir "scripts\acode-kit.mjs"
+  if (-not (Test-PathExists $cliScript)) {
+    throw "CLI script not found at $cliScript"
+  }
+
+  $cmdLauncher = Join-Path $binDir "acode-kit.cmd"
+  $psLauncher = Join-Path $binDir "acode-kit.ps1"
+
+  @(
+    "@echo off"
+    "setlocal"
+    "node `"$cliScript`" %*"
+  ) | Set-Content -LiteralPath $cmdLauncher -Encoding ascii
+
+  @(
+    '$ErrorActionPreference = "Stop"'
+    "& node `"$cliScript`" @args"
+  ) | Set-Content -LiteralPath $psLauncher -Encoding utf8
+
+  if ($SCOPE -eq "user") {
+    Ensure-UserPathContains -BinDir $binDir
+  }
+
+  return $binDir
 }
 
 function Copy-ClaudeAdapter {
@@ -250,9 +332,12 @@ $extractDir = Join-Path $tmpDir "extract"
 New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
 
 try {
+  Show-Step -Current 1 -Title "Preparing install plan" -Detail "Resolving source, target agent, and destination paths."
   $archiveUrl = "https://codeload.github.com/$REPO/tar.gz/refs/heads/$REF"
+  Show-Step -Current 2 -Title "Downloading repository bundle" -Detail $archiveUrl
   Write-Host "Downloading $archiveUrl"
   Invoke-WebRequest -Uri $archiveUrl -OutFile $archiveFile
+  Show-Step -Current 3 -Title "Extracting bundle" -Detail "Unpacking the downloaded archive into a temporary workspace."
   tar -xzf $archiveFile -C $extractDir
 
   $repoDir = Get-ChildItem -LiteralPath $extractDir -Directory | Select-Object -First 1
@@ -265,23 +350,30 @@ try {
     throw "Skill not found at $SKILL_PATH in $REPO@$REF"
   }
 
+  Show-Step -Current 4 -Title "Installing bundle files" -Detail "Copying Acode-kit and adapters into the target runtime directories."
   if ($AGENT -eq "both") {
     Install-Agent -SourceDir $sourceDir -AgentName "codex"
-    if ($SKIP_INIT -ne "true" -and $SCOPE -eq "user") {
-      [void](Run-Init -BundleDir $LAST_BUNDLE_DIR -ProjectRoot (Resolve-GlobalStateRoot "codex") -AgentName "codex")
-    }
     Install-Agent -SourceDir $sourceDir -AgentName "claude"
-    if ($SKIP_INIT -ne "true") {
+  } else {
+    Install-Agent -SourceDir $sourceDir -AgentName $AGENT
+  }
+
+  Show-Step -Current 5 -Title "Registering CLI launcher" -Detail "Creating the 'acode-kit' command entry point."
+  $commandBinDir = Install-CommandLauncher -BundleDir $LAST_BUNDLE_DIR
+
+  if ($SKIP_INIT -ne "true") {
+    Show-Step -Current 6 -Title "Running initialization" -Detail "Refreshing MCP status and NotebookLM auth cache."
+    if ($AGENT -eq "both") {
+      if ($SCOPE -eq "user") {
+        [void](Run-Init -BundleDir $LAST_BUNDLE_DIR -ProjectRoot (Resolve-GlobalStateRoot "codex") -AgentName "codex")
+      }
       if ($SCOPE -eq "user") {
         [void](Run-Init -BundleDir $LAST_BUNDLE_DIR -ProjectRoot (Resolve-GlobalStateRoot "claude") -AgentName "claude")
       } elseif ($SCOPE -eq "project") {
         $projectRoot = Split-Path -Parent (Resolve-DestRoot "claude")
         [void](Run-Init -BundleDir $LAST_BUNDLE_DIR -ProjectRoot $projectRoot -AgentName "claude")
       }
-    }
-  } else {
-    Install-Agent -SourceDir $sourceDir -AgentName $AGENT
-    if ($SKIP_INIT -ne "true") {
+    } else {
       if ($SCOPE -eq "user") {
         [void](Run-Init -BundleDir $LAST_BUNDLE_DIR -ProjectRoot (Resolve-GlobalStateRoot $AGENT) -AgentName $AGENT)
       } elseif ($SCOPE -eq "project" -and $AGENT -eq "claude") {
@@ -289,10 +381,19 @@ try {
         [void](Run-Init -BundleDir $LAST_BUNDLE_DIR -ProjectRoot $projectRoot -AgentName $AGENT)
       }
     }
+  } else {
+    Show-Step -Current 6 -Title "Skipping initialization" -Detail "SKIP_INIT=true was provided; initialization was intentionally skipped."
   }
 
   Write-Host ""
   Write-Host "Restart your target AI agent after installation."
+  if ($SCOPE -eq "user") {
+    Write-Host "A CLI launcher was installed to $commandBinDir and added to your user PATH."
+    Write-Host "Open a new CMD or PowerShell window if 'acode-kit' is not recognized immediately."
+  } else {
+    Write-Host "A project-local CLI launcher was installed to $commandBinDir"
+    Write-Host "Run it directly or add that directory to PATH for this project."
+  }
   Write-Host ""
   Write-Host "Quick CLI flags after install:"
   Write-Host "  acode-kit -status"
@@ -308,6 +409,7 @@ try {
     Write-Host "Initialization finished."
     Write-Host "The user-level global cache now stores MCP status and NotebookLM auth."
   }
+  Write-Progress -Activity "Installing Acode-kit" -Completed
 } finally {
   if (Test-PathExists $tmpDir) {
     Remove-Item -LiteralPath $tmpDir -Recurse -Force

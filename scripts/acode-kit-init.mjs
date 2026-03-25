@@ -30,13 +30,24 @@ const GLOBAL_STATUS_FILE = ".acode-kit-global.json";
 const VERSION = "1.0.0";
 const IS_WIN = os.platform() === "win32";
 
-/** Cross-platform spawnSync — on Windows, uses shell mode so .cmd/.bat wrappers resolve. */
+function quoteWindowsArg(value) {
+  if (value === "") return '""';
+  if (!/[\s"]/u.test(value)) return value;
+  return `"${String(value).replace(/(\\*)"/g, '$1$1\\"').replace(/(\\+)$/g, '$1$1')}"`;
+}
+
+/** Cross-platform spawnSync — on Windows, routes through cmd.exe without shell:true. */
 function spawnCrossPlatform(cmd, args, opts = {}) {
-  return spawnSync(cmd, args, {
-    ...opts,
-    shell: IS_WIN,
-    windowsHide: true
-  });
+  if (IS_WIN) {
+    const commandLine = [cmd, ...args].map(quoteWindowsArg).join(" ");
+    return spawnSync(process.env.comspec || "cmd.exe", ["/d", "/s", "/c", commandLine], {
+      ...opts,
+      shell: false,
+      windowsHide: true
+    });
+  }
+
+  return spawnSync(cmd, args, opts);
 }
 
 // ---------------------------------------------------------------------------

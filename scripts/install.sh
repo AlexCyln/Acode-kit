@@ -11,9 +11,20 @@ CODEX_ROOT_DEFAULT="${CODEX_HOME:-$HOME/.codex}/skills"
 CLAUDE_ROOT_DEFAULT="${CLAUDE_HOME:-$HOME/.claude}"
 LOCAL_ROOT_DEFAULT="${PWD}/agent-skills"
 DEST_ROOT="${DEST_ROOT:-}"
+TOTAL_STEPS=6
 
 exists() {
   [[ -e "$1" ]]
+}
+
+show_step() {
+  local current="$1"
+  local title="$2"
+  local detail="${3:-}"
+  printf "\n[%s/%s] %s\n" "$current" "$TOTAL_STEPS" "$title"
+  if [[ -n "$detail" ]]; then
+    printf "  %s\n" "$detail"
+  fi
 }
 
 detect_agent() {
@@ -69,6 +80,69 @@ resolve_global_state_root() {
     claude) echo "${CLAUDE_HOME:-$HOME/.claude}/acode-kit" ;;
     *) echo "${LOCAL_ROOT_DEFAULT}/.acode-kit-state" ;;
   esac
+}
+
+resolve_command_bin_dir() {
+  if [[ "$SCOPE" == "project" ]]; then
+    echo "${PWD}/.acode-kit/bin"
+  else
+    echo "${HOME}/.acode-kit/bin"
+  fi
+}
+
+ensure_path_in_shell_rc() {
+  local bin_dir="$1"
+  local marker="# >>> acode-kit bin >>>"
+  local export_line='export PATH="$HOME/.acode-kit/bin:$PATH"'
+  local shell_name
+  shell_name="$(basename "${SHELL:-}")"
+  local rc_file=""
+
+  case "$shell_name" in
+    zsh) rc_file="${HOME}/.zshrc" ;;
+    bash) rc_file="${HOME}/.bashrc" ;;
+    *) rc_file="${HOME}/.profile" ;;
+  esac
+
+  touch "$rc_file"
+  if ! grep -Fq "$marker" "$rc_file"; then
+    {
+      echo ""
+      echo "$marker"
+      echo "$export_line"
+      echo "# <<< acode-kit bin <<<"
+    } >> "$rc_file"
+  fi
+
+  case ":$PATH:" in
+    *":$bin_dir:"*) ;;
+    *) export PATH="$bin_dir:$PATH" ;;
+  esac
+}
+
+install_command_launcher() {
+  local bundle_dir="$1"
+  local bin_dir
+  bin_dir="$(resolve_command_bin_dir)"
+  mkdir -p "$bin_dir"
+
+  local cli_script="$bundle_dir/scripts/acode-kit.mjs"
+  if [[ ! -f "$cli_script" ]]; then
+    echo "CLI script not found at $cli_script" >&2
+    exit 1
+  fi
+
+  cat > "$bin_dir/acode-kit" <<EOF
+#!/usr/bin/env bash
+node "$cli_script" "\$@"
+EOF
+  chmod +x "$bin_dir/acode-kit"
+
+  if [[ "$SCOPE" == "user" ]]; then
+    ensure_path_in_shell_rc "$bin_dir"
+  fi
+
+  echo "$bin_dir"
 }
 
 copy_claude_adapter() {
@@ -224,8 +298,11 @@ trap cleanup EXIT
 
 mkdir -p "$EXTRACT_DIR"
 
+show_step 1 "Preparing install plan" "Resolving source, target agent, and destination paths."
+show_step 2 "Downloading repository bundle" "$ARCHIVE_URL"
 echo "Downloading $ARCHIVE_URL"
 curl -fsSL "$ARCHIVE_URL" -o "$ARCHIVE_FILE"
+show_step 3 "Extracting bundle" "Unpacking the downloaded archive into a temporary workspace."
 tar -xzf "$ARCHIVE_FILE" -C "$EXTRACT_DIR"
 
 REPO_DIR="$(find "$EXTRACT_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
@@ -236,13 +313,23 @@ if [[ ! -f "$SOURCE_DIR/SKILL.md" ]]; then
   exit 1
 fi
 
+show_step 4 "Installing bundle files" "Copying Acode-kit and adapters into the target runtime directories."
 if [[ "$AGENT" == "both" ]]; then
   install_agent "$SOURCE_DIR" codex
-  if [[ "$SKIP_INIT" != "true" && "$SCOPE" == "user" ]]; then
-    run_init "$LAST_BUNDLE_DIR" "$(resolve_global_state_root codex)" codex || true
-  fi
   install_agent "$SOURCE_DIR" claude
-  if [[ "$SKIP_INIT" != "true" ]]; then
+else
+  install_agent "$SOURCE_DIR" "$AGENT"
+fi
+
+show_step 5 "Registering CLI launcher" "Creating the 'acode-kit' command entry point."
+COMMAND_BIN_DIR="$(install_command_launcher "$LAST_BUNDLE_DIR")"
+
+if [[ "$SKIP_INIT" != "true" ]]; then
+  show_step 6 "Running initialization" "Refreshing MCP status and NotebookLM auth cache."
+  if [[ "$AGENT" == "both" ]]; then
+    if [[ "$SCOPE" == "user" ]]; then
+      run_init "$LAST_BUNDLE_DIR" "$(resolve_global_state_root codex)" codex || true
+    fi
     case "$SCOPE" in
       user)
         run_init "$LAST_BUNDLE_DIR" "$(resolve_global_state_root claude)" claude || true
@@ -252,10 +339,7 @@ if [[ "$AGENT" == "both" ]]; then
         run_init "$LAST_BUNDLE_DIR" "$PROJECT_ROOT" claude || true
         ;;
     esac
-  fi
-else
-  install_agent "$SOURCE_DIR" "$AGENT"
-  if [[ "$SKIP_INIT" != "true" ]]; then
+  else
     case "$SCOPE" in
       user)
         run_init "$LAST_BUNDLE_DIR" "$(resolve_global_state_root "$AGENT")" "$AGENT" || true
@@ -268,10 +352,19 @@ else
         ;;
     esac
   fi
+else
+  show_step 6 "Skipping initialization" "SKIP_INIT=true was provided; initialization was intentionally skipped."
 fi
 
 echo ""
 echo "Restart your target AI agent after installation."
+if [[ "$SCOPE" == "user" ]]; then
+  echo "A CLI launcher was installed to $COMMAND_BIN_DIR and added to your shell PATH."
+  echo "Open a new terminal if 'acode-kit' is not recognized immediately."
+else
+  echo "A project-local CLI launcher was installed to $COMMAND_BIN_DIR"
+  echo "Run it directly or add that directory to PATH for this project."
+fi
 echo ""
 echo "Quick CLI flags after install:"
 echo "  acode-kit -status"

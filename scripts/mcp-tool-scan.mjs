@@ -81,23 +81,55 @@ const TOOL_REGISTRY = [
 
 const IS_WIN = os.platform() === "win32";
 
+function quoteWindowsArg(value) {
+  if (value === "") return '""';
+  if (!/[\s"]/u.test(value)) return value;
+  return `"${String(value).replace(/(\\*)"/g, '$1$1\\"').replace(/(\\+)$/g, '$1$1')}"`;
+}
+
 /** Cross-platform check for whether a CLI command exists on PATH. */
 function hasCommand(cmd) {
-  const probe = spawnSync(IS_WIN ? "where" : "which", [cmd], {
-    encoding: "utf8",
-    shell: IS_WIN,
-    windowsHide: true
-  });
+  const probe = IS_WIN
+    ? spawnSync(process.env.comspec || "cmd.exe", ["/d", "/s", "/c", `where ${quoteWindowsArg(cmd)}`], {
+      encoding: "utf8",
+      windowsHide: true
+    })
+    : spawnSync("which", [cmd], { encoding: "utf8" });
   return probe.status === 0;
 }
 
-/** Cross-platform spawnSync — on Windows, uses shell mode so .cmd/.bat wrappers resolve. */
+/** Cross-platform spawnSync — on Windows, routes through cmd.exe without using shell:true. */
 function spawnCrossPlatform(cmd, args, opts = {}) {
-  return spawnSync(cmd, args, {
-    ...opts,
-    shell: IS_WIN,
-    windowsHide: true
-  });
+  if (IS_WIN) {
+    const commandLine = [cmd, ...args].map(quoteWindowsArg).join(" ");
+    return spawnSync(process.env.comspec || "cmd.exe", ["/d", "/s", "/c", commandLine], {
+      ...opts,
+      shell: false,
+      windowsHide: true
+    });
+  }
+
+  return spawnSync(cmd, args, opts);
+}
+
+function safeRemoveDir(targetDir) {
+  const maxAttempts = IS_WIN ? 6 : 1;
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      fs.rmSync(targetDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 150 });
+      return { success: true, attempts: attempt };
+    } catch (error) {
+      lastError = error;
+      if (!IS_WIN || (error.code !== "EPERM" && error.code !== "EBUSY")) {
+        break;
+      }
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 200 * attempt);
+    }
+  }
+
+  return { success: false, error: lastError };
 }
 
 function readJsonIfExists(filePath) {
@@ -507,9 +539,15 @@ async function main() {
             }
           }
         } finally {
-          // Cleanup temp directory
-          fs.rmSync(tmpDir, { recursive: true, force: true });
-          if (!outputJson) console.log(`  Temp directory cleaned up.`);
+          // Cleanup temp directory. Windows can keep transient handles briefly after npx/npm exits.
+          const cleanup = safeRemoveDir(tmpDir);
+          if (!outputJson) {
+            if (cleanup.success) {
+              console.log(`  Temp directory cleaned up.`);
+            } else {
+              console.log(`  Temp directory cleanup skipped (${cleanup.error?.code || "unknown"}).`);
+            }
+          }
         }
 
         // Step 6: Re-scan to verify
