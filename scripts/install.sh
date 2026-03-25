@@ -12,6 +12,7 @@ CLAUDE_ROOT_DEFAULT="${CLAUDE_HOME:-$HOME/.claude}"
 LOCAL_ROOT_DEFAULT="${PWD}/agent-skills"
 DEST_ROOT="${DEST_ROOT:-}"
 TOTAL_STEPS=6
+PATH_CONFIG_FILE=""
 
 exists() {
   [[ -e "$1" ]]
@@ -90,28 +91,57 @@ resolve_command_bin_dir() {
   fi
 }
 
+resolve_shell_rc_file() {
+  local shell_name
+  shell_name="$(basename "${SHELL:-}")"
+  local candidates=()
+
+  case "$shell_name" in
+    zsh) candidates=("${HOME}/.zshrc" "${HOME}/.zprofile" "${HOME}/.profile") ;;
+    bash) candidates=("${HOME}/.bashrc" "${HOME}/.bash_profile" "${HOME}/.profile") ;;
+    *) candidates=("${HOME}/.profile") ;;
+  esac
+
+  local rc_file=""
+  for rc_file in "${candidates[@]}"; do
+    if [[ -e "$rc_file" ]]; then
+      if [[ -w "$rc_file" ]]; then
+        echo "$rc_file"
+        return 0
+      fi
+      continue
+    fi
+
+    local parent_dir
+    parent_dir="$(dirname "$rc_file")"
+    if [[ -w "$parent_dir" ]]; then
+      echo "$rc_file"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 ensure_path_in_shell_rc() {
   local bin_dir="$1"
   local marker="# >>> acode-kit bin >>>"
   local export_line='export PATH="$HOME/.acode-kit/bin:$PATH"'
-  local shell_name
-  shell_name="$(basename "${SHELL:-}")"
   local rc_file=""
 
-  case "$shell_name" in
-    zsh) rc_file="${HOME}/.zshrc" ;;
-    bash) rc_file="${HOME}/.bashrc" ;;
-    *) rc_file="${HOME}/.profile" ;;
-  esac
-
-  touch "$rc_file"
-  if ! grep -Fq "$marker" "$rc_file"; then
-    {
-      echo ""
-      echo "$marker"
-      echo "$export_line"
-      echo "# <<< acode-kit bin <<<"
-    } >> "$rc_file"
+  if rc_file="$(resolve_shell_rc_file)"; then
+    touch "$rc_file"
+    if ! grep -Fq "$marker" "$rc_file"; then
+      {
+        echo ""
+        echo "$marker"
+        echo "$export_line"
+        echo "# <<< acode-kit bin <<<"
+      } >> "$rc_file"
+    fi
+    PATH_CONFIG_FILE="$rc_file"
+  else
+    PATH_CONFIG_FILE=""
   fi
 
   case ":$PATH:" in
@@ -359,8 +389,15 @@ fi
 echo ""
 echo "Restart your target AI agent after installation."
 if [[ "$SCOPE" == "user" ]]; then
-  echo "A CLI launcher was installed to $COMMAND_BIN_DIR and added to your shell PATH."
-  echo "Open a new terminal if 'acode-kit' is not recognized immediately."
+  echo "A CLI launcher was installed to $COMMAND_BIN_DIR."
+  if [[ -n "$PATH_CONFIG_FILE" ]]; then
+    echo "Your PATH was updated in $PATH_CONFIG_FILE."
+    echo "Open a new terminal if 'acode-kit' is not recognized immediately."
+  else
+    echo "The installer could not persist PATH automatically because no writable shell startup file was available."
+    echo "Add this line to your shell config manually:"
+    echo "  export PATH=\"\$HOME/.acode-kit/bin:\$PATH\""
+  fi
 else
   echo "A project-local CLI launcher was installed to $COMMAND_BIN_DIR"
   echo "Run it directly or add that directory to PATH for this project."
