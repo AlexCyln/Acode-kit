@@ -220,13 +220,13 @@ Acode-kit 适合这些场景：
 macOS / Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
 Windows PowerShell:
 
 ```powershell
-irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
 ```
 
 指定 agent / scope 示例：
@@ -234,19 +234,19 @@ irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/insta
 macOS / Linux:
 
 ```bash
-AGENT=codex SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | bash
+AGENT=codex SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
 Windows PowerShell:
 
 ```powershell
-$env:AGENT="claude"; $env:SCOPE="user"; irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
+$env:AGENT="claude"; $env:SCOPE="user"; irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
 ```
 
 #### npm 直接安装
 
 ```bash
-npm install -g github:AlexCyln/Acode-kit-Plus
+npm install -g github:AlexCyln/Acode-kit
 acode-kit bootstrap
 ```
 
@@ -549,13 +549,13 @@ Install directly from GitHub and let the installer fetch and place the bundle au
 macOS / Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
 Windows PowerShell:
 
 ```powershell
-irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
 ```
 
 With explicit agent / scope:
@@ -563,19 +563,19 @@ With explicit agent / scope:
 macOS / Linux:
 
 ```bash
-AGENT=codex SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.sh | bash
+AGENT=codex SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.sh | bash
 ```
 
 Windows PowerShell:
 
 ```powershell
-$env:AGENT="claude"; $env:SCOPE="user"; irm https://raw.githubusercontent.com/AlexCyln/Acode-kit-Plus/main/scripts/install.ps1 | iex
+$env:AGENT="claude"; $env:SCOPE="user"; irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
 ```
 
 ### npm direct install
 
 ```bash
-npm install -g github:AlexCyln/Acode-kit-Plus
+npm install -g github:AlexCyln/Acode-kit
 acode-kit bootstrap
 ```
 

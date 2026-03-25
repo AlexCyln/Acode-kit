@@ -13,7 +13,7 @@
 当前项目支持三类官方安装方式，均面向 GitHub 分发与自动安装：
 
 1. GitHub + `curl` / `irm` 一键安装
-2. `npm install -g github:AlexCyln/Acode-kit-Plus` 后执行 `acode-kit bootstrap`
+2. `npm install -g github:AlexCyln/Acode-kit` 后执行 `acode-kit bootstrap`
 3. 在本地仓库执行 `node scripts/acode-kit.mjs bootstrap`
 
 平台要求：
