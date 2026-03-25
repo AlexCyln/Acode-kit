@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { removeFromExtensionsIndex } from "./extension-module-helpers.mjs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const bundleRoot = path.resolve(__dirname, "..");
 
 function parseArgs(argv) {
   const args = {};
@@ -27,15 +32,14 @@ function main() {
     process.exit(args.help ? 0 : 1);
   }
 
-  const repoRoot = process.cwd();
-  const packDir = path.join(repoRoot, "Acode-kit", "extensions", "packs", args.id);
+  const packDir = path.join(bundleRoot, "Acode-kit", "extensions", "packs", args.id);
   if (!fs.existsSync(packDir)) {
     console.error(`Extension pack not found: ${args.id}`);
     process.exit(1);
   }
 
   fs.rmSync(packDir, { recursive: true, force: true });
-  removeFromExtensionsIndex(repoRoot, args.id);
+  removeFromExtensionsIndex(bundleRoot, args.id);
 
   console.log(`extension removed: ${args.id}`);
 }

@@ -3,8 +3,13 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { ACODE_KIT_VERSION } from "./acode-kit-version.mjs";
 import { findInitializedProjects, parseProjectExtensions, read } from "./extension-module-helpers.mjs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const bundleRoot = path.resolve(__dirname, "..");
 
 function readJsonIfExists(filePath) {
   if (!fs.existsSync(filePath)) return null;
@@ -30,23 +35,23 @@ function inferAgentBundle(repoRoot) {
 }
 
 function main() {
-  const repoRoot = process.cwd();
+  const workspaceRoot = process.cwd();
   const codexGlobal = readJsonIfExists(resolveGlobalStatusPath("codex"));
   const claudeGlobal = readJsonIfExists(resolveGlobalStatusPath("claude"));
-  const workspaceStatus = readJsonIfExists(path.join(repoRoot, ".acode-kit-initialized.json"));
-  const projectExtensionsPath = path.join(repoRoot, "docs", "project", "PROJECT_EXTENSIONS.md");
+  const workspaceStatus = readJsonIfExists(path.join(workspaceRoot, ".acode-kit-initialized.json"));
+  const projectExtensionsPath = path.join(workspaceRoot, "docs", "project", "PROJECT_EXTENSIONS.md");
   const activeProjectExtensions = parseProjectExtensions(projectExtensionsPath).filter((item) => item.status === "已启用");
-  const initializedProjects = findInitializedProjects(repoRoot);
+  const initializedProjects = findInitializedProjects(workspaceRoot);
 
-  const scan = spawnSync("node", [path.join("scripts", "mcp-tool-scan.mjs"), "--json"], {
-    cwd: repoRoot,
+  const scan = spawnSync("node", [path.join(__dirname, "mcp-tool-scan.mjs"), "--json"], {
+    cwd: bundleRoot,
     encoding: "utf8"
   });
   const mcpPayload = JSON.parse(scan.stdout || "{\"tools\":[]}");
 
   console.log("Acode-kit Status");
   console.log(`version: ${ACODE_KIT_VERSION}`);
-  console.log(`agent basis: ${inferAgentBundle(repoRoot)}`);
+  console.log(`agent basis: ${inferAgentBundle(bundleRoot)}`);
   console.log(`workspace initialized: ${workspaceStatus ? "yes" : "no"}`);
   console.log(`global cache: codex=${codexGlobal ? "yes" : "no"}, claude=${claudeGlobal ? "yes" : "no"}`);
   console.log("");
@@ -55,7 +60,7 @@ function main() {
     console.log("  - none discovered");
   } else {
     for (const projectPath of initializedProjects) {
-      console.log(`  - ${path.relative(repoRoot, projectPath) || "."}`);
+      console.log(`  - ${path.relative(workspaceRoot, projectPath) || "."}`);
     }
   }
   console.log("");

@@ -111,9 +111,6 @@ function copyBundleScripts(sourceDir, bundleDir) {
 }
 
 function resolveGlobalStateRoot(agent) {
-  if (agent === "claude") {
-    return path.join(process.env.CLAUDE_HOME || path.join(os.homedir(), ".claude"), "acode-kit");
-  }
   if (agent === "codex") {
     return path.join(process.env.CODEX_HOME || path.join(os.homedir(), ".codex"), "acode-kit");
   }
@@ -122,13 +119,8 @@ function resolveGlobalStateRoot(agent) {
 
 function detectAgentMode() {
   const codexBase = process.env.CODEX_HOME || path.join(os.homedir(), ".codex");
-  const claudeBase = process.env.CLAUDE_HOME || path.join(os.homedir(), ".claude");
   const hasCodex = exists(codexBase) || exists(path.join(codexBase, "skills"));
-  const hasClaude = exists(claudeBase) || exists(path.join(claudeBase, "agents"));
-
-  if (hasCodex && hasClaude) return "both";
   if (hasCodex) return "codex";
-  if (hasClaude) return "claude";
   return "local";
 }
 
@@ -137,25 +129,19 @@ function createJobs(args) {
   const scope = args.scope || "user";
   const resolvedAgent = requestedAgent === "auto" ? detectAgentMode() : requestedAgent;
 
-  if (!["auto", "codex", "claude", "local", "both"].includes(requestedAgent)) {
+  if (!["auto", "codex", "local"].includes(requestedAgent)) {
     throw new Error(`Unsupported --agent value: ${requestedAgent}`);
   }
   if (!["user", "project"].includes(scope)) {
     throw new Error(`Unsupported --scope value: ${scope}`);
   }
 
-  const codexRoot = path.resolve(args["dest-dir"] || path.join(process.env.CODEX_HOME || path.join(os.homedir(), ".codex"), "skills"));
-  const claudeRoot = path.resolve(args["dest-dir"] || (scope === "project" ? path.join(process.cwd(), ".claude") : (process.env.CLAUDE_HOME || path.join(os.homedir(), ".claude"))));
+  const codexRoot = path.resolve(args["dest-dir"] || (scope === "project"
+    ? path.join(process.cwd(), ".codex", "skills")
+    : path.join(process.env.CODEX_HOME || path.join(os.homedir(), ".codex"), "skills")));
   const localRoot = path.resolve(args["dest-dir"] || DEFAULT_LOCAL_ROOT);
 
-  if (resolvedAgent === "both") {
-    return [
-      { agent: "codex", destRoot: codexRoot },
-      { agent: "claude", destRoot: claudeRoot }
-    ];
-  }
   if (resolvedAgent === "codex") return [{ agent: "codex", destRoot: codexRoot }];
-  if (resolvedAgent === "claude") return [{ agent: "claude", destRoot: claudeRoot }];
   return [{ agent: "local", destRoot: localRoot }];
 }
 
@@ -196,44 +182,11 @@ function installCodex(sourceDir, destRoot) {
   return { lines: [`Installed Codex skill to ${bundleDir}`], bundleDir };
 }
 
-function installClaude(sourceDir, destRoot) {
-  ensureSkill(sourceDir);
-  const bundleDir = path.join(destRoot, path.basename(sourceDir));
-  const adapterTemplate = path.join(sourceDir, "integrations", "claude", "acode-kit.md");
-  const routerAdapterTemplate = path.join(sourceDir, "integrations", "claude", "acode-run.md");
-  const agentFile = path.join(destRoot, "agents", "acode-kit.md");
-  const routerAgentFile = path.join(destRoot, "agents", "acode-run.md");
-
-  if (!exists(adapterTemplate)) {
-    throw new Error(`Claude adapter not found in ${adapterTemplate}`);
-  }
-
-  copyDir(sourceDir, bundleDir);
-  copyBundleScripts(sourceDir, bundleDir);
-  copyFile(adapterTemplate, agentFile);
-  if (exists(routerAdapterTemplate)) {
-    copyFile(routerAdapterTemplate, routerAgentFile);
-  }
-
-  const lines = [
-    `Installed Claude bundle to ${bundleDir}`,
-    `Installed Claude subagent to ${agentFile}`,
-    exists(routerAdapterTemplate)
-      ? `Installed Claude unified entry to ${routerAgentFile}`
-      : "Claude unified entry adapter not found; skipping acode-run adapter."
-  ];
-  return { lines, bundleDir };
-}
-
 function installLocal(sourceDir, destRoot) {
   ensureSkill(sourceDir);
   const bundleDir = path.join(destRoot, path.basename(sourceDir));
-  const claudeAdapterTemplate = path.join(sourceDir, "integrations", "claude", "acode-kit.md");
-  const claudeRouterAdapterTemplate = path.join(sourceDir, "integrations", "claude", "acode-run.md");
   const codexAdapterTemplate = path.join(sourceDir, "integrations", "codex", "acode-kit.md");
   const codexRouterAdapterTemplate = path.join(sourceDir, "integrations", "codex", "acode-run.md");
-  const portableClaudeFile = path.join(destRoot, "claude", "acode-kit.md");
-  const portableRouterFile = path.join(destRoot, "claude", "acode-run.md");
   const portableCodexFile = path.join(destRoot, "codex", "acode-kit.md");
   const portableCodexRouterFile = path.join(destRoot, "codex", "acode-run.md");
 
@@ -242,14 +195,6 @@ function installLocal(sourceDir, destRoot) {
   const lines = [`Installed portable bundle to ${bundleDir}`];
   const result = { lines, bundleDir };
 
-  if (exists(claudeAdapterTemplate)) {
-    copyFile(claudeAdapterTemplate, portableClaudeFile);
-    lines.push(`Saved portable Claude adapter to ${portableClaudeFile}`);
-  }
-  if (exists(claudeRouterAdapterTemplate)) {
-    copyFile(claudeRouterAdapterTemplate, portableRouterFile);
-    lines.push(`Saved portable Claude unified entry to ${portableRouterFile}`);
-  }
   if (exists(codexAdapterTemplate)) {
     copyFile(codexAdapterTemplate, portableCodexFile);
     lines.push(`Saved portable Codex runtime guide to ${portableCodexFile}`);
@@ -261,7 +206,6 @@ function installLocal(sourceDir, destRoot) {
 
   lines.push("Manual next step:");
   lines.push("- Codex: copy the Acode-kit folder into ~/.codex/skills/ and use codex/*.md as runtime supplements if you need standalone references.");
-  lines.push("- Claude Code: copy the Acode-kit folder into ~/.claude/ and copy claude/*.md into ~/.claude/agents/.");
   return result;
 }
 
@@ -281,7 +225,7 @@ function runInit(bundleDir, projectRoot, args) {
 
   // Map install --agent to init --provider
   const agent = args.agent || "auto";
-  if (agent === "claude" || agent === "codex") {
+  if (agent === "codex") {
     initArgs.push("--provider", agent);
   }
 
@@ -320,9 +264,7 @@ function main() {
     for (const job of jobs) {
       const result = job.agent === "codex"
         ? installCodex(prepared.sourceDir, job.destRoot)
-        : job.agent === "claude"
-          ? installClaude(prepared.sourceDir, job.destRoot)
-          : installLocal(prepared.sourceDir, job.destRoot);
+        : installLocal(prepared.sourceDir, job.destRoot);
       for (const line of result.lines) console.log(line);
       lastBundleDir = result.bundleDir;
 
@@ -330,11 +272,8 @@ function main() {
         logStep(6, "Running initialization", "Refreshing MCP status and NotebookLM auth cache.");
         if (scope === "user") {
           runInit(lastBundleDir, resolveGlobalStateRoot(job.agent), args);
-        } else if (scope === "project" && job.agent === "claude") {
-          const projectRoot = args["dest-dir"]
-            ? path.dirname(path.resolve(args["dest-dir"]))
-            : process.cwd();
-          runInit(lastBundleDir, projectRoot, args);
+        } else if (scope === "project") {
+          runInit(lastBundleDir, process.cwd(), args);
         }
       }
     }

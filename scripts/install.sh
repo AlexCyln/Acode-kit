@@ -8,7 +8,6 @@ AGENT="${AGENT:-auto}"
 SCOPE="${SCOPE:-user}"
 SKIP_INIT="${SKIP_INIT:-false}"
 CODEX_ROOT_DEFAULT="${CODEX_HOME:-$HOME/.codex}/skills"
-CLAUDE_ROOT_DEFAULT="${CLAUDE_HOME:-$HOME/.claude}"
 LOCAL_ROOT_DEFAULT="${PWD}/agent-skills"
 DEST_ROOT="${DEST_ROOT:-}"
 TOTAL_STEPS=6
@@ -30,21 +29,13 @@ show_step() {
 
 detect_agent() {
   local has_codex="false"
-  local has_claude="false"
 
   if exists "${CODEX_HOME:-$HOME/.codex}" || exists "${CODEX_HOME:-$HOME/.codex}/skills"; then
     has_codex="true"
   fi
-  if exists "${CLAUDE_HOME:-$HOME/.claude}" || exists "${CLAUDE_HOME:-$HOME/.claude}/agents"; then
-    has_claude="true"
-  fi
 
-  if [[ "$has_codex" == "true" && "$has_claude" == "true" ]]; then
-    echo "both"
-  elif [[ "$has_codex" == "true" ]]; then
+  if [[ "$has_codex" == "true" ]]; then
     echo "codex"
-  elif [[ "$has_claude" == "true" ]]; then
-    echo "claude"
   else
     echo "local"
   fi
@@ -58,12 +49,11 @@ resolve_dest_root() {
   fi
 
   case "$agent" in
-    codex) echo "$CODEX_ROOT_DEFAULT" ;;
-    claude)
+    codex)
       if [[ "$SCOPE" == "project" ]]; then
-        echo "${PWD}/.claude"
+        echo "${PWD}/.codex/skills"
       else
-        echo "$CLAUDE_ROOT_DEFAULT"
+        echo "$CODEX_ROOT_DEFAULT"
       fi
       ;;
     local) echo "$LOCAL_ROOT_DEFAULT" ;;
@@ -78,7 +68,6 @@ resolve_global_state_root() {
   local agent="$1"
   case "$agent" in
     codex) echo "${CODEX_HOME:-$HOME/.codex}/acode-kit" ;;
-    claude) echo "${CLAUDE_HOME:-$HOME/.claude}/acode-kit" ;;
     *) echo "${LOCAL_ROOT_DEFAULT}/.acode-kit-state" ;;
   esac
 }
@@ -175,26 +164,6 @@ EOF
   echo "$bin_dir"
 }
 
-copy_claude_adapter() {
-  local source_dir="$1"
-  local dest_root="$2"
-  local adapter_file="$source_dir/integrations/claude/acode-kit.md"
-  local router_adapter_file="$source_dir/integrations/claude/acode-run.md"
-  # acode-init.md removed — init is now a CLI-only script
-
-  if [[ ! -f "$adapter_file" ]]; then
-    echo "Claude adapter not found at $adapter_file" >&2
-    exit 1
-  fi
-
-  mkdir -p "$dest_root/agents"
-  cp "$adapter_file" "$dest_root/agents/acode-kit.md"
-  if [[ -f "$router_adapter_file" ]]; then
-    cp "$router_adapter_file" "$dest_root/agents/acode-run.md"
-  fi
-  # init is handled by CLI script, no adapter needed
-}
-
 install_agent() {
   local source_dir="$1"
   local agent="$2"
@@ -219,26 +188,8 @@ install_agent() {
     codex)
       echo "Installed Codex skill to $target_dir"
       ;;
-    claude)
-      copy_claude_adapter "$source_dir" "$dest_root"
-      echo "Installed Claude bundle to $target_dir"
-      echo "Installed Claude subagent to $dest_root/agents/acode-kit.md"
-      if [[ -f "$source_dir/integrations/claude/acode-run.md" ]]; then
-        echo "Installed Claude unified entry to $dest_root/agents/acode-run.md"
-      fi
-      # init is CLI-only, no adapter to install
-      ;;
     local)
-      mkdir -p "$dest_root/claude"
       mkdir -p "$dest_root/codex"
-      if [[ -f "$source_dir/integrations/claude/acode-kit.md" ]]; then
-        cp "$source_dir/integrations/claude/acode-kit.md" "$dest_root/claude/acode-kit.md"
-        echo "Saved portable Claude adapter to $dest_root/claude/acode-kit.md"
-      fi
-      if [[ -f "$source_dir/integrations/claude/acode-run.md" ]]; then
-        cp "$source_dir/integrations/claude/acode-run.md" "$dest_root/claude/acode-run.md"
-        echo "Saved portable Claude unified entry to $dest_root/claude/acode-run.md"
-      fi
       if [[ -f "$source_dir/integrations/codex/acode-kit.md" ]]; then
         cp "$source_dir/integrations/codex/acode-kit.md" "$dest_root/codex/acode-kit.md"
         echo "Saved portable Codex runtime guide to $dest_root/codex/acode-kit.md"
@@ -250,7 +201,6 @@ install_agent() {
       echo "Installed portable bundle to $target_dir"
       echo "Manual next step:"
       echo "- Codex: copy the Acode-kit folder into ~/.codex/skills/ and use codex/*.md as runtime supplements if needed."
-      echo "- Claude Code: copy the Acode-kit folder into ~/.claude/ and copy claude/acode-kit.md and claude/acode-run.md into ~/.claude/agents/"
       ;;
   esac
 }
@@ -271,7 +221,7 @@ run_init() {
   echo "Running initialization..."
   echo "========================"
   local init_args=(--cwd "$project_root" --force)
-  if [[ "$agent" == "claude" || "$agent" == "codex" ]]; then
+  if [[ "$agent" == "codex" ]]; then
     init_args+=(--provider "$agent")
   fi
   if [[ "$SCOPE" == "user" || "$SCOPE" == "project" ]]; then
@@ -288,8 +238,8 @@ if [[ "$AGENT" == "auto" ]]; then
   AGENT="$(detect_agent)"
 fi
 
-if [[ ! "$AGENT" =~ ^(codex|claude|local|both)$ ]]; then
-  echo "Unsupported AGENT=$AGENT. Use codex, claude, local, both, or auto." >&2
+if [[ ! "$AGENT" =~ ^(codex|local)$ ]]; then
+  echo "Unsupported AGENT=$AGENT. Use codex, local, or auto." >&2
   exit 1
 fi
 
@@ -298,11 +248,7 @@ if [[ ! "$SCOPE" =~ ^(user|project)$ ]]; then
   exit 1
 fi
 
-if [[ "$AGENT" == "both" ]]; then
-  RESOLVED_DEST_INFO="codex=$(resolve_dest_root codex) | claude=$(resolve_dest_root claude)"
-else
-  RESOLVED_DEST_INFO="$(resolve_dest_root "$AGENT")"
-fi
+RESOLVED_DEST_INFO="$(resolve_dest_root "$AGENT")"
 
 echo "Acode-kit installer"
 echo "- requested agent: $REQUESTED_AGENT"
@@ -344,44 +290,21 @@ if [[ ! -f "$SOURCE_DIR/SKILL.md" ]]; then
 fi
 
 show_step 4 "Installing bundle files" "Copying Acode-kit and adapters into the target runtime directories."
-if [[ "$AGENT" == "both" ]]; then
-  install_agent "$SOURCE_DIR" codex
-  install_agent "$SOURCE_DIR" claude
-else
-  install_agent "$SOURCE_DIR" "$AGENT"
-fi
+install_agent "$SOURCE_DIR" "$AGENT"
 
 show_step 5 "Registering CLI launcher" "Creating the 'acode-kit' command entry point."
 COMMAND_BIN_DIR="$(install_command_launcher "$LAST_BUNDLE_DIR")"
 
 if [[ "$SKIP_INIT" != "true" ]]; then
   show_step 6 "Running initialization" "Refreshing MCP status and NotebookLM auth cache."
-  if [[ "$AGENT" == "both" ]]; then
-    if [[ "$SCOPE" == "user" ]]; then
-      run_init "$LAST_BUNDLE_DIR" "$(resolve_global_state_root codex)" codex || true
-    fi
-    case "$SCOPE" in
-      user)
-        run_init "$LAST_BUNDLE_DIR" "$(resolve_global_state_root claude)" claude || true
-        ;;
-      project)
-        PROJECT_ROOT="$(dirname "$(resolve_dest_root claude)")"
-        run_init "$LAST_BUNDLE_DIR" "$PROJECT_ROOT" claude || true
-        ;;
-    esac
-  else
-    case "$SCOPE" in
-      user)
-        run_init "$LAST_BUNDLE_DIR" "$(resolve_global_state_root "$AGENT")" "$AGENT" || true
-        ;;
-      project)
-        if [[ "$AGENT" == "claude" ]]; then
-          PROJECT_ROOT="$(dirname "$(resolve_dest_root claude)")"
-          run_init "$LAST_BUNDLE_DIR" "$PROJECT_ROOT" "$AGENT" || true
-        fi
-        ;;
-    esac
-  fi
+  case "$SCOPE" in
+    user)
+      run_init "$LAST_BUNDLE_DIR" "$(resolve_global_state_root "$AGENT")" "$AGENT" || true
+      ;;
+    project)
+      run_init "$LAST_BUNDLE_DIR" "$PWD" "$AGENT" || true
+      ;;
+  esac
 else
   show_step 6 "Skipping initialization" "SKIP_INIT=true was provided; initialization was intentionally skipped."
 fi

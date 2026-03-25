@@ -8,7 +8,6 @@ $AGENT = if ($env:AGENT) { $env:AGENT } else { "auto" }
 $SCOPE = if ($env:SCOPE) { $env:SCOPE } else { "user" }
 $SKIP_INIT = if ($env:SKIP_INIT) { $env:SKIP_INIT } else { "false" }
 $CODEX_ROOT_DEFAULT = if ($env:CODEX_HOME) { Join-Path $env:CODEX_HOME "skills" } else { Join-Path $HOME ".codex\skills" }
-$CLAUDE_ROOT_DEFAULT = if ($env:CLAUDE_HOME) { $env:CLAUDE_HOME } else { Join-Path $HOME ".claude" }
 $LOCAL_ROOT_DEFAULT = Join-Path (Get-Location).Path "agent-skills"
 $DEST_ROOT = if ($env:DEST_ROOT) { $env:DEST_ROOT } else { "" }
 $TOTAL_STEPS = 6
@@ -24,7 +23,6 @@ function Get-BaseHome {
   $homeRoot = $null
   switch ($AgentName) {
     "codex" { $homeRoot = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME ".codex" } }
-    "claude" { $homeRoot = if ($env:CLAUDE_HOME) { $env:CLAUDE_HOME } else { Join-Path $HOME ".claude" } }
     default { $homeRoot = $LOCAL_ROOT_DEFAULT }
   }
 
@@ -54,14 +52,10 @@ function Show-Step {
 
 function Detect-Agent {
   $codexBase = Get-BaseHome "codex"
-  $claudeBase = Get-BaseHome "claude"
 
   $hasCodex = (Test-PathExists $codexBase) -or (Test-PathExists (Join-Path $codexBase "skills"))
-  $hasClaude = (Test-PathExists $claudeBase) -or (Test-PathExists (Join-Path $claudeBase "agents"))
 
-  if ($hasCodex -and $hasClaude) { return "both" }
   if ($hasCodex) { return "codex" }
-  if ($hasClaude) { return "claude" }
   return "local"
 }
 
@@ -71,12 +65,11 @@ function Resolve-DestRoot {
   if ($DEST_ROOT -ne "") { return $DEST_ROOT }
 
   switch ($AgentName) {
-    "codex" { return Join-Path (Get-BaseHome "codex") "skills" }
-    "claude" {
+    "codex" {
       if ($SCOPE -eq "project") {
-        return Join-Path (Get-Location).Path ".claude"
+        return Join-Path (Get-Location).Path ".codex\skills"
       }
-      return Get-BaseHome "claude"
+      return Join-Path (Get-BaseHome "codex") "skills"
     }
     "local" { return $LOCAL_ROOT_DEFAULT }
     default { throw "Unsupported agent: $AgentName" }
@@ -88,7 +81,6 @@ function Resolve-GlobalStateRoot {
 
   switch ($AgentName) {
     "codex" { return Join-Path (Get-BaseHome "codex") "acode-kit" }
-    "claude" { return Join-Path (Get-BaseHome "claude") "acode-kit" }
     default { return Join-Path $LOCAL_ROOT_DEFAULT ".acode-kit-state" }
   }
 }
@@ -158,25 +150,6 @@ function Install-CommandLauncher {
   return $binDir
 }
 
-function Copy-ClaudeAdapter {
-  param(
-    [string]$SourceDir,
-    [string]$DestRoot
-  )
-  $adapterFile = Join-Path $SourceDir "integrations\claude\acode-kit.md"
-  $routerAdapterFile = Join-Path $SourceDir "integrations\claude\acode-run.md"
-  if (-not (Test-PathExists $adapterFile)) {
-    throw "Claude adapter not found at $adapterFile"
-  }
-
-  $agentsDir = Join-Path $DestRoot "agents"
-  New-Item -ItemType Directory -Path $agentsDir -Force | Out-Null
-  Copy-Item -LiteralPath $adapterFile -Destination (Join-Path $agentsDir "acode-kit.md") -Force
-  if (Test-PathExists $routerAdapterFile) {
-    Copy-Item -LiteralPath $routerAdapterFile -Destination (Join-Path $agentsDir "acode-run.md") -Force
-  }
-}
-
 function Write-InstallSummary {
   param(
     [string]$RequestedAgent,
@@ -230,31 +203,11 @@ function Install-Agent {
     "codex" {
       Write-Host "Installed Codex skill to $targetDir"
     }
-    "claude" {
-      Copy-ClaudeAdapter -SourceDir $SourceDir -DestRoot $destRoot
-      Write-Host "Installed Claude bundle to $targetDir"
-      Write-Host "Installed Claude subagent to $(Join-Path $destRoot 'agents\acode-kit.md')"
-      if (Test-PathExists (Join-Path $SourceDir "integrations\claude\acode-run.md")) {
-        Write-Host "Installed Claude unified entry to $(Join-Path $destRoot 'agents\acode-run.md')"
-      }
-    }
     "local" {
-      $portableClaudeDir = Join-Path $destRoot "claude"
       $portableCodexDir = Join-Path $destRoot "codex"
-      New-Item -ItemType Directory -Path $portableClaudeDir -Force | Out-Null
       New-Item -ItemType Directory -Path $portableCodexDir -Force | Out-Null
-      $adapterPath = Join-Path $SourceDir "integrations\claude\acode-kit.md"
-      $routerAdapterPath = Join-Path $SourceDir "integrations\claude\acode-run.md"
       $codexAdapterPath = Join-Path $SourceDir "integrations\codex\acode-kit.md"
       $codexRouterAdapterPath = Join-Path $SourceDir "integrations\codex\acode-run.md"
-      if (Test-PathExists $adapterPath) {
-        Copy-Item -LiteralPath $adapterPath -Destination (Join-Path $portableClaudeDir "acode-kit.md") -Force
-        Write-Host "Saved portable Claude adapter to $(Join-Path $portableClaudeDir 'acode-kit.md')"
-      }
-      if (Test-PathExists $routerAdapterPath) {
-        Copy-Item -LiteralPath $routerAdapterPath -Destination (Join-Path $portableClaudeDir "acode-run.md") -Force
-        Write-Host "Saved portable Claude unified entry to $(Join-Path $portableClaudeDir 'acode-run.md')"
-      }
       if (Test-PathExists $codexAdapterPath) {
         Copy-Item -LiteralPath $codexAdapterPath -Destination (Join-Path $portableCodexDir "acode-kit.md") -Force
         Write-Host "Saved portable Codex runtime guide to $(Join-Path $portableCodexDir 'acode-kit.md')"
@@ -266,7 +219,6 @@ function Install-Agent {
       Write-Host "Installed portable bundle to $targetDir"
       Write-Host "Manual next step:"
       Write-Host "- Codex: copy the Acode-kit folder into $(Join-Path (Get-BaseHome 'codex') 'skills') and use codex/*.md as runtime supplements if needed."
-      Write-Host "- Claude Code: copy the Acode-kit folder into $(Get-BaseHome 'claude') and copy claude/acode-kit.md plus claude/acode-run.md into $(Join-Path (Get-BaseHome 'claude') 'agents')."
     }
   }
 }
@@ -291,7 +243,7 @@ function Run-Init {
   Write-Host "This refreshes MCP status and NotebookLM auth into the user-level global cache."
 
   $initArgs = @("--cwd", $ProjectRoot, "--force")
-  if ($AgentName -in @("claude", "codex")) {
+  if ($AgentName -eq "codex") {
     $initArgs += @("--provider", $AgentName)
   }
   if ($SCOPE -in @("user", "project")) {
@@ -309,19 +261,15 @@ if ($AGENT -eq "auto") {
   $AGENT = Detect-Agent
 }
 
-if ($AGENT -notin @("codex", "claude", "local", "both")) {
-  throw "Unsupported AGENT=$AGENT. Use codex, claude, local, both, or auto."
+if ($AGENT -notin @("codex", "local")) {
+  throw "Unsupported AGENT=$AGENT. Use codex, local, or auto."
 }
 
 if ($SCOPE -notin @("user", "project")) {
   throw "Unsupported SCOPE=$SCOPE. Use user or project."
 }
 
-if ($AGENT -eq "both") {
-  $resolvedDestInfo = "codex=$(Resolve-DestRoot 'codex') | claude=$(Resolve-DestRoot 'claude')"
-} else {
-  $resolvedDestInfo = Resolve-DestRoot $AGENT
-}
+$resolvedDestInfo = Resolve-DestRoot $AGENT
 
 Write-InstallSummary -RequestedAgent $REQUESTED_AGENT -ResolvedAgent $AGENT -Scope $SCOPE -Destination $resolvedDestInfo
 
@@ -351,35 +299,17 @@ try {
   }
 
   Show-Step -Current 4 -Title "Installing bundle files" -Detail "Copying Acode-kit and adapters into the target runtime directories."
-  if ($AGENT -eq "both") {
-    Install-Agent -SourceDir $sourceDir -AgentName "codex"
-    Install-Agent -SourceDir $sourceDir -AgentName "claude"
-  } else {
-    Install-Agent -SourceDir $sourceDir -AgentName $AGENT
-  }
+  Install-Agent -SourceDir $sourceDir -AgentName $AGENT
 
   Show-Step -Current 5 -Title "Registering CLI launcher" -Detail "Creating the 'acode-kit' command entry point."
   $commandBinDir = Install-CommandLauncher -BundleDir $LAST_BUNDLE_DIR
 
   if ($SKIP_INIT -ne "true") {
     Show-Step -Current 6 -Title "Running initialization" -Detail "Refreshing MCP status and NotebookLM auth cache."
-    if ($AGENT -eq "both") {
-      if ($SCOPE -eq "user") {
-        [void](Run-Init -BundleDir $LAST_BUNDLE_DIR -ProjectRoot (Resolve-GlobalStateRoot "codex") -AgentName "codex")
-      }
-      if ($SCOPE -eq "user") {
-        [void](Run-Init -BundleDir $LAST_BUNDLE_DIR -ProjectRoot (Resolve-GlobalStateRoot "claude") -AgentName "claude")
-      } elseif ($SCOPE -eq "project") {
-        $projectRoot = Split-Path -Parent (Resolve-DestRoot "claude")
-        [void](Run-Init -BundleDir $LAST_BUNDLE_DIR -ProjectRoot $projectRoot -AgentName "claude")
-      }
-    } else {
-      if ($SCOPE -eq "user") {
-        [void](Run-Init -BundleDir $LAST_BUNDLE_DIR -ProjectRoot (Resolve-GlobalStateRoot $AGENT) -AgentName $AGENT)
-      } elseif ($SCOPE -eq "project" -and $AGENT -eq "claude") {
-        $projectRoot = Split-Path -Parent (Resolve-DestRoot "claude")
-        [void](Run-Init -BundleDir $LAST_BUNDLE_DIR -ProjectRoot $projectRoot -AgentName $AGENT)
-      }
+    if ($SCOPE -eq "user") {
+      [void](Run-Init -BundleDir $LAST_BUNDLE_DIR -ProjectRoot (Resolve-GlobalStateRoot $AGENT) -AgentName $AGENT)
+    } elseif ($SCOPE -eq "project") {
+      [void](Run-Init -BundleDir $LAST_BUNDLE_DIR -ProjectRoot (Get-Location).Path -AgentName $AGENT)
     }
   } else {
     Show-Step -Current 6 -Title "Skipping initialization" -Detail "SKIP_INIT=true was provided; initialization was intentionally skipped."

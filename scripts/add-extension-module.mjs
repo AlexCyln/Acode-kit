@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { createScanReadyPack, installPreparedPack, resolveExtensionSource, updateExtensionsIndex } from "./extension-module-helpers.mjs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const bundleRoot = path.resolve(__dirname, "..");
 
 function parseArgs(argv) {
   const args = {};
@@ -27,17 +32,16 @@ function main() {
     process.exit(args.help ? 0 : 1);
   }
 
-  const repoRoot = process.cwd();
-  const sourceInfo = resolveExtensionSource(repoRoot, args.path);
-  const prepared = createScanReadyPack(repoRoot, sourceInfo);
+  const sourceInfo = resolveExtensionSource(bundleRoot, args.path);
+  const prepared = createScanReadyPack(bundleRoot, sourceInfo);
 
   const scan = spawnSync("node", [
-    path.join("scripts", "scan-extension-module.mjs"),
+    path.join(__dirname, "scan-extension-module.mjs"),
     "--path",
     args.path,
     "--json"
   ], {
-    cwd: repoRoot,
+    cwd: bundleRoot,
     encoding: "utf8"
   });
 
@@ -53,8 +57,8 @@ function main() {
     process.exit(1);
   }
 
-  const installed = installPreparedPack(repoRoot, sourceInfo, prepared);
-  updateExtensionsIndex(repoRoot, installed.manifest);
+  const installed = installPreparedPack(bundleRoot, sourceInfo, prepared);
+  updateExtensionsIndex(bundleRoot, installed.manifest);
 
   console.log(`extension installed: ${installed.manifest.id}`);
   console.log(`type: ${installed.manifest.type}`);

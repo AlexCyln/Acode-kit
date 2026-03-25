@@ -39,8 +39,8 @@ function main() {
   assert.match(scan.stdout, /Architecture status: pass/, "scan should show architecture status");
 
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "acode-cli-test-"));
-  const sandboxRepo = path.join(tempRoot, "repo");
-  fs.cpSync(repoRoot, sandboxRepo, { recursive: true });
+  const sandboxWorkspace = path.join(tempRoot, "workspace");
+  fs.mkdirSync(sandboxWorkspace, { recursive: true });
 
   const extensionMd = path.join(tempRoot, "demo-third-party-extension.md");
   fs.writeFileSync(
@@ -49,19 +49,19 @@ function main() {
     "utf8"
   );
 
-  const add = runCli(["-add", extensionMd], sandboxRepo);
+  const add = runCli(["-add", extensionMd], sandboxWorkspace);
   assert.equal(add.status, 0, add.stderr || add.stdout);
   assert.match(add.stdout, /extension installed: demo-third-party-extension/, "add should install extension");
   assert.ok(
-    fs.existsSync(path.join(sandboxRepo, "Acode-kit", "extensions", "packs", "demo-third-party-extension")),
+    fs.existsSync(path.join(repoRoot, "Acode-kit", "extensions", "packs", "demo-third-party-extension")),
     "installed extension pack should exist"
   );
 
-  const remove = runCli(["-remove", "demo-third-party-extension"], sandboxRepo);
+  const remove = runCli(["-remove", "demo-third-party-extension"], sandboxWorkspace);
   assert.equal(remove.status, 0, remove.stderr || remove.stdout);
   assert.match(remove.stdout, /extension removed: demo-third-party-extension/, "remove should remove extension");
   assert.ok(
-    !fs.existsSync(path.join(sandboxRepo, "Acode-kit", "extensions", "packs", "demo-third-party-extension")),
+    !fs.existsSync(path.join(repoRoot, "Acode-kit", "extensions", "packs", "demo-third-party-extension")),
     "removed extension pack should not exist"
   );
 

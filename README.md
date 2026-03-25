@@ -245,7 +245,7 @@ AGENT=codex SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Aco
 Windows PowerShell:
 
 ```powershell
-$env:AGENT="claude"; $env:SCOPE="user"; irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
+$env:AGENT="codex"; $env:SCOPE="user"; irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
 ```
 
 #### npm 直接安装
@@ -294,17 +294,19 @@ node scripts/install.mjs --source-dir ./Acode-kit --agent codex --scope user
 适合把工作流和项目骨架直接装进指定项目目录：
 
 ```bash
-node scripts/install.mjs --source-dir ./Acode-kit --agent claude --scope project --dest-dir /path/to/my-project/.claude
+node scripts/install.mjs --source-dir ./Acode-kit --agent codex --scope project --dest-dir /path/to/my-project/.codex/skills
 ```
 
 #### 初始化
 
 初始化会：
 
-1. 扫描 MCP 工具
-2. 同步 NotebookLM 认证状态
-3. 写入 `.acode-kit-initialized.json`
-4. 同步用户级全局状态缓存
+1. 先扫描 4 个 MCP 工具
+2. 已存在的 MCP 保持不变并跳过重复安装
+3. 仅对缺失 MCP 执行安装
+4. 同步 NotebookLM 认证状态
+5. 写入 `.acode-kit-initialized.json`
+6. 同步用户级全局状态缓存
 
 NotebookLM 认证触发口令固定为：
 
@@ -579,7 +581,7 @@ AGENT=codex SCOPE=user curl -fsSL https://raw.githubusercontent.com/AlexCyln/Aco
 Windows PowerShell:
 
 ```powershell
-$env:AGENT="claude"; $env:SCOPE="user"; irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
+$env:AGENT="codex"; $env:SCOPE="user"; irm https://raw.githubusercontent.com/AlexCyln/Acode-kit/main/scripts/install.ps1 | iex
 ```
 
 ### npm direct install

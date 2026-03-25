@@ -166,9 +166,18 @@ function scanTools(provider) {
 // ---------------------------------------------------------------------------
 
 async function installMissingTools(scanResult, provider, autoYes) {
+  const installed = scanResult.tools.filter((t) => t.status === "installed");
   const missing = scanResult.tools.filter((t) => t.status === "missing");
+
+  if (installed.length > 0) {
+    console.log(`\n${installed.length} tool(s) already installed and will be kept as-is:`);
+    for (const t of installed) {
+      console.log(`  [OK] ${t.name} (skip reinstall)`);
+    }
+  }
+
   if (missing.length === 0) {
-    console.log("\nAll MCP tools are installed.");
+    console.log("\nAll MCP tools are already installed. No reinstall will be performed.");
     return;
   }
 
