@@ -130,7 +130,7 @@ function Install-CommandLauncher {
   @(
     "@echo off"
     "setlocal"
-    "node `"$cliScript`" %*"
+    "powershell -NoProfile -ExecutionPolicy Bypass -File `"%~dp0acode-kit.ps1`" %*"
   ) | Set-Content -LiteralPath $cmdLauncher -Encoding ascii
 
   @(
