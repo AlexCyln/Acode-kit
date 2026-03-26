@@ -22,6 +22,13 @@ Extensions are loaded only when:
 3. extension `requires` constraints match the current project
 4. the current task still needs extra constraints after core standards are loaded
 
+When an extension is loaded:
+
+1. keep the extension node-local
+2. summarize extension usage to the user in one compact statement
+3. state the extension id, the delegated or assisted scope, and the practical effect on the current node
+4. do not present the extension as a workflow owner
+
 ## Hard prohibitions
 
 1. do not read all global standards on skill entry
@@ -32,6 +39,7 @@ Extensions are loaded only when:
 6. Do not bulk-read all workflows or all standards on entry.
 7. do not bulk-read all registered extensions on entry
 8. do not activate an extension only because it exists in the registry
+9. do not let LMS tier downshift remove required document materialization or node review outputs
 
 ## Stability criteria
 

@@ -56,15 +56,18 @@ If a project has marked an extension as `已停用`:
 ### `reference-only`
 1. main agent reads the extension document directly
 2. no sub-agent dispatch is required
+3. tell the user which extension was loaded and what node-local help it provided
 
 ### `workflow-helper`
 1. main agent may read the extension to help the current node
 2. extension does not own the node
+3. tell the user which extension was used, what it contributed, and why it matters at this node
 
 ### `delegated-capability`
 1. main agent may delegate a bounded task to the extension skill
 2. the extension returns compressed conclusions only
 3. final gate and stage decisions still belong to the main agent
+4. after the delegated task returns, give the user a concise summary of which extension handled what and why
 
 ## Hard prohibitions
 
@@ -74,3 +77,4 @@ If a project has marked an extension as `已停用`:
 4. do not activate an extension that is not declared at project level
 5. do not activate an extension whose latest security scan is not `pass`
 6. do not activate an extension whose workflow compatibility scan is not `pass`
+7. do not hide extension usage from the user; always expose a concise node-local usage summary

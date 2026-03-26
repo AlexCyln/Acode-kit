@@ -50,9 +50,16 @@ Defines the startup lane before stage-driven execution begins.
 
 - project root structure
 - root `AGENTS.md`
-- project control docs populated from templates
+- project control docs materialized from approved startup artifacts and templates
 - dependencies and environment initialized
 - pending confirmations extracted instead of invented
+
+Required materialization at `Step 4`:
+
+1. the approved Step 2 project skeleton must be written into the formal project docs instead of being re-summarized into a weaker placeholder
+2. the approved Step 3 PRD and progress plan must be written into the formal project docs instead of being regenerated from memory
+3. templates may provide structure and metadata fields, but approved content remains the source of truth
+4. if any approved section is missing at setup time, stop and reconstruct it from the approved artifact before continuing
 
 ## Startup rules
 
@@ -63,3 +70,5 @@ Defines the startup lane before stage-driven execution begins.
 5. Step 4 is setup only; it is not design or application implementation.
 6. Startup never invokes `acode-run`.
 7. `acode-run` may only appear later as a bounded routed subtask after Gate 4.
+8. LMS tier changes setup density only; it does not relax Step 4 deliverable completeness.
+9. Step 4 must create formal project docs by carrying forward approved startup content, not by inventing new simplified documents.

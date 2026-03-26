@@ -62,6 +62,8 @@ Within Stage 5, the module sequence is fixed:
 3. The drafts must be review-ready markdown, not loose chat notes.
 4. Step 3 must also produce an LMS tier recommendation draft based on the approved PRD skeleton.
 5. Persistence into the project directory still happens in Step 4, but the Step 2 / Step 3 artifacts must already be structured as file-ready markdown before the gate decision.
+6. Step 4 must materialize the approved Step 2 and Step 3 artifacts into formal project docs instead of replacing them with weaker summaries.
+7. Templates may add structure and metadata, but approved startup content remains the source of truth.
 
 ## User approval contract
 
@@ -111,6 +113,7 @@ After the PRD is approved at Gate 3 and before Step 4 begins, the agent must:
 6. proceed to Step 4 only after the tier is explicitly confirmed
 
 The tier decision must be derived from the PRD draft and project skeleton, not from a fixed numeric threshold table.
+The tier changes execution density only; it must not remove gates, stages, Step 5a-5e, required inputs, required outputs, or standards obligations.
 
 ### Gate 3.5 output contract
 
@@ -176,6 +179,16 @@ Provider adapters must **not** change:
 5. Step 4 / Stage 4 separation
 6. Pencil usage boundary
 
+## Extension usage disclosure
+
+Whenever an extension is loaded at a node:
+
+1. keep the extension node-local and bounded
+2. tell the user which extension was used
+3. tell the user what it did at the current node
+4. tell the user why it was helpful
+5. do not present the extension as a workflow owner
+
 ## Minimal simulation checklist
 
 A correct provider runtime must pass this path check:
@@ -196,5 +209,6 @@ A correct provider runtime must pass this path check:
 2. Large projects may expand into more modules and more detailed documentation, but they do not change the approval boundaries.
 3. The workflow is stable when each node can be executed with the same entry, output, and review contract regardless of project size.
 4. If a node cannot state its input, output, review point, and document update target clearly, the workflow is not ready for execution.
+5. LMS tier may reduce scope breadth or batching width, but it may not reduce workflow rigor.
 
 Any provider implementation that violates this checklist is incompatible with Acode-kit.

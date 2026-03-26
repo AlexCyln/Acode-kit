@@ -5,11 +5,13 @@
 - 业务场景：
 - 本期版本目标：
 - 项目类型：<!-- web / mobile / mini-program / desktop / cross-platform -->
+- 来源基线：<!-- Gate 2 已批准项目骨架 / 最近一次批准修订 -->
 
 ## 范围
 - 本期 Must：
 - 本期 Should：
 - 本期 Could：
+- 对应已批准骨架版本：<!-- 例如 Skeleton V1.0 -->
 
 ## 技术约束
 - 已声明技术栈：见 `PROJECT_OVERRIDES.md`
@@ -40,6 +42,7 @@
 - 当前进度：
 - 最近一次更新：
 - 实施信息：
+- 启动承接说明：<!-- Step 4 是否已完整承接 Step 2 / Step 3 已批准内容 -->
 
 ## LMS / 版本治理
 - LMS 档位：<!-- S / M / L -->

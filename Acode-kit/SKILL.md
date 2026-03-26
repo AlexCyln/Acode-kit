@@ -86,6 +86,12 @@ Startup sequence:
 8. Step 4: project environment setup
 9. Gate 4: user approval
 
+LMS governs execution density only:
+1. `S` / `M` / `L` may change module granularity, batching width, and document expansion depth
+2. `S` / `M` / `L` may not remove startup gates, Stage 1-7, or Step 5a-5e
+3. every node still keeps its required inputs, outputs, review boundary, and standards obligations
+4. smaller LMS tiers reduce scope breadth, not workflow rigor
+
 Stage-driven execution:
 1. Stage 1: requirements structuring + module decomposition
 2. Stage 2: overall UI architecture
@@ -110,6 +116,8 @@ Stage 5 is fixed per module:
 5. do not skip or merge gates
 6. do not skip stages when downstream outputs depend on them
 7. wait for explicit user approval at every gate, stage review, and Step 5a-5e review
+8. `Step 4` must materialize the approved Step 2 / Step 3 outputs into project docs; it must not replace them with weaker template-only summaries
+9. when an extension is loaded, tell the user which extension was used, what it did at the current node, and why it was helpful
 
 ## Workflow references
 Use these files instead of expanding the main entry:

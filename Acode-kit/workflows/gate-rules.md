@@ -23,6 +23,25 @@ After every approved gate, stage, and module step:
 6. update `PROJECT_ACCESS_INFO.md` when URLs, accounts, passwords, tokens, or external entries change
 7. update detailed API / database / module / testing docs when implementation facts change
 
+## Approved artifact carry-forward
+
+Once a startup artifact is approved:
+
+1. that approved artifact becomes the frozen source for the next node
+2. later nodes may format, split, or enrich it, but may not replace it with a weaker summary
+3. `Step 4` must materialize approved Step 2 and Step 3 outputs into formal project docs
+4. if templates are used, they must wrap the approved content rather than overwrite it
+5. if a later node needs new facts, update the formal doc and keep the approved sections intact unless the user explicitly revises them
+
+## LMS governance floor
+
+LMS may scale execution density only:
+
+1. `S`, `M`, and `L` may change module granularity, batching, and documentation depth
+2. `S`, `M`, and `L` may not remove required workflow nodes
+3. `S`, `M`, and `L` may not reduce required inputs, outputs, review checkpoints, or standards coverage for a node
+4. if scope must shrink for a smaller tier, shrink breadth first and keep the workflow contract unchanged
+
 ## Review boundary reminders
 
 1. Gate 3 approval does not authorize design.
