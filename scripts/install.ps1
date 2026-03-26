@@ -130,13 +130,27 @@ function Install-CommandLauncher {
   @(
     "@echo off"
     "setlocal"
-    "powershell -NoProfile -ExecutionPolicy Bypass -File `"%~dp0acode-kit.ps1`" %*"
+    "set `"CLI_SCRIPT=%~dp0..\..\.codex\skills\Acode-kit\scripts\acode-kit.mjs`""
+    "if not exist `"%CLI_SCRIPT%`" if defined CODEX_HOME set `"CLI_SCRIPT=%CODEX_HOME%\skills\Acode-kit\scripts\acode-kit.mjs`""
+    "if not exist `"%CLI_SCRIPT%`" set `"CLI_SCRIPT=%USERPROFILE%\.codex\skills\Acode-kit\scripts\acode-kit.mjs`""
+    "if not exist `"%CLI_SCRIPT%`" ("
+    "  echo Acode-kit CLI script not found. Re-run the installer."
+    "  exit /b 1"
+    ")"
+    "node `"%CLI_SCRIPT%`" %*"
   ) | Set-Content -LiteralPath $cmdLauncher -Encoding ascii
 
   @(
     '$ErrorActionPreference = "Stop"'
-    "& node `"$cliScript`" @args"
-  ) | Set-Content -LiteralPath $psLauncher -Encoding utf8
+    '$candidates = @('
+    '  (Join-Path $PSScriptRoot "..\..\.codex\skills\Acode-kit\scripts\acode-kit.mjs"),'
+    '  $(if ($env:CODEX_HOME) { Join-Path $env:CODEX_HOME "skills\Acode-kit\scripts\acode-kit.mjs" } else { $null }),'
+    '  (Join-Path $HOME ".codex\skills\Acode-kit\scripts\acode-kit.mjs")'
+    ') | Where-Object { $_ }'
+    '$cliScript = $candidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1'
+    'if (-not $cliScript) { throw "Acode-kit CLI script not found. Re-run the installer." }'
+    '& node $cliScript @args'
+  ) | Set-Content -LiteralPath $psLauncher -Encoding ascii
 
   if ($SCOPE -eq "user") {
     Ensure-UserPathContains -BinDir $binDir
