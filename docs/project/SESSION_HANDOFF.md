@@ -8,19 +8,19 @@
 - Step: 非模块迭代
 - Slice: N/A
 - Next Action: 后续若新增技术栈包，需按“directory fragment + Step 3 输入冻结 + Step 4 DIRECTORY_PLAN 合成”统一接入
-- Progress: 88%
-- Implementation Info: 已完成 Step 4 文档归位规则、LMS 不降节点规则、扩展调用摘要规则、Step 3 技术栈与目录输入冻结、Step 4 目录计划合成与技术栈目录片段接入
+- Progress: 100%
+- Implementation Info: 已完成 Step 4 文档归位规则、LMS 不降节点规则、扩展调用摘要规则、Step 3 技术栈与目录输入冻结、Step 4 目录计划合成与技术栈目录片段接入，并已推送目录整合规则到 GitHub
 - Change Branch: 无
-- Rollback Point: 规则增强前的 workflow / extension registry 基线
+- Rollback Point: 引入 directory fragments 与 Step 3/4 目录整合前的 workflow / reference 基线
 - LMS Tier: M
-- Frozen Version: v2.0 workflow-contract-hardening
-- Revision State: 修订中
+- Frozen Version: v2.1
+- Revision State: 已冻结
 
 ## 当前对象
 
 - 项目：`Acode-kit`
 - 当前目标：稳定 `Acode-kit` 作为 Codex 中唯一公开 skill 入口，并保证安装、扩展、激活链路可用
-- 当前版本：`v2.0`
+- 当前版本：`v2.1`
 
 ## 本轮已完成
 
@@ -71,6 +71,7 @@
 - `37c450a` `fix: expose only one public skill entry`
 - `088594a` `fix: quote acode-kit skill description yaml`
 - `de7414e` `fix: back up project docs before extension state updates`
+- `9614ddc` `feat: add stack-driven directory synthesis workflow`
 
 ## 当前本机结论
 
@@ -101,16 +102,15 @@
 
 ## 推荐下一步
 
-1. 完全重启 VS Code / Codex 会话，确认 skill 列表刷新
-2. 选一组真实技术选型做启动模拟，验证：
+1. 选一组真实技术选型做启动模拟，验证：
    - `STACK_AND_DIRECTORY_INPUTS.approved.md`
    - `DIRECTORY_PLAN.md`
    - 目录创建与启动文档归位
-3. 后续新增任意 stack/scenario 包时，必须同步新增对应 `*.directory.json`
-4. 若仍被 `vibe-project-builder` 抢入口：
+2. 后续新增任意 stack/scenario 包时，必须同步新增对应 `*.directory.json`
+3. 若仍被 `vibe-project-builder` 抢入口：
    - 修改 `vibe-project-builder/SKILL.md`
    - 加入“如果用户显式提到 Acode-kit，不要接管，必须退出并让 Acode-kit 接管”
-5. 如需进一步增强扩展治理，可考虑：
+4. 如需进一步增强扩展治理，可考虑：
    - `-enable` 增加 preview/diff 模式
    - `-disable` 增加更细的回滚提示
 
@@ -196,7 +196,7 @@
 
 - 当前档位：`M`
 - 档位约束：仅控制规模密度，不降低节点、输入输出、审批和标准要求
-- Frozen Version：`v2.1 directory-synthesis-hardening`
+- Frozen Version：`v2.1`
 - Rollback Point：引入 directory fragments 与 Step 3/4 目录整合前的 workflow / reference 基线
 
 ## 已更新文档
