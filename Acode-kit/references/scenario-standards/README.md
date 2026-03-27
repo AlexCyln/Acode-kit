@@ -16,3 +16,6 @@ Planned first-wave packages:
 10. `mobile-experience.md`
 11. `multi-end-fusion.md`
 12. `official-brand-site.md`
+13. `data-dashboard.md`
+14. `creator-platform.md`
+15. `marketing-landing.md`
