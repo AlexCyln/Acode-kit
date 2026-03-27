@@ -12,6 +12,7 @@ LOCAL_ROOT_DEFAULT="${PWD}/agent-skills"
 DEST_ROOT="${DEST_ROOT:-}"
 TOTAL_STEPS=6
 PATH_CONFIG_FILE=""
+CURRENT_VERSION=""
 
 exists() {
   [[ -e "$1" ]]
@@ -240,19 +241,6 @@ fi
 
 RESOLVED_DEST_INFO="$(resolve_dest_root "$AGENT")"
 
-echo "Acode-kit installer"
-echo "- requested agent: $REQUESTED_AGENT"
-echo "- resolved agent: $AGENT"
-echo "- scope: $SCOPE"
-echo "- destination: $RESOLVED_DEST_INFO"
-if [[ "$SCOPE" == "user" ]]; then
-  echo "- note: user-level installs are intended to populate a persistent global MCP cache for future sessions"
-fi
-if [[ "$REQUESTED_AGENT" == "auto" ]]; then
-  echo "- note: auto now defaults to Codex skill registration"
-  echo "- note: use AGENT=local only if you explicitly want a portable non-registered bundle"
-fi
-
 TMP_DIR="$(mktemp -d)"
 ARCHIVE_URL="https://codeload.github.com/${REPO}/tar.gz/refs/heads/${REF}"
 ARCHIVE_FILE="$TMP_DIR/archive.tar.gz"
@@ -278,6 +266,27 @@ SOURCE_DIR="$REPO_DIR/$SKILL_PATH"
 if [[ ! -f "$SOURCE_DIR/SKILL.md" ]]; then
   echo "Skill not found at $SKILL_PATH in $REPO@$REF" >&2
   exit 1
+fi
+
+VERSION_FILE="$REPO_DIR/VERSION"
+if [[ -f "$VERSION_FILE" ]]; then
+  CURRENT_VERSION="$(tr -d '\r\n' < "$VERSION_FILE")"
+fi
+
+echo "Acode-kit installer"
+if [[ -n "$CURRENT_VERSION" ]]; then
+  echo "- version: $CURRENT_VERSION"
+fi
+echo "- requested agent: $REQUESTED_AGENT"
+echo "- resolved agent: $AGENT"
+echo "- scope: $SCOPE"
+echo "- destination: $RESOLVED_DEST_INFO"
+if [[ "$SCOPE" == "user" ]]; then
+  echo "- note: user-level installs are intended to populate a persistent global MCP cache for future sessions"
+fi
+if [[ "$REQUESTED_AGENT" == "auto" ]]; then
+  echo "- note: auto now defaults to Codex skill registration"
+  echo "- note: use AGENT=local only if you explicitly want a portable non-registered bundle"
 fi
 
 show_step 4 "Installing bundle files" "Copying Acode-kit and adapters into the target runtime directories."

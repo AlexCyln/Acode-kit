@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
+import { ACODE_KIT_VERSION } from "./acode-kit-version.mjs";
 
 const DEFAULT_REPO = "AlexCyln/Acode-kit";
 const DEFAULT_SKILL_PATH = "Acode-kit";
@@ -249,6 +250,7 @@ function runInit(bundleDir, projectRoot, args) {
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
+  console.log(`Acode-kit installer ${ACODE_KIT_VERSION}`);
   logStep(1, "Preparing install plan", "Resolving source, target agent, and destination paths.");
   const jobs = createJobs(args);
   const prepared = prepareSource(args);

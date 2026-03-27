@@ -29,6 +29,8 @@
     "scripts",
     "Acode-kit",
     "README.md",
+    "CHANGELOG.md",
+    "VERSION",
     "LICENSE"
   ],
   "keywords": [

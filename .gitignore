@@ -6,3 +6,4 @@ agent-skills*/
 tmp/
 *.tmp
 .acode-router/
+docs/project/SESSION_HANDOFF.md

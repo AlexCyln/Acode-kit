@@ -13,6 +13,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { ACODE_KIT_VERSION } from "./acode-kit-version.mjs";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -220,7 +221,7 @@ function getGlobalStatusPath(homeDir) {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "acode-mcp-workspace-"));
   const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), "acode-mcp-home-"));
   const workspaceStatus = {
-    version: "v2.0",
+    version: ACODE_KIT_VERSION,
     initializedAt: new Date().toISOString(),
     scope: "workspace",
     provider: "codex",

@@ -15,6 +15,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { ACODE_KIT_VERSION } from "./acode-kit-version.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -65,7 +66,7 @@ function getGlobalStatusPath(homeDir) {
     assert(fs.existsSync(statusPath), "Status file created in empty folder");
 
     const status = JSON.parse(fs.readFileSync(statusPath, "utf8"));
-    assert(status.version === "v2.0", "Status file has version v2.0");
+    assert(status.version === ACODE_KIT_VERSION, `Status file has version ${ACODE_KIT_VERSION}`);
     assert(status.scope === "workspace", "Workspace status file is marked as workspace");
     assert(status.projectFolder.wasEmpty === true, "wasEmpty is true for empty folder");
     assert(status.projectFolder.path === tmpDir, "projectFolder.path matches cwd");

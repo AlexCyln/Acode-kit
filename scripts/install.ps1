@@ -11,6 +11,7 @@ $CODEX_ROOT_DEFAULT = if ($env:CODEX_HOME) { Join-Path $env:CODEX_HOME "skills" 
 $LOCAL_ROOT_DEFAULT = Join-Path (Get-Location).Path "agent-skills"
 $DEST_ROOT = if ($env:DEST_ROOT) { $env:DEST_ROOT } else { "" }
 $TOTAL_STEPS = 6
+$CURRENT_VERSION = ""
 
 function Test-PathExists {
   param([string]$TargetPath)
@@ -168,6 +169,9 @@ function Write-InstallSummary {
   )
 
   Write-Host "Acode-kit installer"
+  if ($CURRENT_VERSION -ne "") {
+    Write-Host "- version: $CURRENT_VERSION"
+  }
   Write-Host "- requested agent: $RequestedAgent"
   Write-Host "- resolved agent: $ResolvedAgent"
   Write-Host "- scope: $Scope"
@@ -282,8 +286,6 @@ if ($SCOPE -notin @("user", "project")) {
 
 $resolvedDestInfo = Resolve-DestRoot $AGENT
 
-Write-InstallSummary -RequestedAgent $REQUESTED_AGENT -ResolvedAgent $AGENT -Scope $SCOPE -Destination $resolvedDestInfo
-
 $tmpDir = Join-Path ([System.IO.Path]::GetTempPath()) ("acode-kit-" + [guid]::NewGuid().ToString("N"))
 $archiveFile = Join-Path $tmpDir "archive.tar.gz"
 $extractDir = Join-Path $tmpDir "extract"
@@ -308,6 +310,12 @@ try {
   if (-not (Test-PathExists (Join-Path $sourceDir "SKILL.md"))) {
     throw "Skill not found at $SKILL_PATH in $REPO@$REF"
   }
+  $versionFile = Join-Path $repoDir.FullName "VERSION"
+  if (Test-PathExists $versionFile) {
+    $CURRENT_VERSION = (Get-Content -LiteralPath $versionFile -Raw).Trim()
+  }
+
+  Write-InstallSummary -RequestedAgent $REQUESTED_AGENT -ResolvedAgent $AGENT -Scope $SCOPE -Destination $resolvedDestInfo
 
   Show-Step -Current 4 -Title "Installing bundle files" -Detail "Copying Acode-kit and adapters into the target runtime directories."
   Install-Agent -SourceDir $sourceDir -AgentName $AGENT
