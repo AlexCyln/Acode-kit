@@ -174,6 +174,9 @@ install_agent() {
     rm -rf "$target_dir/scripts"
     cp -R "$repo_root/scripts" "$target_dir/scripts"
   fi
+  if [[ -f "$repo_root/VERSION" ]]; then
+    cp "$repo_root/VERSION" "$target_dir/VERSION"
+  fi
 
   case "$agent" in
     codex)

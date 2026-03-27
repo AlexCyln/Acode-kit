@@ -106,9 +106,14 @@ function copyFile(sourceFile, destFile) {
 function copyBundleScripts(sourceDir, bundleDir) {
   const repoRoot = path.dirname(sourceDir);
   const scriptsDir = path.join(repoRoot, "scripts");
-  if (!exists(scriptsDir)) return;
-  const targetScriptsDir = path.join(bundleDir, "scripts");
-  copyDir(scriptsDir, targetScriptsDir);
+  if (exists(scriptsDir)) {
+    const targetScriptsDir = path.join(bundleDir, "scripts");
+    copyDir(scriptsDir, targetScriptsDir);
+  }
+  const versionFile = path.join(repoRoot, "VERSION");
+  if (exists(versionFile)) {
+    copyFile(versionFile, path.join(bundleDir, "VERSION"));
+  }
 }
 
 function resolveGlobalStateRoot(agent) {

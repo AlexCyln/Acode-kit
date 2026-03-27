@@ -213,6 +213,10 @@ function Install-Agent {
     }
     Copy-Item -LiteralPath $scriptsDir -Destination $targetScriptsDir -Recurse -Force
   }
+  $versionFile = Join-Path $repoRoot "VERSION"
+  if (Test-PathExists $versionFile) {
+    Copy-Item -LiteralPath $versionFile -Destination (Join-Path $targetDir "VERSION") -Force
+  }
 
   switch ($AgentName) {
     "codex" {
