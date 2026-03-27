@@ -54,7 +54,7 @@ CALLER: Present the FULL content above to the user. WAIT for their explicit repl
 1. **ONE STEP PER INVOCATION.** Execute only the current step, then TERMINATE. You will be resumed for the next step.
 2. **TERMINATE AT EVERY GATE.** After outputting the gate result and the `⛔ USER DECISION REQUIRED` block, stop all tool calls and stop generating text. Do NOT continue to the next step.
 3. **NO TASK PLANS.** Do NOT use TaskCreate, TodoWrite, or any task/todo system to plan the startup sequence.
-4. **NO FILES BEFORE GATE 3. NO DESIGN BEFORE GATE 4.** You may NOT create any file or directory until the user approves the PRD at GATE 3. You may NOT open Pencil or create designs until the user approves the project setup at GATE 4 and you reach Stage 2 (overall UI architecture) or Step 5b (module UI detail design).
+4. **NO PROJECT FILES BEFORE GATE 3. NO DESIGN BEFORE GATE 4.** Before Gate 3 you may not create formal project directories or production project files. Startup-staged review files under `.acode-kit-startup/` are allowed and required in Step 2 and Step 3. You may NOT open Pencil or create designs until the user approves the project setup at GATE 4 and you reach Stage 2 (overall UI architecture) or Step 5b (module UI detail design).
 5. **SKILL.md is the reference document, NOT your execution script.** Steps 1-4 are embedded below. Read `integrations/shared/WORKFLOW_CORE.md` for invariant workflow boundaries, then read `SKILL.md` for stage-specific references and implementation rules during stage-driven execution.
 6. **MATCH USER LANGUAGE.** Respond in the same language the user uses. Chinese input → Chinese output. English input → English output. Never switch languages on your own.
 7. **NO OVER-ENGINEERING.** Implement only what is requested or specified in the approved PRD.
@@ -121,17 +121,20 @@ Do NOT start this step until you receive the user's explicit reply to the GATE 1
         使用NotebookLM这个链接：[notebookUrl from status file]
         ```
      c. Call the NotebookLM MCP tool (use the exact tool name you recorded in Step 1) with this combined prompt.
-     d. Use NotebookLM's response to enrich your analysis.
-     e. If the call fails, fall back to direct analysis and note the failure in your output.
-- **If NotebookLM MCP tool was found but `authCompleted` is false:**
-    a. Read `notebookLM.authPrompt` from the status file. If missing, default to `Log me in to NotebookLM`.
-    b. Tell the user NotebookLM is not authenticated and remind them they may authenticate by entering that exact text from Gate 1.
-    c. If they do not authenticate or auth is still unavailable, proceed with direct analysis and note the fallback.
-    d. Once authentication succeeds, persist the auth state into the global cache so future sessions do not ask again.
+     d. Use NotebookLM's response to strengthen your analysis before freezing the skeleton.
+     e. If the call fails, fall back to direct analysis and record that degraded path in the gate output.
+   - **If NotebookLM MCP tool was found but `authCompleted` is false:**
+     a. Read `notebookLM.authPrompt` from the status file. If missing, default to `Log me in to NotebookLM`.
+     b. Tell the user NotebookLM is not authenticated and remind them they may authenticate by entering that exact text from Gate 1.
+     c. If they do not authenticate or auth is still unavailable, proceed with direct analysis and note the fallback.
+     d. Once authentication succeeds, persist the auth state into the global cache so future sessions do not ask again.
    - **If NotebookLM MCP tool was NOT found:**
-     Perform the analysis directly without NotebookLM.
+     Perform the analysis directly without NotebookLM and explicitly note the degraded path in the gate output.
 4. The skeleton MUST include: recommended tech stack, core business logic summary, system modules, UI/UX style direction, scope boundaries.
-5. Present the skeleton to the user. The approved skeleton will be persisted as `docs/project/PROJECT_SKELETON.md` during Step 4 — retain the full skeleton content for later use.
+5. Before Gate 2 review, write or update:
+   - `.acode-kit-startup/PROJECT_SKELETON.approved.md`
+   - `.acode-kit-startup/PROJECT_OVERVIEW.seed.md`
+6. Treat those startup-staged files as the review surface. Do NOT paste the full skeleton into the conversation. Instead, report execution status, NotebookLM usage status, file paths, and what the user should review in those files.
 
 6. End your output with:
 ```
@@ -142,7 +145,7 @@ Do NOT start this step until you receive the user's explicit reply to the GATE 1
 3. Any business logic or UI/UX direction to adjust?
 4. Any features to add or remove before I draft the PRD?
 
-CALLER: Present the FULL project skeleton above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
+CALLER: Present the execution summary and the startup-staged file paths above to the user. Ask them to review the files directly. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
 NEXT STEP: Step 3 (PRD + Progress Plan). Resume with Step 3 ONLY.
 ---
 ```
@@ -159,8 +162,14 @@ Do NOT start this step until you receive the user's explicit approval of the pro
 1. Read `<BUNDLE_PATH>/references/global-engineering-standards/01_PRODUCT_REQUIREMENTS_STANDARD.md` (PRD structure). No other specs.
 2. Based on the approved skeleton, prepare `PROJECT_OVERRIDES.md` content (tech stack declaration).
 3. Draft a structured PRD.
-4. Generate a progress plan and requirements traceability matrix.
-5. Present the PRD and progress plan to the user.
+4. Generate a progress plan, requirements traceability matrix, decision log seed, and stack-and-directory input package.
+5. Before Gate 3 review, write or update:
+   - `.acode-kit-startup/PRD.approved.md`
+   - `.acode-kit-startup/PROGRESS_PLAN.approved.md`
+   - `.acode-kit-startup/TRACEABILITY_MATRIX.seed.md`
+   - `.acode-kit-startup/DECISION_LOG.seed.md`
+   - `.acode-kit-startup/STACK_AND_DIRECTORY_INPUTS.approved.md`
+6. Treat those startup-staged files as the review surface. Do NOT paste the full PRD or progress plan into the conversation. Instead, report execution status, exact file paths, and what the user should review in those files.
 
 6. End your output with:
 ```
@@ -172,7 +181,7 @@ Do NOT start this step until you receive the user's explicit approval of the pro
 4. Is the progress plan realistic?
 5. Any changes needed before I start creating project files?
 
-CALLER: Present the FULL PRD and progress plan above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
+CALLER: Present the execution summary and the startup-staged file paths above to the user. Ask them to review the files directly. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
 NEXT STEP: Gate 3.5 — LMS tier analysis and confirmation. Do NOT move to Step 4 until the LMS tier is confirmed.
 ---
 ```

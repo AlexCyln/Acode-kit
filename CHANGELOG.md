@@ -10,3 +10,5 @@
 - `project-blueprints/` 调整为 fallback 参考，不再作为目录创建主输入。
 - 为首批高频 stack/scenario 包新增 `*.directory.json` 结构化目录片段。
 - `SESSION_HANDOFF.md` 改为本地交接文件，不再作为 GitHub 持续同步文档。
+- `Step 2` / `Step 3` 改为启动期文件优先审阅：先写入 `.acode-kit-startup/`，对话仅汇报执行状态、NotebookLM 使用情况与文件路径，不再内联完整文档正文。
+- `NotebookLM` 在 `Step 2` 改为“可用即强制强化”的标准输入：已安装且已认证时必须先参与需求分析，失败时才允许显式降级为直接分析。

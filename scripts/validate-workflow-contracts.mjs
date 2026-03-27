@@ -56,11 +56,17 @@ function validateMandatoryMcpAndVersionLock(core, claude, skill, loadingRules, e
   mustContain(core, "Step 4 must materialize the approved Step 2 and Step 3 artifacts into formal project docs", "workflow core step 4 materialization");
   mustContain(core, "The tier changes execution density only", "workflow core lms density");
   mustContain(core, "tell the user which extension was used", "workflow core extension disclosure");
+  mustContain(core, "Step 2 and Step 3 must write or update their startup-staged files under `.acode-kit-startup/` before asking for gate approval.", "workflow core startup file-first");
+  mustContain(core, "For Step 2 and Step 3, the review surface is the startup-staged files written under `.acode-kit-startup/`.", "workflow core startup review surface");
+  mustContain(core, "Step 2 requirements analysis must use it as a strengthening input", "workflow core notebooklm strengthening");
 
   mustContain(claude, "After Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4 (project setup, NOT design).", "claude gate 3.5 boundary");
   mustContain(claude, "Design tools are ONLY used at Stage 2 (overall UI architecture) and Step 5b (module UI detail design)", "claude pencil boundary");
   mustContain(claude, "Do NOT mention \"Pencil\" or \"design phase\" in Gate 3 questions.", "claude gate 3 pencil ban");
   mustContain(claude, "Do NOT create custom HTML/CSS primitives when shadcn equivalents exist.", "claude shadcn prohibition");
+  mustContain(claude, "Do NOT paste the full skeleton into the conversation.", "claude startup skeleton path-only review");
+  mustContain(claude, "Do NOT paste the full PRD or progress plan into the conversation.", "claude startup prd path-only review");
+  mustContain(claude, "Ask them to review the files directly.", "claude startup file review prompt");
 
   mustContain(skill, "`Step 4` is not `Stage 4`", "SKILL step/stage separation");
   mustContain(skill, "Pencil/design tools only at Stage 2 and Step 5b", "SKILL pencil boundary");

@@ -175,11 +175,17 @@ function main() {
   mustContain(core, "Step 4 must materialize the approved Step 2 and Step 3 artifacts into formal project docs", "workflow core step 4 materialization");
   mustContain(core, "The tier changes execution density only", "workflow core lms density");
   mustContain(core, "tell the user which extension was used", "workflow core extension disclosure");
+  mustContain(core, "Step 2 and Step 3 must write or update their startup-staged files under `.acode-kit-startup/` before asking for gate approval.", "workflow core startup file-first");
+  mustContain(core, "For Step 2 and Step 3, the review surface is the startup-staged files written under `.acode-kit-startup/`.", "workflow core startup review surface");
+  mustContain(core, "Step 2 requirements analysis must use it as a strengthening input", "workflow core notebooklm strengthening");
 
   mustContain(startup, "Gate 3.5: LMS tier analysis and confirmation", "startup gate 3.5");
   mustContain(startup, ".acode-kit-startup/PROJECT_SKELETON.approved.md", "startup staged skeleton");
   mustContain(startup, ".acode-kit-startup/STACK_AND_DIRECTORY_INPUTS.approved.md", "startup staged stack inputs");
   mustContain(startup, "docs/project/DIRECTORY_PLAN.md", "startup directory plan");
+  mustContain(startup, "do not paste the full skeleton or overview into the conversation", "startup step 2 path-only review");
+  mustContain(startup, "do not paste the full PRD, progress plan, or stack input package into the conversation", "startup step 3 path-only review");
+  mustContain(startup, "if NotebookLM MCP is installed and authenticated, use it to strengthen requirements analysis before freezing the skeleton", "startup notebooklm strengthening");
   mustContain(gates, "Document update cadence", "gate rules update cadence");
   mustContain(stageExecution, "Stage 5: module iteration", "stage execution stage 5");
   mustContain(moduleIteration, "Red-Green-Refactor TDD", "module iteration tdd");
@@ -192,6 +198,12 @@ function main() {
   mustContain(claude, "NEXT STEP: Stage-driven execution begins at Stage 1", "claude gate 4 next step");
   mustContain(claude, "integrations/shared/WORKFLOW_CORE.md", "claude shared core reference");
   mustContain(claude, "If the user chooses NotebookLM authentication and their reply is exactly `Log me in to NotebookLM`", "claude notebook auth passthrough");
+  mustContain(claude, ".acode-kit-startup/PROJECT_SKELETON.approved.md", "claude step 2 startup skeleton file");
+  mustContain(claude, ".acode-kit-startup/PRD.approved.md", "claude step 3 startup prd file");
+  mustContain(claude, "Use NotebookLM's response to strengthen your analysis before freezing the skeleton.", "claude notebook strengthening");
+  mustContain(claude, "Do NOT paste the full skeleton into the conversation.", "claude step 2 path-only review");
+  mustContain(claude, "Do NOT paste the full PRD or progress plan into the conversation.", "claude step 3 path-only review");
+  mustContain(claude, "Ask them to review the files directly.", "claude file review prompt");
 
   mustContain(codex, "Gate 1 -> Step 2 only", "codex gate 1 mapping");
   mustContain(codex, "Gate 3 -> Gate 3.5 only", "codex gate 3 mapping");
@@ -202,6 +214,8 @@ function main() {
   mustContain(codex, "global MCP cache", "codex global cache fallback");
   mustContain(codex, "if the user reply is exactly `Log me in to NotebookLM`", "codex notebook auth passthrough");
   mustContain(codex, "Gate 3.5 output block", "codex gate 3.5 output block");
+  mustContain(codex, "Step 2 requirements analysis must call NotebookLM before freezing the project skeleton", "codex notebook strengthening");
+  mustContain(codex, "do not paste the full skeleton, PRD, progress plan, or stack input package into the reply", "codex startup path-only review");
 
   mustContain(codexRun, "`acode-run` is internal and not user-facing.", "codex run contract");
   mustContain(codexRun, "Fallback order stays `error -> timeout -> quality_low -> budget_exceeded`.", "codex run fallback");

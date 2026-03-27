@@ -61,19 +61,28 @@ Within Stage 5, the module sequence is fixed:
 2. Step 3 must produce a markdown PRD draft in the shape of `PRD.md`.
 3. The drafts must be review-ready markdown, not loose chat notes.
 4. Step 3 must also produce an LMS tier recommendation draft based on the approved PRD skeleton.
-5. Persistence into the project directory still happens in Step 4, but the Step 2 / Step 3 artifacts must already be structured as file-ready markdown before the gate decision.
-6. Step 4 must materialize the approved Step 2 and Step 3 artifacts into formal project docs instead of replacing them with weaker summaries.
-7. Templates may add structure and metadata, but approved startup content remains the source of truth.
+5. Step 2 and Step 3 must write or update their startup-staged files under `.acode-kit-startup/` before asking for gate approval.
+6. Persistence into the project directory still happens in Step 4, but the Step 2 / Step 3 artifacts must already be structured as file-ready markdown before the gate decision.
+7. Step 4 must materialize the approved Step 2 and Step 3 artifacts into formal project docs instead of replacing them with weaker summaries.
+8. Templates may add structure and metadata, but approved startup content remains the source of truth.
+9. If NotebookLM is installed and authenticated, Step 2 requirements analysis must use it as a strengthening input before the project skeleton is frozen.
+10. If NotebookLM is unavailable, unauthenticated, or fails, the runtime may fall back to direct analysis only after explicitly disclosing that degraded path.
 
 ## User approval contract
 
 At every gate:
 
-1. Present the full deliverable for that gate.
+1. Present the review surface for that gate.
 2. Ask for explicit approval or revisions.
 3. Stop advancing until the user replies.
 4. If the user requests changes, revise the same gate deliverable and present it again.
 5. If the user requests to skip ahead, refuse and restate the mandatory sequence.
+
+Startup gate exception:
+
+1. For Step 2 and Step 3, the review surface is the startup-staged files written under `.acode-kit-startup/`.
+2. For those two gates, do not inline the full skeleton, PRD, or progress plan into the conversation.
+3. Instead, report execution status, exact file paths, NotebookLM usage status, and the review focus so the user can inspect the files directly.
 
 The same approval rule applies to stage reviews and every Step 5a-5e review inside module iteration.
 

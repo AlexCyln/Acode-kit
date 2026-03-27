@@ -65,6 +65,12 @@ If NotebookLM MCP is installed but `authCompleted` is false:
 7. if auth is still unavailable for the current step, fall back to direct analysis instead of blocking the workflow forever
 8. if the global cache later records `authCompleted: true`, treat that as the persistent environment-level NotebookLM state on future sessions
 
+If NotebookLM MCP is installed and `authCompleted` is true:
+
+1. Step 2 requirements analysis must call NotebookLM before freezing the project skeleton
+2. use NotebookLM as a strengthening source, not as a replacement for gate control
+3. if NotebookLM fails during Step 2, disclose the failure and continue with direct analysis
+
 ## Gate handoff format in Codex
 
 End every gate response with this block:
@@ -88,6 +94,16 @@ WAIT: Stop here and wait for the user's explicit reply before continuing.
 5. Gate 4 -> Stage 1 only
 
 Never map a gate directly to design or implementation unless the shared workflow graph allows it.
+
+## Startup file-first review behavior
+
+For Step 2 and Step 3 in Codex:
+
+1. write or update the required startup-staged files under `.acode-kit-startup/` before asking for user review
+2. do not paste the full skeleton, PRD, progress plan, or stack input package into the reply
+3. tell the user which files were written and where they are
+4. summarize execution status, deltas, unresolved questions, and review focus only
+5. ask the user to review those files and reply with approval or revisions
 
 ## Refusal behavior
 

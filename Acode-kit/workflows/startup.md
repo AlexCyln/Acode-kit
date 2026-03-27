@@ -35,6 +35,16 @@ Defines the startup lane before stage-driven execution begins.
 - UI/UX direction
 - scope boundaries
 
+`Step 2` execution contract:
+
+1. write or update the startup-staged files before asking for Gate 2 review
+2. treat the startup-staged files as the authoritative review surface
+3. do not paste the full skeleton or overview into the conversation
+4. tell the user which files were written, whether NotebookLM strengthening was used, and what needs review inside those files
+5. the gate response may summarize execution status, deltas, and review focus only
+6. if NotebookLM MCP is installed and authenticated, use it to strengthen requirements analysis before freezing the skeleton
+7. if NotebookLM is unavailable or fails, continue with direct analysis but explicitly disclose the degraded path in the gate response
+
 ### Step 3
 
 - startup-staged file `.acode-kit-startup/PRD.approved.md`
@@ -53,6 +63,14 @@ Defines the startup lane before stage-driven execution begins.
 6. declared deployment and environment delivery mode
 7. design asset, third-party integration, and tool constraints
 8. any known module-level directory expectations implied by active scenario and stack packages
+
+`Step 3` execution contract:
+
+1. write or update all startup-staged Step 3 files before asking for Gate 3 review
+2. treat the startup-staged files as the authoritative review surface
+3. do not paste the full PRD, progress plan, or stack input package into the conversation
+4. tell the user which files were written, the current execution status, and the exact file paths for review
+5. the gate response may summarize scope changes, unresolved items, and review focus only
 
 ### Gate 3.5
 
@@ -95,3 +113,5 @@ Required materialization at `Step 4`:
 12. `Step 4` may rename and move startup-staged files into formal destinations, but it must not rewrite their approved substance into a weaker summary.
 13. `Step 4` must synthesize a stack-aligned `DIRECTORY_PLAN.md` before creating directories.
 14. If active stack or scenario fragments conflict, resolve the conflict in the directory plan and record the rationale before creating directories.
+15. `Step 2` and `Step 3` user-facing gate responses must point the user to the startup-staged files for review instead of inlining the full document bodies in chat.
+16. If NotebookLM is available and authenticated at `Step 2`, requirements analysis must use it as a strengthening input before the project skeleton is frozen.
