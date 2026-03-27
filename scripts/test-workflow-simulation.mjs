@@ -124,6 +124,36 @@ function main() {
       "DEVELOPMENT_DOCUMENTATION_INDEX.template.md"
     )
   );
+  const stackDirectoryInputsTemplate = read(
+    path.join(
+      repoRoot,
+      "Acode-kit",
+      "assets",
+      "project-doc-templates",
+      "STACK_AND_DIRECTORY_INPUTS.template.md"
+    )
+  );
+  const directoryPlanTemplate = read(
+    path.join(
+      repoRoot,
+      "Acode-kit",
+      "assets",
+      "project-doc-templates",
+      "DIRECTORY_PLAN.template.md"
+    )
+  );
+  const directorySynthesisRules = read(
+    path.join(
+      repoRoot,
+      "Acode-kit",
+      "references",
+      "load-rules",
+      "DIRECTORY_BLUEPRINT_SYNTHESIS_RULES.md"
+    )
+  );
+  const blueprintReadme = read(
+    path.join(repoRoot, "Acode-kit", "references", "project-blueprints", "README.md")
+  );
 
   mustContain(skill, "integrations/shared/WORKFLOW_CORE.md", "SKILL shared core reference");
   mustContain(skill, "workflows/startup.md", "SKILL startup workflow reference");
@@ -142,9 +172,14 @@ function main() {
   mustContain(core, "break the module into explicit reviewable page units", "workflow core page batch review");
   mustContain(core, "Gate 3.5: LMS tier analysis and confirmation", "workflow core gate 3.5");
   mustContain(core, "Gate 3.5 output contract", "workflow core gate 3.5 output contract");
+  mustContain(core, "Step 4 must materialize the approved Step 2 and Step 3 artifacts into formal project docs", "workflow core step 4 materialization");
+  mustContain(core, "The tier changes execution density only", "workflow core lms density");
+  mustContain(core, "tell the user which extension was used", "workflow core extension disclosure");
 
   mustContain(startup, "Gate 3.5: LMS tier analysis and confirmation", "startup gate 3.5");
-  mustContain(startup, "review-ready markdown draft shaped like `docs/project/PROJECT_SKELETON.md`", "startup skeleton draft");
+  mustContain(startup, ".acode-kit-startup/PROJECT_SKELETON.approved.md", "startup staged skeleton");
+  mustContain(startup, ".acode-kit-startup/STACK_AND_DIRECTORY_INPUTS.approved.md", "startup staged stack inputs");
+  mustContain(startup, "docs/project/DIRECTORY_PLAN.md", "startup directory plan");
   mustContain(gates, "Document update cadence", "gate rules update cadence");
   mustContain(stageExecution, "Stage 5: module iteration", "stage execution stage 5");
   mustContain(moduleIteration, "Red-Green-Refactor TDD", "module iteration tdd");
@@ -191,6 +226,9 @@ function main() {
   mustContain(testingSpec, "阶段级产物必须可验证", "testing spec stage verifiability");
   mustContain(executionFlowSpec, "变更与回滚通道", "execution flow change rollback lane");
   mustContain(executionFlowSpec, "TDD 总线与分线执行模型", "execution flow TDD model");
+  mustContain(executionFlowSpec, "实现与目录输入包", "execution flow stack directory inputs");
+  mustContain(executionFlowSpec, "`DIRECTORY_PLAN.md`", "execution flow directory plan");
+  mustContain(executionFlowSpec, "fallback", "execution flow fallback blueprints");
 
   mustContain(overridesTemplate, "项目级执行约束", "overrides template execution constraints");
   mustContain(overridesTemplate, "设计实现要求", "overrides template design rules");
@@ -200,10 +238,13 @@ function main() {
   mustContain(projectOverviewTemplate, "实施信息", "project overview implementation field");
   mustContain(projectSkeletonTemplate, "文档信息", "project skeleton metadata");
   mustContain(projectSkeletonTemplate, "审阅阶段：Gate 2", "project skeleton review gate");
+  mustContain(projectSkeletonTemplate, "技术选型目录蓝图", "project skeleton blueprint field");
   mustContain(projectOverviewTemplate, "LMS / 版本治理", "project overview lms section");
   mustContain(projectOverviewTemplate, "激活矩阵", "project overview activation matrix");
+  mustContain(projectOverviewTemplate, "启动来源文件", "project overview startup source");
   mustContain(read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "PRD.template.md")), "LMS 档位", "prd template lms tier");
   mustContain(read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "PRD.template.md")), "修订与回滚", "prd template revision rollback");
+  mustContain(read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "PRD.template.md")), "启动冻结稿", "prd template startup source");
   mustContain(read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "SESSION_HANDOFF.template.md")), "LMS Tier", "session handoff lms tier");
   mustContain(read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "SESSION_HANDOFF.template.md")), "Frozen Version", "session handoff frozen version");
   mustContain(read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "DECISION_LOG.template.md")), "LMS 档位", "decision log lms tier");
@@ -215,6 +256,13 @@ function main() {
   mustContain(agentsTemplate, "已批准页面、API、数据结构和模块说明一旦修订，旧版本立即失效", "agents template version lock");
   mustContain(read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "ACTIVE_STANDARDS.template.md")), "已激活规范包", "active standards template");
   mustContain(devIndexTemplate, "# 开发文档索引", "dev doc index template header");
+  mustContain(stackDirectoryInputsTemplate, "前端输入", "stack and directory inputs frontend section");
+  mustContain(stackDirectoryInputsTemplate, "数据库与数据访问输入", "stack and directory inputs data section");
+  mustContain(directoryPlanTemplate, "目录来源摘要", "directory plan source summary");
+  mustContain(directoryPlanTemplate, "最终目录树", "directory plan tree section");
+  mustContain(directorySynthesisRules, "Synthesis order", "directory synthesis rules order");
+  mustContain(directorySynthesisRules, "fallback blueprints", "directory synthesis fallback");
+  mustContain(blueprintReadme, "fallback", "blueprint readme fallback role");
   mustContain(devIndexTemplate, "当前优先补齐项", "dev doc index priority section");
   mustContain(devIndexTemplate, "母规范激活矩阵入口", "dev doc index activation entry");
   mustContain(read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "DECISION_LOG.template.md")), "回滚点", "decision log rollback point");

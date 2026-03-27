@@ -1,0 +1,17 @@
+{
+  "id": "mybatis-plus",
+  "source": "Acode-kit/references/stack-standards/data-access/mybatis-plus.md",
+  "domain": "data-access",
+  "priority": 95,
+  "applies_when": {
+    "data_access": ["mybatis-plus", "mybatis plus"],
+    "backend_runtime": ["spring-boot", "spring boot", "java-spring-boot"]
+  },
+  "paths": [
+    { "path": "backend/src/main/java/<base-package>/infrastructure/persistence/entity", "required": true, "reason": "persistent entities" },
+    { "path": "backend/src/main/java/<base-package>/infrastructure/persistence/mapper", "required": true, "reason": "mapper interfaces" },
+    { "path": "backend/src/main/java/<base-package>/infrastructure/persistence/query", "required": true, "reason": "query objects and pagination inputs" },
+    { "path": "backend/src/main/java/<base-package>/infrastructure/persistence/convertor", "required": true, "reason": "entity-vo-dto conversion" },
+    { "path": "backend/src/main/resources/mapper", "required": false, "reason": "xml and custom sql mapping resources" }
+  ]
+}

@@ -27,7 +27,8 @@ Defines the startup lane before stage-driven execution begins.
 
 ### Step 2
 
-- review-ready markdown draft shaped like `docs/project/PROJECT_SKELETON.md`
+- startup-staged file `.acode-kit-startup/PROJECT_SKELETON.approved.md`
+- startup-staged file `.acode-kit-startup/PROJECT_OVERVIEW.seed.md`
 - recommended tech stack
 - business logic summary
 - module decomposition seed
@@ -36,9 +37,22 @@ Defines the startup lane before stage-driven execution begins.
 
 ### Step 3
 
-- review-ready markdown draft shaped like `docs/project/PRD.md`
-- progress plan
-- traceability structure
+- startup-staged file `.acode-kit-startup/PRD.approved.md`
+- startup-staged file `.acode-kit-startup/PROGRESS_PLAN.approved.md`
+- startup-staged file `.acode-kit-startup/TRACEABILITY_MATRIX.seed.md`
+- startup-staged file `.acode-kit-startup/DECISION_LOG.seed.md`
+- startup-staged file `.acode-kit-startup/STACK_AND_DIRECTORY_INPUTS.approved.md`
+
+`Step 3` must freeze implementation-facing inputs as far as the current project truth allows, including:
+
+1. requirement boundary and approved scope
+2. UI and interaction direction
+3. declared frontend runtime, UI system, styling, and testing stack
+4. declared backend runtime, API style, and security boundary
+5. declared database, migration, and data-access strategy
+6. declared deployment and environment delivery mode
+7. design asset, third-party integration, and tool constraints
+8. any known module-level directory expectations implied by active scenario and stack packages
 
 ### Gate 3.5
 
@@ -49,17 +63,21 @@ Defines the startup lane before stage-driven execution begins.
 ### Step 4
 
 - project root structure
+- synthesized directory plan from active scenario and stack fragments
 - root `AGENTS.md`
-- project control docs materialized from approved startup artifacts and templates
+- project control docs relocated from startup-staged approved artifacts into formal paths
 - dependencies and environment initialized
 - pending confirmations extracted instead of invented
 
 Required materialization at `Step 4`:
 
-1. the approved Step 2 project skeleton must be written into the formal project docs instead of being re-summarized into a weaker placeholder
-2. the approved Step 3 PRD and progress plan must be written into the formal project docs instead of being regenerated from memory
-3. templates may provide structure and metadata fields, but approved content remains the source of truth
-4. if any approved section is missing at setup time, stop and reconstruct it from the approved artifact before continuing
+1. `Step 2` and `Step 3` outputs must already exist as startup-staged files with stable names under `.acode-kit-startup/`
+2. the approved Step 2 project skeleton must be moved into formal project docs instead of being re-summarized into a weaker placeholder
+3. the approved Step 3 PRD and progress plan must be moved into formal project docs instead of being regenerated from memory
+4. templates may provide structure, metadata fields, and destination names, but approved startup content remains the source of truth
+5. if any approved section is missing at setup time, stop and reconstruct it from the approved startup artifact before continuing
+6. directory creation must follow `docs/project/DIRECTORY_PLAN.md`, which is synthesized from the approved Step 3 stack inputs plus active scenario and stack directory fragments
+7. `references/project-blueprints/` remain fallback references only when active fragments are insufficient for a professional stack-aligned directory decision
 
 ## Startup rules
 
@@ -72,3 +90,8 @@ Required materialization at `Step 4`:
 7. `acode-run` may only appear later as a bounded routed subtask after Gate 4.
 8. LMS tier changes setup density only; it does not relax Step 4 deliverable completeness.
 9. Step 4 must create formal project docs by carrying forward approved startup content, not by inventing new simplified documents.
+10. From `Step 2` onward, every approved startup artifact must be persisted as a file under `.acode-kit-startup/` before the workflow may advance to the next gate.
+11. Startup-staged files use stable names and are the only authoritative handoff source for `Step 4` document relocation.
+12. `Step 4` may rename and move startup-staged files into formal destinations, but it must not rewrite their approved substance into a weaker summary.
+13. `Step 4` must synthesize a stack-aligned `DIRECTORY_PLAN.md` before creating directories.
+14. If active stack or scenario fragments conflict, resolve the conflict in the directory plan and record the rationale before creating directories.

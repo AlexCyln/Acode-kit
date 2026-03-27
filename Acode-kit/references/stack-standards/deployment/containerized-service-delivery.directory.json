@@ -1,0 +1,16 @@
+{
+  "id": "containerized-service-delivery",
+  "source": "Acode-kit/references/stack-standards/deployment/containerized-service-delivery.md",
+  "domain": "deployment",
+  "priority": 90,
+  "applies_when": {
+    "deployment_mode": ["docker", "docker-compose", "compose", "kubernetes", "containerized"]
+  },
+  "paths": [
+    { "path": "deploy/docker", "required": true, "reason": "image definitions and compose files" },
+    { "path": "deploy/config", "required": true, "reason": "deployment-side config manifests" },
+    { "path": "deploy/env", "required": true, "reason": "environment templates and examples" },
+    { "path": "scripts/deploy", "required": false, "reason": "deploy, rollback, health-check scripts" },
+    { "path": "sql/migrations", "required": false, "reason": "migration path coordinated with containerized delivery" }
+  ]
+}

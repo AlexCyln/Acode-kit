@@ -1,0 +1,16 @@
+{
+  "id": "bs-commerce-transaction",
+  "source": "Acode-kit/references/scenario-standards/bs-commerce-transaction.md",
+  "domain": "scenario",
+  "priority": 75,
+  "applies_when": {
+    "scenario": ["bs-commerce-transaction", "commerce-transaction", "order-platform", "trade-ops"]
+  },
+  "paths": [
+    { "path": "src/features/orders", "required": false, "reason": "order center and lifecycle pages" },
+    { "path": "src/features/payments", "required": false, "reason": "payment and refund operations" },
+    { "path": "src/features/fulfillment", "required": false, "reason": "fulfillment and shipping workflows" },
+    { "path": "src/features/after-sales", "required": false, "reason": "after-sales and dispute workflows" },
+    { "path": "src/features/reconciliation", "required": false, "reason": "reconciliation and risk views" }
+  ]
+}

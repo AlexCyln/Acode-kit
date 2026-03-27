@@ -1,0 +1,15 @@
+{
+  "id": "bs-admin-console",
+  "source": "Acode-kit/references/scenario-standards/bs-admin-console.md",
+  "domain": "scenario",
+  "priority": 70,
+  "applies_when": {
+    "scenario": ["bs-admin-console", "admin-console", "saas-admin", "operations-console"]
+  },
+  "paths": [
+    { "path": "src/features/dashboard", "required": false, "reason": "dashboard and summary screens" },
+    { "path": "src/features/query-center", "required": false, "reason": "list, filter, and search heavy pages" },
+    { "path": "src/features/detail-pages", "required": false, "reason": "detail and edit workflows" },
+    { "path": "src/features/access-control", "required": false, "reason": "permission and organization management" }
+  ]
+}

@@ -12,6 +12,8 @@ Main agent reads in this order only:
 6. required active extensions
 7. project-level `ACTIVE_STANDARDS.md`
 8. current project control docs
+9. startup-staged `.acode-kit-startup/*.md` artifacts when the workflow is still before or inside `Step 4`
+10. `references/load-rules/DIRECTORY_BLUEPRINT_SYNTHESIS_RULES.md` only when entering `Step 4` directory planning
 
 ## Extension loading
 
@@ -40,6 +42,9 @@ When an extension is loaded:
 7. do not bulk-read all registered extensions on entry
 8. do not activate an extension only because it exists in the registry
 9. do not let LMS tier downshift remove required document materialization or node review outputs
+10. do not regenerate Step 2 or Step 3 content from memory once a startup-staged file already exists
+11. do not improvise project directory structure when active stack/scenario fragments already cover the current project
+12. do not use fallback project blueprints as the primary source when active stack or scenario fragments are available
 
 ## Stability criteria
 
@@ -48,3 +53,5 @@ When an extension is loaded:
 3. every node must state its next action
 4. every node must know which docs it updates
 5. if a node cannot be explained with those four properties, loading is not yet sufficient
+6. startup nodes must know the stable staged filename or formal destination filename for every artifact they create or update
+7. `Step 4` must know which active stack or scenario fragments supplied each major directory branch

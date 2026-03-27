@@ -8,6 +8,9 @@
 - 冻结状态：
 - 版本锁：
 - 来源基线：<!-- Gate 3 已批准 PRD 草案 / 最近一次批准修订 -->
+- 启动冻结稿：`.acode-kit-startup/PRD.approved.md`
+- 正式归位路径：`docs/project/PRD.md`
+- Step 4 归位状态：未归位 / 已归位 / 已校验
 
 ## 项目背景
 - 

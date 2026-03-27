@@ -23,6 +23,8 @@
 5. 对于新的大模块，若仍存在较大范围不确定性，必须先补模块级正式审阅稿，经过确认后再进入实现。
 6. 对于模块下的子模块 / 系统 / 页面，在执行前必须先补轻量“核心执行说明”，经过确认后再进入实现。
 7. 对于需要页面承载的节点，模块级 UI 设计审阅稿、页面核心执行说明与前端复刻/还原记录都属于开发过程文档治理范围。
+8. 启动阶段形成的每一份项目级文档，都必须先以稳定文件名固化为文件，不得只存在于对话或临时草稿里。
+9. `Step 4` 的职责是将已冻结启动文件归位到正式目录，而不是重新生成一份内容更弱的正式文档。
 
 ## 2. 必须维护的开发过程文档
 每个项目在 `docs/project/` 下，至少应持续维护以下四类文档：
@@ -121,6 +123,20 @@
 3. 新增文档后，应立即纳入项目文档索引或目录总表。
 4. 不允许出现“代码已经实现，但无法定位详细文档”的情况。
 
+## 3.3 启动期文件固化规则
+1. 从 `Step 2` 开始，所有启动期产物必须先写入 `.acode-kit-startup/`。
+2. 启动期文件名必须稳定、可预测、可被脚本引用，不得使用 `draft-final-v2`、`new-prd` 等临时命名。
+3. 最低要求的启动期文件包括：
+   - `PROJECT_SKELETON.approved.md`
+   - `PROJECT_OVERVIEW.seed.md`
+   - `PRD.approved.md`
+   - `PROGRESS_PLAN.approved.md`
+   - `TRACEABILITY_MATRIX.seed.md`
+   - `DECISION_LOG.seed.md`
+   - `STACK_AND_DIRECTORY_INPUTS.approved.md`
+4. Gate 审批通过后，应更新对应启动期文件的状态与版本，而不是另起一份无关联文件。
+5. `Step 4` 创建正式目录时，只允许移动、重命名、补元信息、建立索引引用；不得凭记忆重写正文。
+
 ## 3.1 文档分层与归档规则
 1. 项目级文档应至少分为：
    - 当前有效总控文档
@@ -157,10 +173,22 @@
 3. `FUNCTION_MODULE_RECORD.md`：功能函数与模块记录
 4. `TEST_EXECUTION_RECORD.md`：测试与验证记录
 
+## 5.1 启动期文件与正式文件映射
+1. `.acode-kit-startup/PROJECT_SKELETON.approved.md` -> `docs/project/PROJECT_SKELETON.md`
+2. `.acode-kit-startup/PROJECT_OVERVIEW.seed.md` -> `docs/project/PROJECT_OVERVIEW.md`
+3. `.acode-kit-startup/PRD.approved.md` -> `docs/project/PRD.md`
+4. `.acode-kit-startup/TRACEABILITY_MATRIX.seed.md` -> `docs/project/TRACEABILITY_MATRIX.md`
+5. `.acode-kit-startup/DECISION_LOG.seed.md` -> `docs/project/DECISION_LOG.md`
+6. `.acode-kit-startup/STACK_AND_DIRECTORY_INPUTS.approved.md` -> `docs/project/DIRECTORY_PLAN.md` 的主输入之一
+7. 进度计划可作为 `PROJECT_OVERVIEW.md`、`TRACEABILITY_MATRIX.md`、`SESSION_HANDOFF.md` 的承接内容来源，或在项目确有需要时落为单独计划文档。
+
 ## 6. AI 执行要求
 1. AI 在每轮任务结束前，必须检查本轮是否影响接口文档、数据库文档、功能函数文档、测试文档。
 2. 若影响而未更新，应优先补文档，再结束任务。
 3. `DECISION_LOG`、`TRACEABILITY_MATRIX`、`SESSION_HANDOFF` 只能作为总控文档，不能替代详细过程文档。
+4. 在启动阶段，AI 必须优先更新 `.acode-kit-startup/` 中对应文件，而不是把关键信息仅留在会话总结里。
+5. 在 `Step 4`，AI 必须说明每个正式文件来自哪一份启动冻结稿，确保来源可追溯。
+6. 在 `Step 4`，AI 必须先输出 `DIRECTORY_PLAN.md`，再创建目录和初始化依赖。
 
 ## 7. 验收标准
 当项目进入联调、提测、上线准备阶段时，应满足：
@@ -195,3 +223,4 @@
 2. 关键决策、关键变更、关键验证必须可以从文档索引追溯到详细说明，不得只留在聊天记录中。
 3. 若使用 AI 生成或维护文档，仍需保证结论可验证、引用可定位、与实际代码和配置一致。
 4. 发布前应抽查文档与实现一致性，重点核对 API、DB、测试记录、上线记录和决策日志。
+5. 启动期冻结稿与正式项目文档之间必须存在清晰映射关系，避免 `Step 4` 之后无法追溯正式文档来源。

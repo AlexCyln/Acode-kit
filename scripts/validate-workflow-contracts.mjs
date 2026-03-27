@@ -48,11 +48,14 @@ function validateClaudeRules(claude) {
   assertSequential(numbers, 0, 9, "Claude critical execution rules numbering");
 }
 
-function validateMandatoryMcpAndVersionLock(core, claude, skill, overridesTemplate, projectOverviewTemplate, traceabilityTemplate, decisionLogTemplate, agentsTemplate) {
+function validateMandatoryMcpAndVersionLock(core, claude, skill, loadingRules, extensionLoadingRules, overridesTemplate, projectOverviewTemplate, prdTemplate, traceabilityTemplate, decisionLogTemplate, agentsTemplate, stackInputsTemplate, directoryPlanTemplate, directorySynthesisRules, executionFlowSpec) {
   mustContain(core, "Gate 3.5: LMS tier analysis and confirmation", "workflow core gate 3.5");
   mustContain(core, "NotebookLM authentication exception at Gate 1", "workflow core notebook auth exception");
   mustContain(core, "Do not use Pencil or other design tooling outside Stage 2 and Step 5b", "workflow core pencil boundary");
   mustContain(core, "Step 4 / Stage 4 separation", "workflow core step/stage separation");
+  mustContain(core, "Step 4 must materialize the approved Step 2 and Step 3 artifacts into formal project docs", "workflow core step 4 materialization");
+  mustContain(core, "The tier changes execution density only", "workflow core lms density");
+  mustContain(core, "tell the user which extension was used", "workflow core extension disclosure");
 
   mustContain(claude, "After Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4 (project setup, NOT design).", "claude gate 3.5 boundary");
   mustContain(claude, "Design tools are ONLY used at Stage 2 (overall UI architecture) and Step 5b (module UI detail design)", "claude pencil boundary");
@@ -62,15 +65,28 @@ function validateMandatoryMcpAndVersionLock(core, claude, skill, overridesTempla
   mustContain(skill, "`Step 4` is not `Stage 4`", "SKILL step/stage separation");
   mustContain(skill, "Pencil/design tools only at Stage 2 and Step 5b", "SKILL pencil boundary");
   mustContain(skill, "Gate 3.5: LMS tier confirmation", "SKILL gate 3.5");
+  mustContain(skill, "must materialize the approved Step 2 / Step 3 outputs into project docs", "SKILL step 4 materialization");
+  mustContain(skill, "may not remove startup gates, Stage 1-7, or Step 5a-5e", "SKILL lms rigor");
+  mustContain(skill, "tell the user which extension was used, what it did at the current node, and why it was helpful", "SKILL extension disclosure");
+
+  mustContain(loadingRules, "do not let LMS tier downshift remove required document materialization or node review outputs", "loading rules lms floor");
+  mustContain(loadingRules, "DIRECTORY_BLUEPRINT_SYNTHESIS_RULES.md", "loading rules directory synthesis hook");
+  mustContain(extensionLoadingRules, "tell the user which extension was used, what it contributed, and why it matters at this node", "extension loading disclosure");
 
   mustContain(overridesTemplate, "MCP 使用约束", "overrides template mcp field");
   mustContain(overridesTemplate, "版本锁要求", "overrides template version lock");
 
   mustContain(projectOverviewTemplate, "LMS / 版本治理", "project overview lms section");
   mustContain(projectOverviewTemplate, "激活矩阵", "project overview activation matrix");
+  mustContain(projectOverviewTemplate, "来源基线", "project overview source baseline");
+  mustContain(projectOverviewTemplate, "启动承接说明", "project overview startup carry forward");
+
+  mustContain(prdTemplate, "来源基线", "prd template source baseline");
+  mustContain(prdTemplate, "承接校验", "prd template carry forward check");
 
   mustContain(traceabilityTemplate, "母规范激活矩阵", "traceability activation matrix");
   mustContain(traceabilityTemplate, "版本与回滚", "traceability version rollback");
+  mustContain(traceabilityTemplate, "承接来源", "traceability source carry forward");
 
   mustContain(decisionLogTemplate, "LMS 档位", "decision log lms field");
   mustContain(decisionLogTemplate, "冻结版本", "decision log frozen version");
@@ -79,11 +95,19 @@ function validateMandatoryMcpAndVersionLock(core, claude, skill, overridesTempla
   mustContain(agentsTemplate, "PRD 确认后必须执行 `Gate 3.5`", "agents template gate 3.5");
   mustContain(agentsTemplate, "已批准页面、API、数据结构和模块说明一旦修订，旧版本立即失效", "agents template version lock");
   mustContain(agentsTemplate, "NotebookLM / Pencil / shadcn / Chrome DevTools 在命中的节点必须作为强制消费型 MCP 使用", "agents template mcp enforcement");
+  mustContain(stackInputsTemplate, "前端输入", "stack inputs template frontend section");
+  mustContain(stackInputsTemplate, "后端输入", "stack inputs template backend section");
+  mustContain(directoryPlanTemplate, "目录来源摘要", "directory plan template source section");
+  mustContain(directoryPlanTemplate, "最终目录树", "directory plan template tree section");
+  mustContain(directorySynthesisRules, "Synthesis order", "directory synthesis order section");
+  mustContain(directorySynthesisRules, "fallback blueprints", "directory synthesis fallback section");
+  mustContain(executionFlowSpec, "实现与目录输入包", "execution flow stack input package");
+  mustContain(executionFlowSpec, "`DIRECTORY_PLAN.md`", "execution flow directory plan");
 }
 
 function validateSlimSkill(skill) {
   const lineCount = skill.split("\n").length;
-  assert.ok(lineCount >= 120 && lineCount <= 150, `SKILL line count out of range: ${lineCount}`);
+  assert.ok(lineCount >= 120 && lineCount <= 190, `SKILL line count out of range: ${lineCount}`);
   mustContain(skill, "## First action", "SKILL first action section");
   mustContain(skill, "## Loading order", "SKILL loading order section");
   mustContain(skill, "## Workflow graph", "SKILL workflow graph section");
@@ -97,11 +121,18 @@ function main() {
   const skill = read(path.join(repoRoot, "Acode-kit", "SKILL.md"));
   const core = read(path.join(repoRoot, "Acode-kit", "integrations", "shared", "WORKFLOW_CORE.md"));
   const claude = read(path.join(repoRoot, "Acode-kit", "integrations", "claude", "acode-kit.md"));
+  const loadingRules = read(path.join(repoRoot, "Acode-kit", "references", "load-rules", "DOCUMENT_LOADING_RULES.md"));
+  const extensionLoadingRules = read(path.join(repoRoot, "Acode-kit", "extensions", "registry", "EXTENSION_LOADING_RULES.md"));
   const overridesTemplate = read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "PROJECT_OVERRIDES.template.md"));
   const projectOverviewTemplate = read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "PROJECT_OVERVIEW.template.md"));
+  const prdTemplate = read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "PRD.template.md"));
   const traceabilityTemplate = read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "TRACEABILITY_MATRIX.template.md"));
   const decisionLogTemplate = read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "DECISION_LOG.template.md"));
   const agentsTemplate = read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "AGENTS.template.md"));
+  const stackInputsTemplate = read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "STACK_AND_DIRECTORY_INPUTS.template.md"));
+  const directoryPlanTemplate = read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "DIRECTORY_PLAN.template.md"));
+  const directorySynthesisRules = read(path.join(repoRoot, "Acode-kit", "references", "load-rules", "DIRECTORY_BLUEPRINT_SYNTHESIS_RULES.md"));
+  const executionFlowSpec = read(path.join(repoRoot, "Acode-kit", "references", "global-engineering-standards", "27_PROJECT_EXECUTION_FLOW_SPEC.md"));
   const docsProjectOverview = readIfExists(path.join(repoRoot, "docs", "project", "PROJECT_OVERVIEW.md"));
   const docsPrd = readIfExists(path.join(repoRoot, "docs", "project", "PRD.md"));
   const docsTraceability = readIfExists(path.join(repoRoot, "docs", "project", "TRACEABILITY_MATRIX.md"));
@@ -115,11 +146,18 @@ function main() {
     core,
     claude,
     skill,
+    loadingRules,
+    extensionLoadingRules,
     overridesTemplate,
     projectOverviewTemplate,
+    prdTemplate,
     traceabilityTemplate,
     decisionLogTemplate,
-    agentsTemplate
+    agentsTemplate,
+    stackInputsTemplate,
+    directoryPlanTemplate,
+    directorySynthesisRules,
+    executionFlowSpec
   );
 
   if (docsProjectOverview) {

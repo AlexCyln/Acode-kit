@@ -1,0 +1,20 @@
+{
+  "id": "spring-boot",
+  "source": "Acode-kit/references/stack-standards/backend/spring-boot.md",
+  "domain": "backend",
+  "priority": 90,
+  "applies_when": {
+    "backend_runtime": ["spring-boot", "spring boot", "java-spring-boot"]
+  },
+  "paths": [
+    { "path": "backend/src/main/java/<base-package>/controller", "required": true, "reason": "protocol adaptation and request entry" },
+    { "path": "backend/src/main/java/<base-package>/application", "required": true, "reason": "use-case orchestration and transaction boundary" },
+    { "path": "backend/src/main/java/<base-package>/domain", "required": true, "reason": "core business rules and state models" },
+    { "path": "backend/src/main/java/<base-package>/infrastructure", "required": true, "reason": "database, cache, integration implementations" },
+    { "path": "backend/src/main/java/<base-package>/config", "required": true, "reason": "framework and environment configuration" },
+    { "path": "backend/src/main/java/<base-package>/security", "required": false, "reason": "security boundary when enabled" },
+    { "path": "backend/src/main/java/<base-package>/integration", "required": false, "reason": "external system adapters" },
+    { "path": "backend/src/main/java/<base-package>/job", "required": false, "reason": "scheduled or async jobs" },
+    { "path": "backend/src/main/resources", "required": true, "reason": "application resources and configs" }
+  ]
+}

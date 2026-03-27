@@ -6,6 +6,8 @@
 - 本期版本目标：
 - 项目类型：<!-- web / mobile / mini-program / desktop / cross-platform -->
 - 来源基线：<!-- Gate 2 已批准项目骨架 / 最近一次批准修订 -->
+- 启动来源文件：`.acode-kit-startup/PROJECT_OVERVIEW.seed.md`
+- 正式归位路径：`docs/project/PROJECT_OVERVIEW.md`
 
 ## 范围
 - 本期 Must：
@@ -43,6 +45,7 @@
 - 最近一次更新：
 - 实施信息：
 - 启动承接说明：<!-- Step 4 是否已完整承接 Step 2 / Step 3 已批准内容 -->
+- Step 4 文件归位校验：<!-- 是否由启动冻结稿移动而来 -->
 
 ## LMS / 版本治理
 - LMS 档位：<!-- S / M / L -->

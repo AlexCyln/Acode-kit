@@ -1,0 +1,22 @@
+{
+  "id": "react-shadcn",
+  "source": "Acode-kit/references/stack-standards/frontend/react-shadcn.md",
+  "domain": "frontend",
+  "priority": 90,
+  "applies_when": {
+    "frontend_runtime": ["react"],
+    "ui_system": ["shadcn/ui", "shadcn"],
+    "project_type": ["web", "admin-console", "portal-web"]
+  },
+  "paths": [
+    { "path": "src/components/ui", "required": true, "reason": "shadcn-based base composition layer" },
+    { "path": "src/components/sections", "required": false, "reason": "page-level section composition" },
+    { "path": "src/features", "required": true, "reason": "business modules and page groups" },
+    { "path": "src/lib", "required": true, "reason": "api client, schema, permissions, telemetry utilities" },
+    { "path": "src/hooks", "required": false, "reason": "shared hooks for query, form, and permissions" },
+    { "path": "src/services", "required": false, "reason": "service wrappers or api contracts when separated from lib" },
+    { "path": "src/schemas", "required": false, "reason": "form and validation schemas" },
+    { "path": "src/guards", "required": false, "reason": "route and action guards" },
+    { "path": "src/telemetry", "required": false, "reason": "front-end observability and tracking" }
+  ]
+}
