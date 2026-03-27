@@ -14,7 +14,7 @@
    - `docs/project/SESSION_HANDOFF.md`
 7. 涉及上线时，必须同步更新：
    - `docs/project/GO_LIVE_RECORD.md`
-8. PRD 确认后必须执行 `Gate 3.5`，先完成 LMS 档位分析与用户确认，再进入 Step 4。
+8. PRD 确认后必须执行 `Gate 3.5`，先完成 LMS 档位分析与用户确认，再进入 `Step 4a`；`Gate 4a` 通过后才能进入 `Step 4b`。
 9. 模块迭代必须遵循 `5a -> 5b -> 5c -> 5d -> 5e`；其中 Step 5b 的页面设计必须按页面或页面组分批审阅，用户未明确批准前不得进入 5d。
 10. 若项目声明 `shadcn/ui`，则前端实现必须优先使用 shadcn 标准组件；shadcn MCP 缺失只代表辅助能力降级，不代表可改用自定义基础组件。
 11. 已批准页面、API、数据结构和模块说明一旦修订，旧版本立即失效，必须回到同阶段重新提审并更新回滚点。

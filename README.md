@@ -11,7 +11,7 @@
 
 ### 版本
 
-- 当前版本：`v2.1`
+- 当前版本：`v2.2`
 - 单一版本源：`VERSION`
 - `acode-kit -status`、初始化状态文件与安装器展示版本应统一读取该文件
 
@@ -134,8 +134,10 @@ Step 1 Workspace Status
 → Step 3 PRD + Progress Plan
 → Gate 3
 → Gate 3.5 LMS Tier Confirmation
-→ Step 4 Project Environment Setup
-→ Gate 4
+→ Step 4a Directory Materialization + Document Relocation
+→ Gate 4a
+→ Step 4b Environment + Engineering Scaffold Setup
+→ Gate 4b
 ```
 
 #### 2. 阶段执行段

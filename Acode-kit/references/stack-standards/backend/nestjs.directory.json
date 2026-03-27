@@ -1,0 +1,16 @@
+{
+  "id": "nestjs",
+  "source": "Acode-kit/references/stack-standards/backend/nestjs.md",
+  "domain": "backend",
+  "priority": 86,
+  "applies_when": {
+    "backend_runtime": ["nestjs", "nest", "nest.js", "node-nestjs"]
+  },
+  "paths": [
+    { "path": "backend/src/modules", "required": true, "reason": "business modules and delivery units" },
+    { "path": "backend/src/common", "required": true, "reason": "shared guards, interceptors, filters, pipes, and decorators" },
+    { "path": "backend/src/config", "required": true, "reason": "framework and environment configuration" },
+    { "path": "backend/src/infrastructure", "required": true, "reason": "database, cache, messaging, and external integrations" },
+    { "path": "backend/test", "required": true, "reason": "e2e and integration test entry" }
+  ]
+}

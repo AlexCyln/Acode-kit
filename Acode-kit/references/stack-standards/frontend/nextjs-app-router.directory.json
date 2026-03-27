@@ -1,0 +1,17 @@
+{
+  "id": "nextjs-app-router",
+  "source": "Acode-kit/references/stack-standards/frontend/nextjs-app-router.md",
+  "domain": "frontend",
+  "priority": 92,
+  "applies_when": {
+    "frontend_runtime": ["nextjs-app-router", "nextjs", "next.js", "next-app-router"]
+  },
+  "paths": [
+    { "path": "app", "required": true, "reason": "app router pages, layouts, and route handlers" },
+    { "path": "components", "required": true, "reason": "shared ui and page composition components" },
+    { "path": "features", "required": true, "reason": "business feature groupings" },
+    { "path": "lib", "required": true, "reason": "api client, auth, schema, telemetry, shared utilities" },
+    { "path": "public", "required": true, "reason": "static assets and public files" },
+    { "path": "tests/e2e", "required": false, "reason": "playwright route and page smoke coverage" }
+  ]
+}

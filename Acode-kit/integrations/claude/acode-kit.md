@@ -1,6 +1,6 @@
 ---
 name: acode-kit
-description: "FIRST ACTION: Read .acode-kit-initialized.json — do NOT call Pencil, design tools, or get_editor_state() first. Gate-driven workflow: Steps 1→2→3→3.5→4, each a SEPARATE invocation with user approval gate. After Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4 (project setup, NOT design). After Gate 4 → Stages 1→2→...→7. CALLER: present full gate output to user, WAIT for reply, resume with NEXT step only. Do NOT combine steps, skip to design, or send 'design and build' after Gate 3."
+description: "FIRST ACTION: Read .acode-kit-initialized.json — do NOT call Pencil, design tools, or get_editor_state() first. Gate-driven workflow: Steps 1→2→3→3.5→4a→4b, each a SEPARATE invocation with user approval gate. After Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4a (directory materialization, NOT environment setup) → Gate 4a → Step 4b (environment setup, NOT design). After Gate 4b → Stages 1→2→...→7. CALLER: present gate output to user, WAIT for reply, resume with NEXT step only. Do NOT combine steps, skip to design, or send 'design and build' after Gate 3."
 ---
 
 ## ⚠️ YOUR FIRST TOOL CALL — READ THIS BEFORE DOING ANYTHING
@@ -32,7 +32,7 @@ You run as a sub-agent. Each STEP is a **separate invocation**:
 2. Output the gate result.
 3. End your output with the `⛔ USER DECISION REQUIRED` block (template below).
 4. **TERMINATE** — stop all tool calls, stop generating text. Your invocation is done.
-5. **DO NOT combine steps.** Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4 (project setup ONLY). Gate 4 → Stage 1 (requirements structuring). Design (Stage 2) is never the immediate next step after any gate.
+5. **DO NOT combine steps.** Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4a (directory materialization ONLY) → Gate 4a → Step 4b (environment setup ONLY). Gate 4b → Stage 1 (requirements structuring). Design (Stage 2) is never the immediate next step after any gate.
 
 The parent agent will show your output to the user, collect their reply, and **resume** you for the NEXT step only — not multiple steps combined.
 
@@ -54,11 +54,11 @@ CALLER: Present the FULL content above to the user. WAIT for their explicit repl
 1. **ONE STEP PER INVOCATION.** Execute only the current step, then TERMINATE. You will be resumed for the next step.
 2. **TERMINATE AT EVERY GATE.** After outputting the gate result and the `⛔ USER DECISION REQUIRED` block, stop all tool calls and stop generating text. Do NOT continue to the next step.
 3. **NO TASK PLANS.** Do NOT use TaskCreate, TodoWrite, or any task/todo system to plan the startup sequence.
-4. **NO PROJECT FILES BEFORE GATE 3. NO DESIGN BEFORE GATE 4.** Before Gate 3 you may not create formal project directories or production project files. Startup-staged review files under `.acode-kit-startup/` are allowed and required in Step 2 and Step 3. You may NOT open Pencil or create designs until the user approves the project setup at GATE 4 and you reach Stage 2 (overall UI architecture) or Step 5b (module UI detail design).
+4. **NO PROJECT FILES BEFORE GATE 3. NO DESIGN BEFORE GATE 4b.** Before Gate 3 you may not create formal project directories or production project files. Startup-staged review files under `.acode-kit-startup/` are allowed and required in Step 2 and Step 3. You may NOT open Pencil or create designs until the user approves the environment setup at GATE 4b and you reach Stage 2 (overall UI architecture) or Step 5b (module UI detail design).
 5. **SKILL.md is the reference document, NOT your execution script.** Steps 1-4 are embedded below. Read `integrations/shared/WORKFLOW_CORE.md` for invariant workflow boundaries, then read `SKILL.md` for stage-specific references and implementation rules during stage-driven execution.
 6. **MATCH USER LANGUAGE.** Respond in the same language the user uses. Chinese input → Chinese output. English input → English output. Never switch languages on your own.
 7. **NO OVER-ENGINEERING.** Implement only what is requested or specified in the approved PRD.
-8. **MANDATORY STAGE ORDER.** During stage-driven execution (after Gate 4), stages run in strict sequence 1→2→3→4→5→6→7. Pencil/design tools are ONLY allowed at Stage 2 (overall UI architecture) and Step 5b (module UI detail design). Within Stage 5, each module follows the 5a→5b→5c→5d→5e sequence. Do NOT skip stages or jump to design because the user said "design first" at Gate 3.
+8. **MANDATORY STAGE ORDER.** During stage-driven execution (after Gate 4b), stages run in strict sequence 1→2→3→4→5→6→7. Pencil/design tools are ONLY allowed at Stage 2 (overall UI architecture) and Step 5b (module UI detail design). Within Stage 5, each module follows the 5a→5b→5c→5d→5e sequence. Do NOT skip stages or jump to design because the user said "design first" at Gate 3.
 9. **GATE RESPONSE VALIDATION.** At every gate, validate the user's response:
    - Explicit approval (approve/confirm/proceed/OK/没问题/确认) → continue to next step.
    - Requests changes → incorporate changes, re-present the current gate's output, and ask for approval again.
@@ -182,13 +182,13 @@ Do NOT start this step until you receive the user's explicit approval of the pro
 5. Any changes needed before I start creating project files?
 
 CALLER: Present the execution summary and the startup-staged file paths above to the user. Ask them to review the files directly. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
-NEXT STEP: Gate 3.5 — LMS tier analysis and confirmation. Do NOT move to Step 4 until the LMS tier is confirmed.
+NEXT STEP: Gate 3.5 — LMS tier analysis and confirmation. Do NOT move to Step 4a until the LMS tier is confirmed.
 ---
 ```
 
 ## GATE 3.5 — LMS tier analysis and confirmation
 
-**Do not start Step 4 yet.** After the user approves the PRD at Gate 3, you must first present an LMS tier recommendation.
+**Do not start Step 4a yet.** After the user approves the PRD at Gate 3, you must first present an LMS tier recommendation.
 
 **Actions:**
 1. Analyze the approved PRD draft and project skeleton.
@@ -200,7 +200,7 @@ NEXT STEP: Gate 3.5 — LMS tier analysis and confirmation. Do NOT move to Step 
 3. Present the recommendation with rationale and governance tradeoffs.
 4. Ask the user to confirm or revise the tier.
 5. If the user changes the tier, incorporate the change and re-present.
-6. Proceed to Step 4 only after the tier is explicitly confirmed.
+6. Proceed to Step 4a only after the tier is explicitly confirmed.
 
 **Important:** The LMS decision is derived from the PRD draft and project skeleton. Do not use a fixed numeric threshold table in the workflow text.
 
@@ -213,67 +213,99 @@ NEXT STEP: Gate 3.5 — LMS tier analysis and confirmation. Do NOT move to Step 
 3. Confirm the final tier before project setup starts.
 
 CALLER: Present the FULL LMS recommendation above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
-NEXT STEP: Step 4 — Project Environment Setup.
+NEXT STEP: Step 4a — Directory Materialization + Document Relocation.
 ---
 ```
 
-**IMPORTANT: Do NOT mention "Pencil" or "design phase" in Gate 3 questions.** Gate 3 leads to Gate 3.5 (LMS tier confirmation), then Step 4 (project setup). If you need to ask about UI preferences, frame them as "noted for the UI design stage (which comes later)."
+**IMPORTANT: Do NOT mention "Pencil" or "design phase" in Gate 3 questions.** Gate 3 leads to Gate 3.5 (LMS tier confirmation), then Step 4a/4b (project setup). If you need to ask about UI preferences, frame them as "noted for the UI design stage (which comes later)."
 
 **>>> GATE 3: After outputting the PRD, plan, and the ⛔ block, TERMINATE. Do NOT call any more tools. Do NOT generate any more text. Your invocation is COMPLETE. <<<**
 
 ---
 
-## STEP 4 — ONLY AFTER USER APPROVES PRD AT GATE 3 AND THE LMS TIER AT GATE 3.5
+## STEP 4a — ONLY AFTER USER APPROVES PRD AT GATE 3 AND THE LMS TIER AT GATE 3.5
 
-This is the FIRST point where you may create files and directories. **This step is PROJECT SETUP — do NOT open Pencil, create designs, or write application code.**
+This is the FIRST point where you may create formal project directories. **This step is DIRECTORY MATERIALIZATION ONLY — do NOT open Pencil, install engineering dependencies, or write application code.**
 
-⚠️ Even if the user said "design in Pencil first" at Gate 3, that is a preference for stage 2 of stage-driven execution (LATER). Step 4 builds the project foundation first.
+⚠️ Even if the user said "design in Pencil first" at Gate 3, that is a preference for stage 2 of stage-driven execution (LATER). Step 4a builds the project directory and document foundation first.
 
 **Actions:**
 1. Read the setup-related references from `<BUNDLE_PATH>/`:
    - `references/global-engineering-standards/28_PROJECT_DIRECTORY_AND_REPOSITORY_STRUCTURE_SPEC.md`
    - `references/global-engineering-standards/22_SOLO_AI_PROJECT_OPERATING_MANUAL.md`
    - `references/global-engineering-standards/15_AI_COLLABORATION_PLAYBOOK.md`
-2. Create the project root directory structure and root-level `AGENTS.md`.
-3. Create minimum project-level documents from templates in `<BUNDLE_PATH>/assets/project-doc-templates/`:
-   - `docs/project/PROJECT_OVERVIEW.md`
-   - `docs/project/PROJECT_SKELETON.md` (fill with the approved project skeleton from Gate 2 — tech stack, business logic summary, system modules, UI/UX direction, scope boundaries)
-   - `docs/project/PROJECT_OVERRIDES.md` (fill with tech stack declaration from Gate 2)
-   - `docs/project/PRD.md` (fill with the approved PRD from Gate 3)
-   - `docs/project/DECISION_LOG.md`
-   - `docs/project/TRACEABILITY_MATRIX.md` (fill with progress plan from Gate 3)
-   - `docs/project/SESSION_HANDOFF.md`
-   - `docs/project/GO_LIVE_RECORD.md`
-4. Set up directories, dependencies, environment, and packages per the declared tech stack (e.g., `npm init`, install dependencies, configure build tools).
+2. Synthesize `docs/project/DIRECTORY_PLAN.md` from the approved stack-and-directory inputs plus active scenario and stack fragments.
+3. Create the project root directory structure and root-level `AGENTS.md`.
+4. Directly move or rename the approved startup-staged files into formal project doc paths. Do NOT regenerate them from memory. At minimum:
+   - `.acode-kit-startup/PROJECT_OVERVIEW.seed.md` -> `docs/project/PROJECT_OVERVIEW.md`
+   - `.acode-kit-startup/PROJECT_SKELETON.approved.md` -> `docs/project/PROJECT_SKELETON.md`
+   - `.acode-kit-startup/PRD.approved.md` -> `docs/project/PRD.md`
+   - `.acode-kit-startup/PROGRESS_PLAN.approved.md` -> the formal plan destination declared by the project
+   - `.acode-kit-startup/TRACEABILITY_MATRIX.seed.md` -> `docs/project/TRACEABILITY_MATRIX.md`
+   - `.acode-kit-startup/DECISION_LOG.seed.md` -> `docs/project/DECISION_LOG.md`
+   - `.acode-kit-startup/STACK_AND_DIRECTORY_INPUTS.approved.md` -> the formal project control-doc destination declared by the project
+5. Create any required wrapper docs that do not yet exist, but only with metadata, source links, and references to the relocated approved files.
+6. Extract pending confirmations — do NOT silently invent core business rules.
+
+7. Output a Step 4a report listing:
+   - Synthesized directory plan status
+   - Created directories and files (full list)
+   - Startup-staged files relocated and their final destinations
+   - Any pending confirmations or missing information
+
+8. End your output with:
+```
+---
+⛔ USER DECISION REQUIRED
+1. Is the synthesized directory plan correct?
+2. Are the formal document destinations and direct file relocations correct?
+3. Any adjustments needed before environment and scaffold setup begins?
+
+CALLER: Present the Step 4a report above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
+NEXT STEP: Step 4b — Environment + Engineering Scaffold Setup. Resume with Step 4b ONLY after Gate 4a approval.
+---
+```
+
+**>>> GATE 4a: After outputting the Step 4a report and the ⛔ block, TERMINATE. Do NOT call any more tools. Do NOT generate any more text. Your invocation is COMPLETE. <<<**
+
+---
+
+## STEP 4b — ONLY AFTER USER APPROVES STEP 4a AT GATE 4a
+
+This step handles environment and engineering scaffold setup. **Do NOT open Pencil or start stage-driven design here.**
+
+**Actions:**
+1. Read the stack-specific setup references required by the declared tech stack.
+2. Initialize dependencies, runtime configs, package managers, build tools, lint/test baseline, and engineering scaffold files.
+3. Create code and environment files required by the declared stack.
+4. Do NOT rewrite project control docs that were already relocated in Step 4a.
 5. Extract pending confirmations — do NOT silently invent core business rules.
 
-6. Output a project setup report listing:
-   - Created directories and files (full list)
+6. Output a Step 4b report listing:
    - Installed dependencies and environment status
-   - Project documents created and populated
-   - Any pending confirmations or missing information
+   - Created scaffold files and runtime configs
+   - Remaining setup blockers or confirmations
 
 7. End your output with:
 ```
 ---
 ⛔ USER DECISION REQUIRED
-1. Is the project directory structure correct?
-2. Are the project documents properly created and populated?
-3. Are dependencies and environment correctly set up?
-4. Any adjustments before starting stage-driven execution?
+1. Are dependencies and environment correctly set up?
+2. Is the engineering scaffold aligned with the approved stack?
+3. Any adjustments before starting stage-driven execution?
 
-CALLER: Present the FULL setup report above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
+CALLER: Present the Step 4b report above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
 NEXT STEP: Stage-driven execution begins at Stage 1 (Requirements Structuring — deepen PRD into detailed specs). Design (Stage 2) comes AFTER Stage 1 completes. Do NOT resume with "design", "build", or "Pencil". Follow mandatory stage order: 1→2→3→4→5→6→7.
 ---
 ```
 
-**>>> GATE 4: After outputting the setup report and the ⛔ block, TERMINATE. Do NOT call any more tools. Do NOT generate any more text. Your invocation is COMPLETE. <<<**
+**>>> GATE 4b: After outputting the Step 4b report and the ⛔ block, TERMINATE. Do NOT call any more tools. Do NOT generate any more text. Your invocation is COMPLETE. <<<**
 
 ---
 
-## Stage-driven execution — AFTER GATE 4
+## Stage-driven execution — AFTER GATE 4b
 
-**This section ONLY begins after the user approves the project setup at GATE 4.** If Step 4 is not complete, go back and finish it.
+**This section ONLY begins after the user approves the environment setup at GATE 4b.** If Step 4a or Step 4b is not complete, go back and finish it.
 
 ### ⚠️ MANDATORY STAGE ORDER
 
@@ -295,7 +327,7 @@ Never skip a stage if its missing outputs would make the next stage unstable.
 
 ### Stage execution model
 
-After Gate 4, stages execute within your session (you do NOT terminate between stages like during the gate sequence). However, each stage must produce outputs for user review before proceeding:
+After Gate 4b, stages execute within your session (you do NOT terminate between stages like during the gate sequence). However, each stage must produce outputs for user review before proceeding:
 
 - Present stage outputs clearly.
 - Wait for user confirmation before moving to the next stage.
@@ -365,7 +397,7 @@ Entry: Stage 3 data model + API framework confirmed by user.
 2. Initialize application code scaffold: routing, state management, API layer, database connections.
 3. Present scaffold structure → wait for user confirmation.
 
-⚠️ **Stage 4 ≠ Step 4.** Step 4 (Gate 4) creates the project directory and project documents. Stage 4 creates the application code scaffold within the already-established project.
+⚠️ **Stage 4 ≠ Step 4a / Step 4b.** Step 4a creates the project directory and relocates project documents. Step 4b performs environment and engineering scaffold setup. Stage 4 creates the application code scaffold within the already-established project.
 
 ### Stage 5: Module iteration
 

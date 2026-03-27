@@ -13,8 +13,10 @@ Defines the startup lane before stage-driven execution begins.
 5. Step 3: PRD + progress plan draft
 6. Gate 3: explicit user approval
 7. Gate 3.5: LMS tier analysis and confirmation
-8. Step 4: project environment setup
-9. Gate 4: explicit user approval
+8. Step 4a: directory materialization + startup file relocation
+9. Gate 4a: explicit user approval
+10. Step 4b: environment + engineering scaffold setup
+11. Gate 4b: explicit user approval
 
 ## Startup outputs
 
@@ -78,40 +80,55 @@ Defines the startup lane before stage-driven execution begins.
 - rationale based on PRD draft and approved skeleton
 - governance and execution-density tradeoffs
 
-### Step 4
+### Step 4a
 
+- synthesized `docs/project/DIRECTORY_PLAN.md` from active scenario and stack fragments
 - project root structure
-- synthesized directory plan from active scenario and stack fragments
 - root `AGENTS.md`
 - project control docs relocated from startup-staged approved artifacts into formal paths
-- dependencies and environment initialized
 - pending confirmations extracted instead of invented
 
-Required materialization at `Step 4`:
+Required materialization at `Step 4a`:
 
 1. `Step 2` and `Step 3` outputs must already exist as startup-staged files with stable names under `.acode-kit-startup/`
-2. the approved Step 2 project skeleton must be moved into formal project docs instead of being re-summarized into a weaker placeholder
-3. the approved Step 3 PRD and progress plan must be moved into formal project docs instead of being regenerated from memory
-4. templates may provide structure, metadata fields, and destination names, but approved startup content remains the source of truth
-5. if any approved section is missing at setup time, stop and reconstruct it from the approved startup artifact before continuing
-6. directory creation must follow `docs/project/DIRECTORY_PLAN.md`, which is synthesized from the approved Step 3 stack inputs plus active scenario and stack directory fragments
-7. `references/project-blueprints/` remain fallback references only when active fragments are insufficient for a professional stack-aligned directory decision
+2. the approved Step 2 and Step 3 files must be directly moved or renamed into formal project docs instead of being re-summarized into weaker placeholders
+3. templates may provide metadata fields, destination names, and index hooks, but approved startup content remains the source of truth
+4. if any approved section is missing at setup time, stop and reconstruct it from the approved startup artifact before continuing
+5. directory creation must follow `docs/project/DIRECTORY_PLAN.md`, which is synthesized from the approved Step 3 stack inputs plus active scenario and stack directory fragments
+6. `references/project-blueprints/` remain fallback references only when active fragments are insufficient for a professional stack-aligned directory decision
+7. `Step 4a` may move, rename, wrap, and link startup-staged files, but it must not regenerate document bodies from memory
+
+### Step 4b
+
+- dependencies initialized
+- environment configured
+- engineering scaffold initialized according to the declared stack
+- pending confirmations extracted instead of invented
+
+`Step 4b` execution contract:
+
+1. it begins only after Gate 4a confirms the directory plan and file relocation results
+2. it may initialize package managers, dependencies, runtime configs, build tools, and engineering scaffold files
+3. it may create code and environment files required by the declared stack
+4. it must not rewrite project control docs that were already relocated in `Step 4a`
+5. it must report scaffold status, dependency status, and remaining environment confirmations separately from the directory-materialization report
 
 ## Startup rules
 
 1. No files or directories before Gate 3 approval.
-2. No design tools before Gate 4 approval.
+2. No design tools before Gate 4b approval.
 3. NotebookLM auth trigger is the exact text `Log me in to NotebookLM`.
 4. If workspace status file is missing, the runtime may use the user-level global cache as baseline.
-5. Step 4 is setup only; it is not design or application implementation.
+5. `Step 4a` is directory materialization only; `Step 4b` is environment and scaffold setup only.
 6. Startup never invokes `acode-run`.
-7. `acode-run` may only appear later as a bounded routed subtask after Gate 4.
-8. LMS tier changes setup density only; it does not relax Step 4 deliverable completeness.
-9. Step 4 must create formal project docs by carrying forward approved startup content, not by inventing new simplified documents.
+7. `acode-run` may only appear later as a bounded routed subtask after Gate 4b.
+8. LMS tier changes setup density only; it does not relax `Step 4a` or `Step 4b` deliverable completeness.
+9. `Step 4a` must create formal project docs by carrying forward approved startup content, not by inventing new simplified documents.
 10. From `Step 2` onward, every approved startup artifact must be persisted as a file under `.acode-kit-startup/` before the workflow may advance to the next gate.
-11. Startup-staged files use stable names and are the only authoritative handoff source for `Step 4` document relocation.
-12. `Step 4` may rename and move startup-staged files into formal destinations, but it must not rewrite their approved substance into a weaker summary.
-13. `Step 4` must synthesize a stack-aligned `DIRECTORY_PLAN.md` before creating directories.
+11. Startup-staged files use stable names and are the only authoritative handoff source for `Step 4a` document relocation.
+12. `Step 4a` may rename and move startup-staged files into formal destinations, but it must not rewrite their approved substance into a weaker summary.
+13. `Step 4a` must synthesize a stack-aligned `DIRECTORY_PLAN.md` before creating directories.
 14. If active stack or scenario fragments conflict, resolve the conflict in the directory plan and record the rationale before creating directories.
 15. `Step 2` and `Step 3` user-facing gate responses must point the user to the startup-staged files for review instead of inlining the full document bodies in chat.
 16. If NotebookLM is available and authenticated at `Step 2`, requirements analysis must use it as a strengthening input before the project skeleton is frozen.
+17. `Step 4b` may start only after `Step 4a` finishes file relocation and the user explicitly approves Gate 4a.

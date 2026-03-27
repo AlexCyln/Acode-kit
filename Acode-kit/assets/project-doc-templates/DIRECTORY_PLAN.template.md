@@ -3,7 +3,7 @@
 ## 文档信息
 - 主输入来源：`.acode-kit-startup/STACK_AND_DIRECTORY_INPUTS.approved.md`
 - 正式路径：`docs/project/DIRECTORY_PLAN.md`
-- 生成节点：Step 4
+- 生成节点：Step 4a
 - 状态：草案 / 已确认 / 已执行
 
 ## 目录来源摘要
@@ -32,4 +32,5 @@ project-root/
 ## 执行状态
 - 是否已按本计划创建目录：
 - 是否已完成启动文件归位：
+- 是否已完成 Gate 4a 审阅：
 - 是否存在待补目录：

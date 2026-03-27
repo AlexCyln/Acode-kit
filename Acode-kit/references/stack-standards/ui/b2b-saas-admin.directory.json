@@ -1,0 +1,17 @@
+{
+  "id": "b2b-saas-admin-ui",
+  "source": "Acode-kit/references/stack-standards/ui/b2b-saas-admin.md",
+  "domain": "ui",
+  "priority": 84,
+  "applies_when": {
+    "ui_system": ["b2b-saas-admin", "b2b-admin-ui", "saas-admin-ui"],
+    "scenario": ["bs-admin-console", "bs-saas-workflow", "bs-platform-ecosystem"]
+  },
+  "paths": [
+    { "path": "src/ui-shell", "required": false, "reason": "shared navigation shell, page frame, and layout primitives" },
+    { "path": "src/components/page-blocks", "required": false, "reason": "stable admin page sections such as filter bars and detail sections" },
+    { "path": "src/components/tables", "required": false, "reason": "table wrappers, column presets, and batch action patterns" },
+    { "path": "src/components/forms", "required": false, "reason": "form layout, grouped fields, and validation presentation patterns" },
+    { "path": "src/components/status", "required": false, "reason": "status tags, risk prompts, and audit-related visual patterns" }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "vue3-vite",
+  "source": "Acode-kit/references/stack-standards/frontend/vue3-vite.md",
+  "domain": "frontend",
+  "priority": 88,
+  "applies_when": {
+    "frontend_runtime": ["vue3-vite", "vue", "vue3", "vite-vue"]
+  },
+  "paths": [
+    { "path": "src/views", "required": true, "reason": "route-level views" },
+    { "path": "src/components", "required": true, "reason": "shared components and sections" },
+    { "path": "src/features", "required": false, "reason": "business feature groupings" },
+    { "path": "src/router", "required": true, "reason": "router config and guards" },
+    { "path": "src/stores", "required": true, "reason": "pinia or equivalent global stores" },
+    { "path": "src/api", "required": true, "reason": "api client and protocol adapters" },
+    { "path": "src/composables", "required": true, "reason": "reusable composition logic" },
+    { "path": "public", "required": false, "reason": "public static assets" }
+  ]
+}

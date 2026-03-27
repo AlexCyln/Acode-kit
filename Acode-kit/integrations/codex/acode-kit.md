@@ -1,6 +1,6 @@
 ---
 name: acode-kit-codex-runtime
-description: Codex runtime supplement for Acode-kit. Keeps the exact same 4-gate + 7-stage workflow plus Gate 3.5 LMS confirmation while adapting stop/resume behavior to Codex's direct user interaction model.
+description: Codex runtime supplement for Acode-kit. Keeps the exact same startup gate graph including Gate 3.5, Gate 4a, and Gate 4b plus the 7-stage execution workflow while adapting stop/resume behavior to Codex's direct user interaction model.
 ---
 
 # Acode-kit Codex Runtime
@@ -50,7 +50,7 @@ Therefore:
 3. Keep the response in the user's language.
 4. Keep the shared gate/stage graph identical to `integrations/shared/WORKFLOW_CORE.md`.
 5. Do not invoke `acode-run` during startup or on initial entry into `Acode-kit`.
-6. `acode-run` is allowed only after Gate 4 and only for a bounded routed subtask inside stage-driven execution.
+6. `acode-run` is allowed only after Gate 4b and only for a bounded routed subtask inside stage-driven execution.
 
 ## NotebookLM authentication behavior
 
@@ -90,8 +90,9 @@ WAIT: Stop here and wait for the user's explicit reply before continuing.
 1. Gate 1 -> Step 2 only
 2. Gate 2 -> Step 3 only
 3. Gate 3 -> Gate 3.5 only
-4. Gate 3.5 -> Step 4 only
-5. Gate 4 -> Stage 1 only
+4. Gate 3.5 -> Step 4a only
+5. Gate 4a -> Step 4b only
+6. Gate 4b -> Stage 1 only
 
 Never map a gate directly to design or implementation unless the shared workflow graph allows it.
 
@@ -115,7 +116,7 @@ If the user asks to skip a gate, skip a stage, jump straight to design, or jump 
 
 ## Stage review behavior
 
-After Gate 4:
+After Gate 4b:
 
 1. follow Stage 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 in order
 2. present outputs for review at each stage
@@ -139,7 +140,7 @@ After Gate 3 is approved:
 2. recommend an LMS tier (`S`, `M`, or `L`)
 3. base the recommendation on architecture scope, module structure, page breadth, and API density
 4. present the recommendation and rationale to the user
-5. wait for explicit confirmation or revision before Step 4
+5. wait for explicit confirmation or revision before Step 4a
 6. do not use a fixed numeric threshold table in the runtime wording
 
 ## Gate 3.5 output block
@@ -154,8 +155,17 @@ Every Gate 3.5 response must end with this block:
 3. Confirm the final tier before project setup starts.
 
 CALLER: Present the FULL LMS recommendation above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
-NEXT STEP: Step 4 — Project Environment Setup.
+NEXT STEP: Step 4a — Directory Materialization + Document Relocation.
 ---
 ```
 
 The response body immediately before the block should include the recommended tier, the reasoning, and the governance tradeoffs.
+
+## Startup setup split
+
+The setup lane is split into two reviewable nodes:
+
+1. `Step 4a` synthesizes `DIRECTORY_PLAN.md`, creates the final directory structure, and directly relocates startup-staged approved files into formal project doc paths
+2. `Step 4a` must not regenerate project documents from memory or install engineering dependencies
+3. `Step 4b` runs only after Gate 4a approval and is responsible for dependency installation, environment setup, and engineering scaffold creation
+4. do not collapse `Step 4a` and `Step 4b` into one reply

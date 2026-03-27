@@ -1,6 +1,6 @@
 ---
 name: Acode-kit
-description: "Lightweight workflow entry for Acode-kit. First action: check `.acode-kit-initialized.json` or the provider global cache. Keep the 4 startup gates + Gate 3.5 + 7 execution stages unchanged. Load workflow and standards progressively. Preserve gate control, stage order, and project-document governance."
+description: "Lightweight workflow entry for Acode-kit. First action: check `.acode-kit-initialized.json` or the provider global cache. Keep the startup gate graph including Gate 3.5, Gate 4a, and Gate 4b plus 7 execution stages unchanged. Load workflow and standards progressively. Preserve gate control, stage order, and project-document governance."
 ---
 # Acode-kit
 Use this skill when:
@@ -43,9 +43,9 @@ When the user invokes `Acode-kit`, stay in the main workflow entry.
 
 1. Do not jump to `acode-run` on entry.
 2. Do not treat `acode-run` as the startup executor.
-3. Do not route Step 1, Step 2, Step 3, Gate 3.5, or Step 4 through `acode-run`.
+3. Do not route Step 1, Step 2, Step 3, Gate 3.5, Step 4a, or Step 4b through `acode-run`.
 4. First complete the startup lane and wait at gates as required.
-5. Only consider `acode-run` after Gate 4, and only for a concrete routed subtask inside stage-driven execution.
+5. Only consider `acode-run` after Gate 4b, and only for a concrete routed subtask inside stage-driven execution.
 
 ## First action
 Before anything else:
@@ -83,8 +83,10 @@ Startup sequence:
 5. Step 3: PRD + progress plan
 6. Gate 3: user approval
 7. Gate 3.5: LMS tier confirmation
-8. Step 4: project environment setup
-9. Gate 4: user approval
+8. Step 4a: directory materialization + document relocation
+9. Gate 4a: user approval
+10. Step 4b: environment + engineering scaffold setup
+11. Gate 4b: user approval
 
 LMS governs execution density only:
 1. `S` / `M` / `L` may change module granularity, batching width, and document expansion depth
@@ -110,13 +112,13 @@ Stage 5 is fixed per module:
 
 ## Non-negotiable boundaries
 1. no file or directory creation before Gate 3 approval
-2. no design work before Gate 4 approval
+2. no design work before Gate 4b approval
 3. Pencil/design tools only at Stage 2 and Step 5b
-4. `Step 4` is not `Stage 4`
+4. `Step 4a` and `Step 4b` are not `Stage 4`
 5. do not skip or merge gates
 6. do not skip stages when downstream outputs depend on them
 7. wait for explicit user approval at every gate, stage review, and Step 5a-5e review
-8. `Step 4` must materialize the approved Step 2 / Step 3 outputs into project docs; it must not replace them with weaker template-only summaries
+8. `Step 4a` must materialize the approved Step 2 / Step 3 outputs into project docs by direct relocation; `Step 4b` handles environment setup afterward
 9. when an extension is loaded, tell the user which extension was used, what it did at the current node, and why it was helpful
 
 ## Workflow references
@@ -151,7 +153,7 @@ Project-level activation lives in:
 3. fallback order: `error -> timeout -> quality_low -> budget_exceeded`
 
 Hard boundary:
-1. never invoke `acode-run` during startup Steps 1-4 or Gates 1-4
+1. never invoke `acode-run` during startup Steps 1-4b or Gates 1-4b
 2. never invoke `acode-run` as a replacement for the main `Acode-kit` workflow entry
 3. invoke it only when the current stage already exists and the task is a bounded routed subtask
 4. final gate decisions, stage review outputs, and user-facing conclusions stay in `Acode-kit`

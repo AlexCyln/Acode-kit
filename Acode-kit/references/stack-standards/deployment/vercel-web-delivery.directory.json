@@ -1,0 +1,14 @@
+{
+  "id": "vercel-web-delivery",
+  "source": "Acode-kit/references/stack-standards/deployment/vercel-web-delivery.md",
+  "domain": "deployment",
+  "priority": 82,
+  "applies_when": {
+    "deployment": ["vercel", "vercel-web", "vercel-web-delivery"]
+  },
+  "paths": [
+    { "path": "deploy/vercel", "required": true, "reason": "vercel deployment config and release notes" },
+    { "path": "deploy/vercel/env", "required": false, "reason": "environment variable templates and mapping notes" },
+    { "path": "deploy/vercel/runbook", "required": false, "reason": "release, preview validation, and rollback guidance" }
+  ]
+}

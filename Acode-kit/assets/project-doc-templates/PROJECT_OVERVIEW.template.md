@@ -44,8 +44,9 @@
 - 当前进度：
 - 最近一次更新：
 - 实施信息：
-- 启动承接说明：<!-- Step 4 是否已完整承接 Step 2 / Step 3 已批准内容 -->
-- Step 4 文件归位校验：<!-- 是否由启动冻结稿移动而来 -->
+- 启动承接说明：<!-- Step 4a 是否已完整承接 Step 2 / Step 3 已批准内容 -->
+- Step 4a 文件归位校验：<!-- 是否由启动冻结稿直接移动而来 -->
+- Step 4b 环境搭建状态：<!-- 未开始 / 进行中 / 已完成 -->
 
 ## LMS / 版本治理
 - LMS 档位：<!-- S / M / L -->
@@ -58,5 +59,5 @@
 ## 激活矩阵
 - 母规范激活状态：<!-- 参见 TRACEABILITY_MATRIX.md / 当前项目文档 -->
 - 关键工作流节点：
-  - Gate 1 / Gate 2 / Gate 3 / Gate 3.5 / Gate 4
+  - Gate 1 / Gate 2 / Gate 3 / Gate 3.5 / Gate 4a / Gate 4b
   - Stage 1 / Stage 2 / Stage 3 / Stage 4 / Stage 5 / Stage 6 / Stage 7

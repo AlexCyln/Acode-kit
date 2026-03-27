@@ -17,8 +17,9 @@ function simulateWorkflow() {
     { from: "step-1", input: "gate-1-approved", to: "step-2" },
     { from: "step-2", input: "gate-2-approved", to: "step-3" },
     { from: "step-3", input: "gate-3-approved", to: "gate-3-5" },
-    { from: "gate-3-5", input: "gate-3-5-approved", to: "step-4" },
-    { from: "step-4", input: "gate-4-approved", to: "stage-1" },
+    { from: "gate-3-5", input: "gate-3-5-approved", to: "step-4a" },
+    { from: "step-4a", input: "gate-4a-approved", to: "step-4b" },
+    { from: "step-4b", input: "gate-4b-approved", to: "stage-1" },
     { from: "stage-1", input: "approved", to: "stage-2" },
     { from: "stage-2", input: "approved", to: "stage-3" },
     { from: "stage-3", input: "approved", to: "stage-4" },
@@ -34,9 +35,11 @@ function simulateWorkflow() {
   const forbiddenJumps = [
     ["step-3", "stage-2"],
     ["step-3", "stage-5d"],
-    ["step-3", "step-4"],
+    ["step-3", "step-4a"],
     ["step-3", "stage-1"],
-    ["step-4", "stage-2"],
+    ["step-4a", "stage-2"],
+    ["step-4a", "stage-1"],
+    ["step-4b", "stage-2"],
     ["stage-1", "stage-5d"],
     ["stage-5a", "stage-5d"],
     ["stage-5b", "stage-6"]
@@ -44,10 +47,11 @@ function simulateWorkflow() {
 
   assert.equal(transitions[0].to, "stop-for-init");
   assert.equal(transitions[3].to, "gate-3-5");
-  assert.equal(transitions[4].to, "step-4");
-  assert.equal(transitions[5].to, "stage-1");
-  assert.equal(transitions[10].to, "stage-5b");
-  assert.equal(transitions[14].to, "stage-6");
+  assert.equal(transitions[4].to, "step-4a");
+  assert.equal(transitions[5].to, "step-4b");
+  assert.equal(transitions[6].to, "stage-1");
+  assert.equal(transitions[11].to, "stage-5b");
+  assert.equal(transitions[15].to, "stage-6");
 
   const allowedTransitionSet = new Set(
     transitions.map(({ from, to }) => `${from}->${to}`)
@@ -163,7 +167,8 @@ function main() {
   mustContain(skill, "references/load-rules/AGENT_DELEGATION_RULES.md", "SKILL delegation rules reference");
 
   mustContain(core, "Step 1: Workspace Status Report", "workflow core startup");
-  mustContain(core, "Gate 4: user approval required", "workflow core gate 4");
+  mustContain(core, "Gate 4a: user approval required", "workflow core gate 4a");
+  mustContain(core, "Gate 4b: user approval required", "workflow core gate 4b");
   mustContain(core, "Stage 1: Requirements structuring + module decomposition", "workflow core stage 1");
   mustContain(core, "Stage 7: Deployment and go-live", "workflow core stage 7");
   mustContain(core, "global MCP cache exists", "workflow core global cache fallback");
@@ -172,7 +177,8 @@ function main() {
   mustContain(core, "break the module into explicit reviewable page units", "workflow core page batch review");
   mustContain(core, "Gate 3.5: LMS tier analysis and confirmation", "workflow core gate 3.5");
   mustContain(core, "Gate 3.5 output contract", "workflow core gate 3.5 output contract");
-  mustContain(core, "Step 4 must materialize the approved Step 2 and Step 3 artifacts into formal project docs", "workflow core step 4 materialization");
+  mustContain(core, "Step 4a must materialize the approved Step 2 and Step 3 artifacts into formal project docs", "workflow core step 4a materialization");
+  mustContain(core, "Step 4b is responsible for environment setup and engineering scaffold creation only after Gate 4a is approved.", "workflow core step 4b setup");
   mustContain(core, "The tier changes execution density only", "workflow core lms density");
   mustContain(core, "tell the user which extension was used", "workflow core extension disclosure");
   mustContain(core, "Step 2 and Step 3 must write or update their startup-staged files under `.acode-kit-startup/` before asking for gate approval.", "workflow core startup file-first");
@@ -183,6 +189,10 @@ function main() {
   mustContain(startup, ".acode-kit-startup/PROJECT_SKELETON.approved.md", "startup staged skeleton");
   mustContain(startup, ".acode-kit-startup/STACK_AND_DIRECTORY_INPUTS.approved.md", "startup staged stack inputs");
   mustContain(startup, "docs/project/DIRECTORY_PLAN.md", "startup directory plan");
+  mustContain(startup, "### Step 4a", "startup step 4a");
+  mustContain(startup, "### Step 4b", "startup step 4b");
+  mustContain(startup, "Gate 4a: explicit user approval", "startup gate 4a");
+  mustContain(startup, "Gate 4b: explicit user approval", "startup gate 4b");
   mustContain(startup, "do not paste the full skeleton or overview into the conversation", "startup step 2 path-only review");
   mustContain(startup, "do not paste the full PRD, progress plan, or stack input package into the conversation", "startup step 3 path-only review");
   mustContain(startup, "if NotebookLM MCP is installed and authenticated, use it to strengthen requirements analysis before freezing the skeleton", "startup notebooklm strengthening");
@@ -194,8 +204,10 @@ function main() {
   mustContain(taskMap, "startup / project skeleton", "task map startup mapping");
   mustContain(delegation, "final gate decisions", "delegation final gate restriction");
 
-  mustContain(claude, "STEP 4 — ONLY AFTER USER APPROVES PRD AT GATE 3", "claude gate 3 to step 4 boundary");
-  mustContain(claude, "NEXT STEP: Stage-driven execution begins at Stage 1", "claude gate 4 next step");
+  mustContain(claude, "## STEP 4a — ONLY AFTER USER APPROVES PRD AT GATE 3", "claude gate 3 to step 4a boundary");
+  mustContain(claude, "## STEP 4b — ONLY AFTER USER APPROVES STEP 4a AT GATE 4a", "claude gate 4a to step 4b boundary");
+  mustContain(claude, "NEXT STEP: Step 4b — Environment + Engineering Scaffold Setup.", "claude gate 4a next step");
+  mustContain(claude, "NEXT STEP: Stage-driven execution begins at Stage 1", "claude gate 4b next step");
   mustContain(claude, "integrations/shared/WORKFLOW_CORE.md", "claude shared core reference");
   mustContain(claude, "If the user chooses NotebookLM authentication and their reply is exactly `Log me in to NotebookLM`", "claude notebook auth passthrough");
   mustContain(claude, ".acode-kit-startup/PROJECT_SKELETON.approved.md", "claude step 2 startup skeleton file");
@@ -207,8 +219,9 @@ function main() {
 
   mustContain(codex, "Gate 1 -> Step 2 only", "codex gate 1 mapping");
   mustContain(codex, "Gate 3 -> Gate 3.5 only", "codex gate 3 mapping");
-  mustContain(codex, "Gate 3.5 -> Step 4 only", "codex gate 3.5 mapping");
-  mustContain(codex, "Gate 4 -> Stage 1 only", "codex gate 4 mapping");
+  mustContain(codex, "Gate 3.5 -> Step 4a only", "codex gate 3.5 mapping");
+  mustContain(codex, "Gate 4a -> Step 4b only", "codex gate 4a mapping");
+  mustContain(codex, "Gate 4b -> Stage 1 only", "codex gate 4b mapping");
   mustContain(codex, "There is no external `CALLER:` layer.", "codex direct interaction");
   mustContain(codex, "wait for the next user message", "codex wait behavior");
   mustContain(codex, "global MCP cache", "codex global cache fallback");
@@ -230,6 +243,8 @@ function main() {
   mustContain(read(path.join(repoRoot, "scripts", "acode-kit.mjs")), "acode-kit bootstrap", "CLI bootstrap command");
 
   mustContain(skill, "Gate 3.5: LMS tier confirmation", "SKILL gate 3.5");
+  mustContain(skill, "Gate 4a: user approval", "SKILL gate 4a");
+  mustContain(skill, "Gate 4b: user approval", "SKILL gate 4b");
   mustContain(skill, "docs/project/ACTIVE_STANDARDS.md", "SKILL active standards");
   mustContain(skill, "fallback order: `error -> timeout -> quality_low -> budget_exceeded`", "SKILL router fallback");
 
@@ -266,7 +281,7 @@ function main() {
   mustContain(read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "PROJECT_OVERRIDES.template.md")), "版本锁要求", "project overrides version lock");
   mustContain(agentsTemplate, "Step 5b 的页面设计必须按页面或页面组分批审阅", "agents template page review rule");
   mustContain(agentsTemplate, "docs/dev/DEVELOPMENT_DOCUMENTATION_INDEX.md", "agents template dev doc index");
-  mustContain(agentsTemplate, "PRD 确认后必须执行 `Gate 3.5`", "agents template gate 3.5");
+  mustContain(agentsTemplate, "Gate 4a", "agents template gate 4a");
   mustContain(agentsTemplate, "已批准页面、API、数据结构和模块说明一旦修订，旧版本立即失效", "agents template version lock");
   mustContain(read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "ACTIVE_STANDARDS.template.md")), "已激活规范包", "active standards template");
   mustContain(devIndexTemplate, "# 开发文档索引", "dev doc index template header");
@@ -274,6 +289,7 @@ function main() {
   mustContain(stackDirectoryInputsTemplate, "数据库与数据访问输入", "stack and directory inputs data section");
   mustContain(directoryPlanTemplate, "目录来源摘要", "directory plan source summary");
   mustContain(directoryPlanTemplate, "最终目录树", "directory plan tree section");
+  mustContain(directoryPlanTemplate, "生成节点：Step 4a", "directory plan step 4a");
   mustContain(directorySynthesisRules, "Synthesis order", "directory synthesis rules order");
   mustContain(directorySynthesisRules, "fallback blueprints", "directory synthesis fallback");
   mustContain(blueprintReadme, "fallback", "blueprint readme fallback role");

@@ -1,0 +1,15 @@
+{
+  "id": "k8s-service-delivery",
+  "source": "Acode-kit/references/stack-standards/deployment/k8s-service-delivery.md",
+  "domain": "deployment",
+  "priority": 88,
+  "applies_when": {
+    "deployment": ["k8s", "kubernetes", "k8s-service-delivery", "kubernetes-delivery"]
+  },
+  "paths": [
+    { "path": "deploy/k8s/base", "required": true, "reason": "base kubernetes manifests" },
+    { "path": "deploy/k8s/overlays", "required": true, "reason": "environment-specific overlays" },
+    { "path": "deploy/k8s/job", "required": false, "reason": "migration, backfill, and job manifests" },
+    { "path": "deploy/k8s/runbook", "required": false, "reason": "release, rollback, and validation guidance" }
+  ]
+}

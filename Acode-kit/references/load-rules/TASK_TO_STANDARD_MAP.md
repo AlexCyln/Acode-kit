@@ -9,15 +9,17 @@
 5. testing / review / traceability: `10`, `11`, `12`, `17`, `24`
 6. deployment / go-live: `13`, `14`, `17`, `18`, `25`, `32`
 7. tool management / degradation: `21`, `31`
-8. Step 4 directory planning: `28`, `30`, active `scenario-standards/*`, active `stack-standards/*`, and `DIRECTORY_BLUEPRINT_SYNTHESIS_RULES.md`
+8. Step 4a directory planning and file relocation: `28`, `30`, active `scenario-standards/*`, active `stack-standards/*`, and `DIRECTORY_BLUEPRINT_SYNTHESIS_RULES.md`
+9. Step 4b environment and scaffold setup: stack-specific architecture, testing, deployment, and environment standards required by the declared stack
 
 ## Stage-sensitive loading
 
 1. Stage 3: load `05`, `06`, `20`, `29`, and when applicable `32`, `33`
-2. Step 4: load directory synthesis rules, active scenario packages, and active stack packages before creating project structure
-3. Step 5c: load API, database, data-access, security, migration, and tenant-boundary rules
-4. Step 5d: load code style, architecture, testing, security, observability, and active stack packages
-5. Stage 6: load testing, debug, observability, deployment-readiness, and rollback rules
+2. Step 4a: load directory synthesis rules, active scenario packages, and active stack packages before creating project structure and relocating approved startup files
+3. Step 4b: load the stack-specific setup standards needed for dependency installation, runtime configuration, and engineering scaffold creation
+4. Step 5c: load API, database, data-access, security, migration, and tenant-boundary rules
+5. Step 5d: load code style, architecture, testing, security, observability, and active stack packages
+6. Stage 6: load testing, debug, observability, deployment-readiness, and rollback rules
 
 ## Task to workflow docs
 

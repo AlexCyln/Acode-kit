@@ -1,0 +1,17 @@
+{
+  "id": "brand-showcase-ui",
+  "source": "Acode-kit/references/stack-standards/ui/brand-showcase-ui.md",
+  "domain": "ui",
+  "priority": 78,
+  "applies_when": {
+    "ui_system": ["brand-showcase-ui", "marketing-brand-ui", "official-brand-ui"],
+    "scenario": ["official-brand-site", "marketing-landing"]
+  },
+  "paths": [
+    { "path": "src/sections/hero", "required": false, "reason": "hero narrative and first-screen conversion patterns" },
+    { "path": "src/sections/value-props", "required": false, "reason": "value proposition and capability sections" },
+    { "path": "src/sections/social-proof", "required": false, "reason": "cases, testimonials, and trust-building sections" },
+    { "path": "src/sections/cta", "required": false, "reason": "conversion forms and primary action sections" },
+    { "path": "src/design-tokens/brand", "required": false, "reason": "brand-specific color, type, spacing, and imagery tokens" }
+  ]
+}

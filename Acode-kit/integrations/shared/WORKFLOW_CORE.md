@@ -20,8 +20,10 @@ It exists to keep the workflow logic identical across providers. Claude and Code
 5. Step 3: PRD + Progress Plan
 6. Gate 3: user approval required
 7. Gate 3.5: LMS tier analysis and confirmation
-8. Step 4: Project Environment Setup
-9. Gate 4: user approval required
+8. Step 4a: Directory Materialization + Document Relocation
+9. Gate 4a: user approval required
+10. Step 4b: Environment + Engineering Scaffold Setup
+11. Gate 4b: user approval required
 
 If the workspace status file is missing but the user-level global MCP cache exists, the runtime may use the global cache as the environment baseline so MCP tools and NotebookLM auth do not need to be reinstalled or re-authorized in every new session.
 
@@ -45,14 +47,14 @@ Within Stage 5, the module sequence is fixed:
 
 ## Non-negotiable boundaries
 
-1. Do not create files or directories before Gate 3 is approved.
-2. Do not start design work before Gate 4 is approved.
+1. Do not create formal project directories or engineering files before Gate 3 is approved.
+2. Do not start design work before Gate 4b is approved.
 3. Do not use Pencil or other design tooling outside Stage 2 and Step 5b.
-4. Do not confuse Step 4 with Stage 4.
+4. Do not confuse Step 4a or Step 4b with Stage 4.
 5. Do not skip or merge gates.
 6. Do not skip stages when downstream outputs depend on them.
 7. Do not continue past any gate or stage review without explicit user approval.
-8. Do not invoke `acode-run` during startup Steps 1-4 or Gates 1-4.
+8. Do not invoke `acode-run` during startup Steps 1-4b or Gates 1-4b.
 9. Do not use `acode-run` as a replacement for the public `Acode-kit` entry.
 
 ## Draft artifact contract
@@ -62,11 +64,13 @@ Within Stage 5, the module sequence is fixed:
 3. The drafts must be review-ready markdown, not loose chat notes.
 4. Step 3 must also produce an LMS tier recommendation draft based on the approved PRD skeleton.
 5. Step 2 and Step 3 must write or update their startup-staged files under `.acode-kit-startup/` before asking for gate approval.
-6. Persistence into the project directory still happens in Step 4, but the Step 2 / Step 3 artifacts must already be structured as file-ready markdown before the gate decision.
-7. Step 4 must materialize the approved Step 2 and Step 3 artifacts into formal project docs instead of replacing them with weaker summaries.
-8. Templates may add structure and metadata, but approved startup content remains the source of truth.
-9. If NotebookLM is installed and authenticated, Step 2 requirements analysis must use it as a strengthening input before the project skeleton is frozen.
-10. If NotebookLM is unavailable, unauthenticated, or fails, the runtime may fall back to direct analysis only after explicitly disclosing that degraded path.
+6. Persistence into the project directory still happens in Step 4a, but the Step 2 / Step 3 artifacts must already be structured as file-ready markdown before the gate decision.
+7. Step 4a must materialize the approved Step 2 and Step 3 artifacts into formal project docs instead of replacing them with weaker summaries.
+8. Step 4a must move or rename the startup-staged files into formal destinations; it must not regenerate those documents from memory.
+9. Step 4b is responsible for environment setup and engineering scaffold creation only after Gate 4a is approved.
+10. Templates may add structure and metadata, but approved startup content remains the source of truth.
+11. If NotebookLM is installed and authenticated, Step 2 requirements analysis must use it as a strengthening input before the project skeleton is frozen.
+12. If NotebookLM is unavailable, unauthenticated, or fails, the runtime may fall back to direct analysis only after explicitly disclosing that degraded path.
 
 ## User approval contract
 
@@ -112,14 +116,14 @@ If the workspace status report shows NotebookLM installed but unauthenticated:
 
 ### Gate 3.5: LMS tier analysis and confirmation
 
-After the PRD is approved at Gate 3 and before Step 4 begins, the agent must:
+After the PRD is approved at Gate 3 and before Step 4a begins, the agent must:
 
 1. analyze the approved PRD draft and project skeleton for architecture size, module count, page scope, and API surface
 2. infer a recommended LMS tier (`S`, `M`, or `L`) from the project complexity
 3. explain why that tier was chosen, including the governance and execution tradeoffs
 4. present the recommendation to the user for confirmation or revision
 5. if the user changes the tier, incorporate that change and re-present before proceeding
-6. proceed to Step 4 only after the tier is explicitly confirmed
+6. proceed to Step 4a only after the tier is explicitly confirmed
 
 The tier decision must be derived from the PRD draft and project skeleton, not from a fixed numeric threshold table.
 The tier changes execution density only; it must not remove gates, stages, Step 5a-5e, required inputs, required outputs, or standards obligations.
@@ -136,7 +140,7 @@ Every Gate 3.5 response must end with this block:
 3. Confirm the final tier before project setup starts.
 
 CALLER: Present the FULL LMS recommendation above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
-NEXT STEP: Step 4 — Project Environment Setup.
+NEXT STEP: Step 4a — Directory Materialization + Document Relocation.
 ---
 ```
 
@@ -145,7 +149,7 @@ The response body immediately before the block should include:
 1. the recommended tier (`S`, `M`, or `L`)
 2. the reasoning behind the recommendation
 3. any tradeoffs that matter for governance or execution density
-4. a clear statement that the user can revise the tier before Step 4
+4. a clear statement that the user can revise the tier before Step 4a
 
 ## Design-tool boundary
 
@@ -185,7 +189,7 @@ Provider adapters must **not** change:
 2. stage count
 3. stage order
 4. approval boundaries
-5. Step 4 / Stage 4 separation
+5. Step 4a / Step 4b / Stage 4 separation
 6. Pencil usage boundary
 
 ## Extension usage disclosure
@@ -206,11 +210,12 @@ A correct provider runtime must pass this path check:
 2. Step 1 output -> Gate 1 approval -> Step 2 only
 3. Step 2 output -> Gate 2 approval -> Step 3 only
 4. Step 3 output -> Gate 3 approval -> Gate 3.5 only
-5. Gate 3.5 output -> confirmation -> Step 4 only
-6. Step 4 output -> Gate 4 approval -> Stage 1 only
-7. Stage 1 -> Stage 2 -> Stage 3 -> Stage 4 in order
-8. Stage 5 must follow 5a -> 5b -> 5c -> 5d -> 5e for each module
-9. Stage 6 and Stage 7 happen only after all modules finish Stage 5
+5. Gate 3.5 output -> confirmation -> Step 4a only
+6. Step 4a output -> Gate 4a approval -> Step 4b only
+7. Step 4b output -> Gate 4b approval -> Stage 1 only
+8. Stage 1 -> Stage 2 -> Stage 3 -> Stage 4 in order
+9. Stage 5 must follow 5a -> 5b -> 5c -> 5d -> 5e for each module
+10. Stage 6 and Stage 7 happen only after all modules finish Stage 5
 
 ## Scale invariants
 

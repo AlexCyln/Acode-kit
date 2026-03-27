@@ -3,7 +3,7 @@
 ## 文档信息
 - 启动来源文件：`.acode-kit-startup/TRACEABILITY_MATRIX.seed.md`
 - 正式归位路径：`docs/project/TRACEABILITY_MATRIX.md`
-- Step 4 归位状态：未归位 / 已归位 / 已校验
+- Step 4a 归位状态：未归位 / 已归位 / 已校验
 
 ## 母规范激活矩阵
 

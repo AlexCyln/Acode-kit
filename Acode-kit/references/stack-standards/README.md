@@ -20,3 +20,9 @@ Planned first-wave packages:
 5. `testing/vitest-rtl-playwright.md`
 6. `ui/b2b-saas-admin.md`
 7. `deployment/containerized-service-delivery.md`
+8. `backend/nestjs.md`
+9. `frontend/nextjs-app-router.md`
+10. `frontend/vue3-vite.md`
+11. `data-access/prisma.md`
+12. `deployment/vercel-web-delivery.md`
+13. `deployment/k8s-service-delivery.md`

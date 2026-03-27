@@ -12,8 +12,8 @@ Main agent reads in this order only:
 6. required active extensions
 7. project-level `ACTIVE_STANDARDS.md`
 8. current project control docs
-9. startup-staged `.acode-kit-startup/*.md` artifacts when the workflow is still before or inside `Step 4`
-10. `references/load-rules/DIRECTORY_BLUEPRINT_SYNTHESIS_RULES.md` only when entering `Step 4` directory planning
+9. startup-staged `.acode-kit-startup/*.md` artifacts when the workflow is still before or inside `Step 4a`
+10. `references/load-rules/DIRECTORY_BLUEPRINT_SYNTHESIS_RULES.md` only when entering `Step 4a` directory planning
 
 ## Extension loading
 
@@ -45,6 +45,7 @@ When an extension is loaded:
 10. do not regenerate Step 2 or Step 3 content from memory once a startup-staged file already exists
 11. do not improvise project directory structure when active stack/scenario fragments already cover the current project
 12. do not use fallback project blueprints as the primary source when active stack or scenario fragments are available
+13. do not let `Step 4b` start before `Step 4a` directory plan synthesis and file relocation are approved
 
 ## Stability criteria
 
@@ -54,4 +55,5 @@ When an extension is loaded:
 4. every node must know which docs it updates
 5. if a node cannot be explained with those four properties, loading is not yet sufficient
 6. startup nodes must know the stable staged filename or formal destination filename for every artifact they create or update
-7. `Step 4` must know which active stack or scenario fragments supplied each major directory branch
+7. `Step 4a` must know which active stack or scenario fragments supplied each major directory branch
+8. `Step 4b` must know which approved stack inputs and declared standards govern dependency and scaffold setup

@@ -1,0 +1,16 @@
+{
+  "id": "prisma",
+  "source": "Acode-kit/references/stack-standards/data-access/prisma.md",
+  "domain": "data-access",
+  "priority": 90,
+  "applies_when": {
+    "data_access": ["prisma"],
+    "backend_runtime": ["nestjs", "nextjs", "node", "nodejs"]
+  },
+  "paths": [
+    { "path": "backend/prisma", "required": true, "reason": "prisma schema, migrations, and seeds" },
+    { "path": "backend/src/infrastructure/persistence/prisma", "required": true, "reason": "prisma client, repositories, and query helpers" },
+    { "path": "backend/src/infrastructure/persistence/prisma/repository", "required": false, "reason": "module-level repository implementations" },
+    { "path": "backend/src/infrastructure/persistence/prisma/query", "required": false, "reason": "complex query helpers and search composition" }
+  ]
+}

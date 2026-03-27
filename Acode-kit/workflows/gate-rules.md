@@ -4,7 +4,7 @@
 
 At every gate or stage review:
 
-1. present the full deliverable
+1. present the current review surface
 2. ask only the decisions the user must make
 3. wait for explicit approval or revision
 4. do not auto-advance
@@ -29,7 +29,7 @@ Once a startup artifact is approved:
 
 1. that approved artifact becomes the frozen source for the next node
 2. later nodes may format, split, or enrich it, but may not replace it with a weaker summary
-3. `Step 4` must materialize approved Step 2 and Step 3 outputs into formal project docs
+3. `Step 4a` must materialize approved Step 2 and Step 3 outputs into formal project docs by direct relocation
 4. if templates are used, they must wrap the approved content rather than overwrite it
 5. if a later node needs new facts, update the formal doc and keep the approved sections intact unless the user explicitly revises them
 
@@ -45,7 +45,8 @@ LMS may scale execution density only:
 ## Review boundary reminders
 
 1. Gate 3 approval does not authorize design.
-2. Gate 3.5 confirmation is mandatory before Step 4.
-3. Gate 4 approval is mandatory before Stage 1.
-4. Stage 2 and Step 5b outputs need explicit user approval before any downstream step.
-5. Approved artifacts become the active frozen version until revised.
+2. Gate 3.5 confirmation is mandatory before Step 4a.
+3. Gate 4a approval is mandatory before Step 4b.
+4. Gate 4b approval is mandatory before Stage 1.
+5. Stage 2 and Step 5b outputs need explicit user approval before any downstream step.
+6. Approved artifacts become the active frozen version until revised.

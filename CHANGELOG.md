@@ -12,3 +12,10 @@
 - `SESSION_HANDOFF.md` 改为本地交接文件，不再作为 GitHub 持续同步文档。
 - `Step 2` / `Step 3` 改为启动期文件优先审阅：先写入 `.acode-kit-startup/`，对话仅汇报执行状态、NotebookLM 使用情况与文件路径，不再内联完整文档正文。
 - `NotebookLM` 在 `Step 2` 改为“可用即强制强化”的标准输入：已安装且已认证时必须先参与需求分析，失败时才允许显式降级为直接分析。
+
+## v2.2
+
+- 启动期 `Step 4` 拆分为 `Step 4a` 与 `Step 4b`：先按 `DIRECTORY_PLAN` 完成目录创建和启动冻结稿直接归位，再进入环境与工程骨架搭建。
+- `PRD.template.md` 升级为项目级指南模板，补齐目标、范围、主流程、模块总览、技术 / UI / 测试 / 部署等正式章节。
+- 继续扩充 stack package 覆盖面，新增 `nextjs-app-router`、`vue3-vite`、`nestjs`、`prisma`、`vercel-web-delivery`、`k8s-service-delivery` 等技术栈包。
+- `ui/` 子域从占位状态扩展为可用包集合，新增品牌展示、数据看板、创作者工作台等 UI 栈包，并补齐对应 `.directory.json` 目录片段。

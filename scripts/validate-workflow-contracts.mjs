@@ -52,15 +52,16 @@ function validateMandatoryMcpAndVersionLock(core, claude, skill, loadingRules, e
   mustContain(core, "Gate 3.5: LMS tier analysis and confirmation", "workflow core gate 3.5");
   mustContain(core, "NotebookLM authentication exception at Gate 1", "workflow core notebook auth exception");
   mustContain(core, "Do not use Pencil or other design tooling outside Stage 2 and Step 5b", "workflow core pencil boundary");
-  mustContain(core, "Step 4 / Stage 4 separation", "workflow core step/stage separation");
-  mustContain(core, "Step 4 must materialize the approved Step 2 and Step 3 artifacts into formal project docs", "workflow core step 4 materialization");
+  mustContain(core, "Step 4a / Step 4b / Stage 4 separation", "workflow core step/stage separation");
+  mustContain(core, "Step 4a must materialize the approved Step 2 and Step 3 artifacts into formal project docs", "workflow core step 4a materialization");
+  mustContain(core, "Step 4b is responsible for environment setup and engineering scaffold creation only after Gate 4a is approved.", "workflow core step 4b setup");
   mustContain(core, "The tier changes execution density only", "workflow core lms density");
   mustContain(core, "tell the user which extension was used", "workflow core extension disclosure");
   mustContain(core, "Step 2 and Step 3 must write or update their startup-staged files under `.acode-kit-startup/` before asking for gate approval.", "workflow core startup file-first");
   mustContain(core, "For Step 2 and Step 3, the review surface is the startup-staged files written under `.acode-kit-startup/`.", "workflow core startup review surface");
   mustContain(core, "Step 2 requirements analysis must use it as a strengthening input", "workflow core notebooklm strengthening");
 
-  mustContain(claude, "After Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4 (project setup, NOT design).", "claude gate 3.5 boundary");
+  mustContain(claude, "After Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4a (directory materialization, NOT environment setup) → Gate 4a → Step 4b (environment setup, NOT design).", "claude gate 3.5 boundary");
   mustContain(claude, "Design tools are ONLY used at Stage 2 (overall UI architecture) and Step 5b (module UI detail design)", "claude pencil boundary");
   mustContain(claude, "Do NOT mention \"Pencil\" or \"design phase\" in Gate 3 questions.", "claude gate 3 pencil ban");
   mustContain(claude, "Do NOT create custom HTML/CSS primitives when shadcn equivalents exist.", "claude shadcn prohibition");
@@ -68,10 +69,10 @@ function validateMandatoryMcpAndVersionLock(core, claude, skill, loadingRules, e
   mustContain(claude, "Do NOT paste the full PRD or progress plan into the conversation.", "claude startup prd path-only review");
   mustContain(claude, "Ask them to review the files directly.", "claude startup file review prompt");
 
-  mustContain(skill, "`Step 4` is not `Stage 4`", "SKILL step/stage separation");
+  mustContain(skill, "`Step 4a` and `Step 4b` are not `Stage 4`", "SKILL step/stage separation");
   mustContain(skill, "Pencil/design tools only at Stage 2 and Step 5b", "SKILL pencil boundary");
   mustContain(skill, "Gate 3.5: LMS tier confirmation", "SKILL gate 3.5");
-  mustContain(skill, "must materialize the approved Step 2 / Step 3 outputs into project docs", "SKILL step 4 materialization");
+  mustContain(skill, "must materialize the approved Step 2 / Step 3 outputs into project docs by direct relocation", "SKILL step 4 materialization");
   mustContain(skill, "may not remove startup gates, Stage 1-7, or Step 5a-5e", "SKILL lms rigor");
   mustContain(skill, "tell the user which extension was used, what it did at the current node, and why it was helpful", "SKILL extension disclosure");
 
@@ -98,17 +99,20 @@ function validateMandatoryMcpAndVersionLock(core, claude, skill, loadingRules, e
   mustContain(decisionLogTemplate, "冻结版本", "decision log frozen version");
   mustContain(decisionLogTemplate, "是否导致旧版本失效", "decision log invalidation field");
 
-  mustContain(agentsTemplate, "PRD 确认后必须执行 `Gate 3.5`", "agents template gate 3.5");
+  mustContain(agentsTemplate, "Gate 4a", "agents template gate 4a");
   mustContain(agentsTemplate, "已批准页面、API、数据结构和模块说明一旦修订，旧版本立即失效", "agents template version lock");
   mustContain(agentsTemplate, "NotebookLM / Pencil / shadcn / Chrome DevTools 在命中的节点必须作为强制消费型 MCP 使用", "agents template mcp enforcement");
   mustContain(stackInputsTemplate, "前端输入", "stack inputs template frontend section");
   mustContain(stackInputsTemplate, "后端输入", "stack inputs template backend section");
   mustContain(directoryPlanTemplate, "目录来源摘要", "directory plan template source section");
   mustContain(directoryPlanTemplate, "最终目录树", "directory plan template tree section");
+  mustContain(directoryPlanTemplate, "生成节点：Step 4a", "directory plan template step 4a");
   mustContain(directorySynthesisRules, "Synthesis order", "directory synthesis order section");
   mustContain(directorySynthesisRules, "fallback blueprints", "directory synthesis fallback section");
   mustContain(executionFlowSpec, "实现与目录输入包", "execution flow stack input package");
   mustContain(executionFlowSpec, "`DIRECTORY_PLAN.md`", "execution flow directory plan");
+  mustContain(executionFlowSpec, "`Step 4a`", "execution flow step 4a");
+  mustContain(executionFlowSpec, "`Step 4b`", "execution flow step 4b");
 }
 
 function validateSlimSkill(skill) {

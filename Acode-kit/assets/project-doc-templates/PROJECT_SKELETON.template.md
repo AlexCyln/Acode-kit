@@ -9,7 +9,7 @@
 - 审阅阶段：Gate 2
 - 启动冻结稿：`.acode-kit-startup/PROJECT_SKELETON.approved.md`
 - 正式归位路径：`docs/project/PROJECT_SKELETON.md`
-- Step 4 归位状态：未归位 / 已归位 / 已校验
+- Step 4a 归位状态：未归位 / 已归位 / 已校验
 - 技术选型目录蓝图：<!-- 例如 references/project-blueprints/react-vite-spa.md -->
 
 ## Recommended Tech Stack

@@ -1,0 +1,17 @@
+{
+  "id": "creator-studio-ui",
+  "source": "Acode-kit/references/stack-standards/ui/creator-studio-ui.md",
+  "domain": "ui",
+  "priority": 79,
+  "applies_when": {
+    "ui_system": ["creator-studio-ui", "creator-workbench-ui", "content-studio-ui"],
+    "scenario": ["creator-platform"]
+  },
+  "paths": [
+    { "path": "src/components/studio/workspace", "required": false, "reason": "creator workspace shell and overview blocks" },
+    { "path": "src/components/studio/editor", "required": false, "reason": "editor host, side panels, and editing affordances" },
+    { "path": "src/components/studio/review", "required": false, "reason": "review feedback, comments, and approval status blocks" },
+    { "path": "src/components/studio/publishing", "required": false, "reason": "publishing actions and distribution state panels" },
+    { "path": "src/components/studio/analytics", "required": false, "reason": "creator metrics, revenue, and performance sections" }
+  ]
+}

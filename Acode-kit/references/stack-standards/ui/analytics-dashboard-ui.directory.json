@@ -1,0 +1,17 @@
+{
+  "id": "analytics-dashboard-ui",
+  "source": "Acode-kit/references/stack-standards/ui/analytics-dashboard-ui.md",
+  "domain": "ui",
+  "priority": 80,
+  "applies_when": {
+    "ui_system": ["analytics-dashboard-ui", "dashboard-ui", "bi-ui"],
+    "scenario": ["data-dashboard", "bs-saas-data-platform"]
+  },
+  "paths": [
+    { "path": "src/components/dashboard/cards", "required": false, "reason": "metric cards and summary blocks" },
+    { "path": "src/components/dashboard/charts", "required": false, "reason": "chart wrappers and analysis visuals" },
+    { "path": "src/components/dashboard/filters", "required": false, "reason": "time range, dimension, and query filters" },
+    { "path": "src/components/dashboard/drilldown", "required": false, "reason": "drilldown panels and linked detail views" },
+    { "path": "src/components/dashboard/explainers", "required": false, "reason": "metric explanation, units, and anomaly notes" }
+  ]
+}
