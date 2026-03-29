@@ -25,4 +25,11 @@
 
 ## Access info rule
 
-`PROJECT_ACCESS_INFO.md` must exist from project start and be refreshed at Step 4, Stage 4, Step 5d, Stage 6, and Stage 7.
+`PROJECT_ACCESS_INFO.md` must exist from project start and be refreshed at Step 4a, Step 4b, Stage 4, Step 5d, Stage 6, and Stage 7.
+
+## Browser validation boundary
+
+1. If the current module contains browser-accessible pages, views, or interactions, Step 5e must call Chrome DevTools MCP for real-browser verification before handing review back to the user.
+2. The Step 5e verification pass must cover page open, core interaction path, visible state checks, and console/runtime error inspection for the current module scope.
+3. The Step 5e output must summarize what was verified in the browser, what failed, what was fixed, and any remaining user-side checks.
+4. If Chrome DevTools MCP is unavailable, Step 5e must explicitly record the blocker, execute the strongest available degraded validation path, and mark real-browser verification as still pending.

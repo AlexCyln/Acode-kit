@@ -67,10 +67,11 @@ Within Stage 5, the module sequence is fixed:
 6. Persistence into the project directory still happens in Step 4a, but the Step 2 / Step 3 artifacts must already be structured as file-ready markdown before the gate decision.
 7. Step 4a must materialize the approved Step 2 and Step 3 artifacts into formal project docs instead of replacing them with weaker summaries.
 8. Step 4a must move or rename the startup-staged files into formal destinations; it must not regenerate those documents from memory.
-9. Step 4b is responsible for environment setup and engineering scaffold creation only after Gate 4a is approved.
-10. Templates may add structure and metadata, but approved startup content remains the source of truth.
-11. If NotebookLM is installed and authenticated, Step 2 requirements analysis must use it as a strengthening input before the project skeleton is frozen.
-12. If NotebookLM is unavailable, unauthenticated, or fails, the runtime may fall back to direct analysis only after explicitly disclosing that degraded path.
+9. Step 4a must confirm the approved tech stack, synthesize the directory plan from active stack fragments, create the final directory tree, and create node-owned governance files before any environment setup starts.
+10. Step 4b is responsible for environment setup and engineering scaffold creation only after Gate 4a is approved, and it runs directly inside the directory tree created by Step 4a.
+11. Templates may add structure and metadata, but approved startup content remains the source of truth.
+12. If NotebookLM is installed and authenticated, Step 2 requirements analysis must use it as a strengthening input before the project skeleton is frozen.
+13. If NotebookLM is unavailable, unauthenticated, or fails, the runtime may fall back to direct analysis only after explicitly disclosing that degraded path.
 
 ## User approval contract
 
@@ -102,6 +103,7 @@ After every approved gate, stage, and Step 5a-5e review:
 6. Refresh detailed implementation docs when API, database, function, or test facts change.
 7. Refresh `PROJECT_ACCESS_INFO.md` when any access address, account, password, token, or external entry changes.
 8. Do not leave status, progress, or implementation notes stale across step boundaries.
+9. Keep process documents explicitly classified as project core, current working files, or history-review artifacts, and archive reviewed-but-inactive materials promptly.
 
 ### NotebookLM authentication exception at Gate 1
 
@@ -172,6 +174,13 @@ For Step 5b module detail design:
 3. present the reviewed page scope, covered states, and open questions clearly
 4. stop after each review batch and wait for explicit user approval
 5. do not move to Step 5c or Step 5d until the current Step 5b review batch is approved
+
+## Browser verification boundary
+
+1. If a Step 5e review includes browser-accessible pages or interactions, Chrome DevTools MCP real-browser verification is mandatory before the user is asked to review the module.
+2. If a Stage 6 review includes browser-accessible integrated scope, Chrome DevTools MCP real-browser verification is mandatory before the user is asked to do final validation.
+3. The verification summary must state the covered browser path, findings, fixes, and any remaining user-side checks.
+4. If Chrome DevTools MCP is unavailable, the runtime must disclose that blocker, execute the strongest degraded validation path, and record that real-browser verification is still pending.
 
 ## Provider adapter responsibilities
 

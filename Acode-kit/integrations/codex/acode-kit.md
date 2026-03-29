@@ -166,6 +166,15 @@ The response body immediately before the block should include the recommended ti
 The setup lane is split into two reviewable nodes:
 
 1. `Step 4a` synthesizes `DIRECTORY_PLAN.md`, creates the final directory structure, and directly relocates startup-staged approved files into formal project doc paths
-2. `Step 4a` must not regenerate project documents from memory or install engineering dependencies
-3. `Step 4b` runs only after Gate 4a approval and is responsible for dependency installation, environment setup, and engineering scaffold creation
-4. do not collapse `Step 4a` and `Step 4b` into one reply
+2. `Step 4a` must confirm the approved tech stack, load the matching stack directory fragments, analyze the final structure, create the directories, relocate startup files, and create the node-owned governance files
+3. `Step 4a` must not regenerate project documents from memory or install engineering dependencies
+4. `Step 4b` runs only after Gate 4a approval and is responsible for dependency installation, environment setup, and engineering scaffold creation directly inside the Step 4a directory tree
+5. do not collapse `Step 4a` and `Step 4b` into one reply
+
+## Browser verification boundary
+
+For browser-accessible UI scope after Gate 4b:
+
+1. Step 5e must call Chrome DevTools MCP for real-browser verification before returning module review to the user
+2. Stage 6 must call Chrome DevTools MCP for real-browser verification before returning final integration review to the user
+3. if Chrome DevTools MCP is unavailable, disclose the blocker and mark real-browser verification as still pending

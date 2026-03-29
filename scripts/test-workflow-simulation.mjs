@@ -178,12 +178,16 @@ function main() {
   mustContain(core, "Gate 3.5: LMS tier analysis and confirmation", "workflow core gate 3.5");
   mustContain(core, "Gate 3.5 output contract", "workflow core gate 3.5 output contract");
   mustContain(core, "Step 4a must materialize the approved Step 2 and Step 3 artifacts into formal project docs", "workflow core step 4a materialization");
-  mustContain(core, "Step 4b is responsible for environment setup and engineering scaffold creation only after Gate 4a is approved.", "workflow core step 4b setup");
+  mustContain(core, "Step 4a must confirm the approved tech stack", "workflow core step 4a stack confirmation");
+  mustContain(core, "Step 4b is responsible for environment setup and engineering scaffold creation only after Gate 4a is approved", "workflow core step 4b setup");
   mustContain(core, "The tier changes execution density only", "workflow core lms density");
   mustContain(core, "tell the user which extension was used", "workflow core extension disclosure");
   mustContain(core, "Step 2 and Step 3 must write or update their startup-staged files under `.acode-kit-startup/` before asking for gate approval.", "workflow core startup file-first");
   mustContain(core, "For Step 2 and Step 3, the review surface is the startup-staged files written under `.acode-kit-startup/`.", "workflow core startup review surface");
   mustContain(core, "Step 2 requirements analysis must use it as a strengthening input", "workflow core notebooklm strengthening");
+  mustContain(core, "project core, current working files, or history-review artifacts", "workflow core doc classification");
+  mustContain(core, "Step 5e review includes browser-accessible pages or interactions", "workflow core step 5e browser verification");
+  mustContain(core, "Stage 6 review includes browser-accessible integrated scope", "workflow core stage 6 browser verification");
 
   mustContain(startup, "Gate 3.5: LMS tier analysis and confirmation", "startup gate 3.5");
   mustContain(startup, ".acode-kit-startup/PROJECT_SKELETON.approved.md", "startup staged skeleton");
@@ -191,6 +195,9 @@ function main() {
   mustContain(startup, "docs/project/DIRECTORY_PLAN.md", "startup directory plan");
   mustContain(startup, "### Step 4a", "startup step 4a");
   mustContain(startup, "### Step 4b", "startup step 4b");
+  mustContain(startup, "confirm the project tech stack from the approved startup docs", "startup step 4a stack confirm");
+  mustContain(startup, "docs/dev/DEVELOPMENT_DOCUMENTATION_INDEX.md", "startup step 4a dev index");
+  mustContain(startup, "it runs directly inside the already created project directory", "startup step 4b in-place setup");
   mustContain(startup, "Gate 4a: explicit user approval", "startup gate 4a");
   mustContain(startup, "Gate 4b: explicit user approval", "startup gate 4b");
   mustContain(startup, "do not paste the full skeleton or overview into the conversation", "startup step 2 path-only review");
@@ -198,8 +205,10 @@ function main() {
   mustContain(startup, "if NotebookLM MCP is installed and authenticated, use it to strengthen requirements analysis before freezing the skeleton", "startup notebooklm strengthening");
   mustContain(gates, "Document update cadence", "gate rules update cadence");
   mustContain(stageExecution, "Stage 5: module iteration", "stage execution stage 5");
+  mustContain(stageExecution, "Stage 6 must execute Chrome DevTools MCP real-browser verification", "stage execution stage 6 browser verification");
   mustContain(moduleIteration, "Red-Green-Refactor TDD", "module iteration tdd");
   mustContain(moduleIteration, "`PROJECT_ACCESS_INFO.md`", "module iteration access info rule");
+  mustContain(moduleIteration, "Step 5e must call Chrome DevTools MCP for real-browser verification", "module iteration step 5e browser verification");
   mustContain(loadingRules, "Do not bulk-read all workflows or all standards on entry.", "loading rules no bulk read");
   mustContain(taskMap, "startup / project skeleton", "task map startup mapping");
   mustContain(delegation, "final gate decisions", "delegation final gate restriction");
@@ -216,6 +225,8 @@ function main() {
   mustContain(claude, "Do NOT paste the full skeleton into the conversation.", "claude step 2 path-only review");
   mustContain(claude, "Do NOT paste the full PRD or progress plan into the conversation.", "claude step 3 path-only review");
   mustContain(claude, "Ask them to review the files directly.", "claude file review prompt");
+  mustContain(claude, "Step 5e must call Chrome DevTools MCP for real-browser verification", "claude step 5e browser verification");
+  mustContain(claude, "Stage 6 must call Chrome DevTools MCP for real-browser verification", "claude stage 6 browser verification");
 
   mustContain(codex, "Gate 1 -> Step 2 only", "codex gate 1 mapping");
   mustContain(codex, "Gate 3 -> Gate 3.5 only", "codex gate 3 mapping");
@@ -229,6 +240,8 @@ function main() {
   mustContain(codex, "Gate 3.5 output block", "codex gate 3.5 output block");
   mustContain(codex, "Step 2 requirements analysis must call NotebookLM before freezing the project skeleton", "codex notebook strengthening");
   mustContain(codex, "do not paste the full skeleton, PRD, progress plan, or stack input package into the reply", "codex startup path-only review");
+  mustContain(codex, "Step 5e must call Chrome DevTools MCP for real-browser verification", "codex step 5e browser verification");
+  mustContain(codex, "Stage 6 must call Chrome DevTools MCP for real-browser verification", "codex stage 6 browser verification");
 
   mustContain(codexRun, "`acode-run` is internal and not user-facing.", "codex run contract");
   mustContain(codexRun, "Fallback order stays `error -> timeout -> quality_low -> budget_exceeded`.", "codex run fallback");
@@ -251,8 +264,13 @@ function main() {
   mustContain(toolSpec, "shadcn MCP 仅在项目已声明使用 `shadcn/ui` 时才有意义", "tool spec shadcn usage scope");
   mustContain(toolSpec, "MCP 辅助能力降级，不阻塞主流程", "tool spec shadcn degradation");
   mustContain(toolSpec, "NotebookLM 的 `authCompleted` 一旦被确认成功，应同步到同一份全局缓存", "tool spec auth persistence");
+  mustContain(toolSpec, "`Step 5e` 在模块级交付前必须调用 Chrome DevTools MCP", "tool spec step 5e chrome devtools");
+  mustContain(toolSpec, "`Stage 6` 在最终联调/交付前必须调用 Chrome DevTools MCP", "tool spec stage 6 chrome devtools");
   mustContain(testingSpec, "总线与分线 TDD", "testing spec total line and branch TDD");
   mustContain(testingSpec, "阶段级产物必须可验证", "testing spec stage verifiability");
+  mustContain(testingSpec, "## 10.6 节点级浏览器验证硬门禁", "testing spec browser verification section");
+  mustContain(testingSpec, "`Step 5e` 在交付用户复核前必须调用 Chrome DevTools MCP", "testing spec step 5e browser verification");
+  mustContain(testingSpec, "`Stage 6` 在交付用户做最终联调或集成核查前", "testing spec stage 6 browser verification");
   mustContain(executionFlowSpec, "变更与回滚通道", "execution flow change rollback lane");
   mustContain(executionFlowSpec, "TDD 总线与分线执行模型", "execution flow TDD model");
   mustContain(executionFlowSpec, "实现与目录输入包", "execution flow stack directory inputs");
@@ -285,6 +303,9 @@ function main() {
   mustContain(agentsTemplate, "已批准页面、API、数据结构和模块说明一旦修订，旧版本立即失效", "agents template version lock");
   mustContain(read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "ACTIVE_STANDARDS.template.md")), "已激活规范包", "active standards template");
   mustContain(devIndexTemplate, "# 开发文档索引", "dev doc index template header");
+  mustContain(devIndexTemplate, "## 项目核心", "dev doc index project core section");
+  mustContain(devIndexTemplate, "## 当前文件", "dev doc index current section");
+  mustContain(devIndexTemplate, "## 历史审阅", "dev doc index history review section");
   mustContain(stackDirectoryInputsTemplate, "前端输入", "stack and directory inputs frontend section");
   mustContain(stackDirectoryInputsTemplate, "数据库与数据访问输入", "stack and directory inputs data section");
   mustContain(directoryPlanTemplate, "目录来源摘要", "directory plan source summary");
@@ -301,6 +322,8 @@ function main() {
   mustContain(read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "TRACEABILITY_MATRIX.template.md")), "母规范激活矩阵", "traceability activation matrix");
   mustContain(read(path.join(repoRoot, "Acode-kit", "assets", "project-doc-templates", "SESSION_HANDOFF.template.md")), "Rollback Point", "session handoff rollback point");
   mustContain(read(path.join(repoRoot, "Acode-kit", "references", "global-engineering-standards", "30_DEVELOPMENT_DOCUMENTATION_GOVERNANCE_SPEC.md")), "每次 gate、stage、模块 step", "doc governance update cadence");
+  mustContain(read(path.join(repoRoot, "Acode-kit", "references", "global-engineering-standards", "30_DEVELOPMENT_DOCUMENTATION_GOVERNANCE_SPEC.md")), "项目核心", "doc governance project core");
+  mustContain(read(path.join(repoRoot, "Acode-kit", "references", "global-engineering-standards", "30_DEVELOPMENT_DOCUMENTATION_GOVERNANCE_SPEC.md")), "历史审阅", "doc governance review history");
 
   simulateWorkflow();
   console.log("workflow simulation passed");

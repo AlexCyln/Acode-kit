@@ -65,6 +65,13 @@ CALLER: Present the FULL content above to the user. WAIT for their explicit repl
    - Requests to skip a gate or jump ahead (e.g., "skip PRD", "just code", "go to Pencil", "跳过", "直接设计", "直接写代码", "直接开始设计") → **REFUSE**. Explain that all 4 gates are mandatory and cannot be skipped. Re-ask for approval of the current gate.
    - Requests conflicting changes (e.g., "use React" when skeleton said Vue) → revise the current deliverable to reflect the change, re-present for approval. Do NOT proceed with unresolved conflicts.
 
+## BROWSER VERIFICATION BOUNDARY
+
+After Gate 4b, for browser-accessible UI scope:
+1. Step 5e must call Chrome DevTools MCP for real-browser verification before handing module review back to the user.
+2. Stage 6 must call Chrome DevTools MCP for real-browser verification before handing final integration review back to the user.
+3. If Chrome DevTools MCP is unavailable, explicitly disclose the blocker, execute the strongest degraded validation path, and mark real-browser verification as still pending.
+
 ---
 
 ## STEP 1 — DO THIS FIRST AND ONLY THIS
@@ -235,8 +242,9 @@ This is the FIRST point where you may create formal project directories. **This 
    - `references/global-engineering-standards/22_SOLO_AI_PROJECT_OPERATING_MANUAL.md`
    - `references/global-engineering-standards/15_AI_COLLABORATION_PLAYBOOK.md`
 2. Synthesize `docs/project/DIRECTORY_PLAN.md` from the approved stack-and-directory inputs plus active scenario and stack fragments.
-3. Create the project root directory structure and root-level `AGENTS.md`.
-4. Directly move or rename the approved startup-staged files into formal project doc paths. Do NOT regenerate them from memory. At minimum:
+3. Confirm the approved tech stack, load the matching stack directory fragments, and analyze the final structure before creating directories.
+4. Create the project root directory structure, root-level `AGENTS.md`, `docs/dev/DEVELOPMENT_DOCUMENTATION_INDEX.md`, and the current-file / history-review containers required by documentation governance.
+5. Directly move or rename the approved startup-staged files into formal project doc paths. Do NOT regenerate them from memory. At minimum:
    - `.acode-kit-startup/PROJECT_OVERVIEW.seed.md` -> `docs/project/PROJECT_OVERVIEW.md`
    - `.acode-kit-startup/PROJECT_SKELETON.approved.md` -> `docs/project/PROJECT_SKELETON.md`
    - `.acode-kit-startup/PRD.approved.md` -> `docs/project/PRD.md`
@@ -244,11 +252,11 @@ This is the FIRST point where you may create formal project directories. **This 
    - `.acode-kit-startup/TRACEABILITY_MATRIX.seed.md` -> `docs/project/TRACEABILITY_MATRIX.md`
    - `.acode-kit-startup/DECISION_LOG.seed.md` -> `docs/project/DECISION_LOG.md`
    - `.acode-kit-startup/STACK_AND_DIRECTORY_INPUTS.approved.md` -> the formal project control-doc destination declared by the project
-5. Create any required wrapper docs that do not yet exist, but only with metadata, source links, and references to the relocated approved files.
-6. Extract pending confirmations — do NOT silently invent core business rules.
+6. Create any required wrapper docs that do not yet exist, but only with metadata, source links, and references to the relocated approved files.
+7. Extract pending confirmations — do NOT silently invent core business rules.
 
 7. Output a Step 4a report listing:
-   - Synthesized directory plan status
+   - Confirmed tech stack and synthesized directory plan status
    - Created directories and files (full list)
    - Startup-staged files relocated and their final destinations
    - Any pending confirmations or missing information

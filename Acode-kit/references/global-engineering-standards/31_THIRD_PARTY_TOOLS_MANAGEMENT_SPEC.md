@@ -105,6 +105,12 @@ Codex：
 codex mcp add chrome-devtools -- npx chrome-devtools-mcp@latest
 ```
 
+**调用规则**：
+1. 对于浏览器可访问的 UI 范围，`Step 5e` 在模块级交付前必须调用 Chrome DevTools MCP 完成真实浏览器验证。
+2. 对于浏览器可访问的集成范围，`Stage 6` 在最终联调/交付前必须调用 Chrome DevTools MCP 完成真实浏览器验证。
+3. Chrome DevTools MCP 的验证结果必须回写测试文档或交接文档，不能只在对话中口头说明。
+4. 若工具缺失或不可用，必须显式记录阻塞和降级路径，不得直接跳过真实浏览器验证要求。
+
 ---
 
 ## 2. 工具状态定义

@@ -42,12 +42,14 @@ project-root/
       SESSION_HANDOFF.md
       GO_LIVE_RECORD.md
     dev/
+      current/
       API_DETAIL_CATALOG.md
       DATABASE_DETAIL_CATALOG.md
       FUNCTION_MODULE_RECORD.md
       TEST_EXECUTION_RECORD.md
       DEVELOPMENT_DOCUMENTATION_INDEX.md
     archive/
+      reviews/
   design/
     design-files/
     assets/
@@ -83,10 +85,12 @@ project-root/
 ### 3.3 `docs/dev/`
 - 存放开发过程文档：接口详细文档、数据库详细文档、功能函数记录、测试执行记录。
 - 参照 `30_DEVELOPMENT_DOCUMENTATION_GOVERNANCE_SPEC.md` 的治理要求。
+- `docs/dev/current/` 用于承载当前正在执行、会在近期继续被引用的模块级说明、调试记录、实现专题和待交付验证材料。
 
 ### 3.4 `docs/archive/`
 - 存放已结束的审阅稿、旧版交接记录、被替换的长历史文档。
 - 当 `SESSION_HANDOFF.md`、`DECISION_LOG.md` 或审阅稿累积过长时，历史内容迁入此处。
+- `docs/archive/reviews/` 用于集中存放已经审阅完成、当前不再主导执行的历史审阅材料。
 
 ### 3.5 `design/`
 - `design-files/`：使用已声明设计工具的原始设计文件。
@@ -143,13 +147,14 @@ project-root/
 
 ## 6. AI 初始化项目目录的标准流程
 1. 检查项目根目录是否已有目录骨架。
-2. 若为新项目，先根据已批准项目类型、运行时、构建工具、部署模式和已激活场景/栈包整合 `DIRECTORY_PLAN.md`。
+2. 若为新项目，先根据已批准项目类型、运行时、构建工具、部署模式和已激活技术栈包确认最终技术栈，再整合 `DIRECTORY_PLAN.md`。
 3. 只有目录片段不足时，才允许参考 `references/project-blueprints/`；若仍不足，再回退到第 2 节标准结构，并在文档中说明原因。
-4. 生成 `AGENTS.md`，写入项目基本信息与规范引用。
-5. 先输出并审阅 `docs/project/DIRECTORY_PLAN.md`，说明目录来源、目录职责和冲突处理。
-6. 将 `.acode-kit-startup/` 中已冻结的启动产物移动到 `docs/project/` 正式位置，不得重新编写简化版文档。
-7. 创建 `docs/dev/DEVELOPMENT_DOCUMENTATION_INDEX.md` 作为开发文档索引入口。
-8. 若已有部分目录，仅补齐缺失部分，不破坏已有结构。
+4. 先分析技术栈包目录片段、公共治理目录和必要 fallback，形成完整目录树与冲突说明。
+5. 生成 `AGENTS.md`，写入项目基本信息与规范引用。
+6. 先输出并审阅 `docs/project/DIRECTORY_PLAN.md`，说明目录来源、目录职责和冲突处理。
+7. 将 `.acode-kit-startup/` 中已冻结的启动产物移动到 `docs/project/` 正式位置，不得重新编写简化版文档。
+8. 创建 `docs/dev/DEVELOPMENT_DOCUMENTATION_INDEX.md`、`docs/dev/current/` 与 `docs/archive/reviews/`，作为当前文件和历史审阅的固定落点。
+9. 若已有部分目录，仅补齐缺失部分，不破坏已有结构。
 
 ## 7. 与 Acode-kit 工作流的集成
 1. SKILL.md 启动流程第 8 步要求创建项目根结构和 `AGENTS.md`，执行时参照本文件。
@@ -161,7 +166,7 @@ project-root/
 在项目初始化、仓库重组、新模块入驻时，先按本文件确认目录结构，再进入具体实现。
 
 ## AI 调用建议
-AI 在收到"初始化项目目录"或"创建项目骨架"的请求时，应先整合已激活场景包和技术栈包中的目录片段，必要时再参考 fallback 蓝图，然后补齐本文件要求的治理目录，不得临时自创目录布局。
+AI 在收到"初始化项目目录"或"创建项目骨架"的请求时，应先从已批准启动文档确认技术栈，再整合已激活技术栈包和场景包中的目录片段，必要时参考 fallback 蓝图，最后补齐本文件要求的治理目录；不得临时自创目录布局，也不得跳过目录分析直接搭环境。
 
 ## 后续可扩展点
 可增加 Monorepo 子包目录约定、微前端目录约定、多环境配置目录约定。

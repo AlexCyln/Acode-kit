@@ -54,12 +54,16 @@ function validateMandatoryMcpAndVersionLock(core, claude, skill, loadingRules, e
   mustContain(core, "Do not use Pencil or other design tooling outside Stage 2 and Step 5b", "workflow core pencil boundary");
   mustContain(core, "Step 4a / Step 4b / Stage 4 separation", "workflow core step/stage separation");
   mustContain(core, "Step 4a must materialize the approved Step 2 and Step 3 artifacts into formal project docs", "workflow core step 4a materialization");
-  mustContain(core, "Step 4b is responsible for environment setup and engineering scaffold creation only after Gate 4a is approved.", "workflow core step 4b setup");
+  mustContain(core, "Step 4a must confirm the approved tech stack", "workflow core step 4a stack confirmation");
+  mustContain(core, "Step 4b is responsible for environment setup and engineering scaffold creation only after Gate 4a is approved", "workflow core step 4b setup");
   mustContain(core, "The tier changes execution density only", "workflow core lms density");
   mustContain(core, "tell the user which extension was used", "workflow core extension disclosure");
   mustContain(core, "Step 2 and Step 3 must write or update their startup-staged files under `.acode-kit-startup/` before asking for gate approval.", "workflow core startup file-first");
   mustContain(core, "For Step 2 and Step 3, the review surface is the startup-staged files written under `.acode-kit-startup/`.", "workflow core startup review surface");
   mustContain(core, "Step 2 requirements analysis must use it as a strengthening input", "workflow core notebooklm strengthening");
+  mustContain(core, "project core, current working files, or history-review artifacts", "workflow core doc classification");
+  mustContain(core, "Step 5e review includes browser-accessible pages or interactions", "workflow core step 5e browser verification");
+  mustContain(core, "Stage 6 review includes browser-accessible integrated scope", "workflow core stage 6 browser verification");
 
   mustContain(claude, "After Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4a (directory materialization, NOT environment setup) → Gate 4a → Step 4b (environment setup, NOT design).", "claude gate 3.5 boundary");
   mustContain(claude, "Design tools are ONLY used at Stage 2 (overall UI architecture) and Step 5b (module UI detail design)", "claude pencil boundary");
@@ -68,6 +72,8 @@ function validateMandatoryMcpAndVersionLock(core, claude, skill, loadingRules, e
   mustContain(claude, "Do NOT paste the full skeleton into the conversation.", "claude startup skeleton path-only review");
   mustContain(claude, "Do NOT paste the full PRD or progress plan into the conversation.", "claude startup prd path-only review");
   mustContain(claude, "Ask them to review the files directly.", "claude startup file review prompt");
+  mustContain(claude, "Step 5e must call Chrome DevTools MCP for real-browser verification", "claude step 5e browser verification");
+  mustContain(claude, "Stage 6 must call Chrome DevTools MCP for real-browser verification", "claude stage 6 browser verification");
 
   mustContain(skill, "`Step 4a` and `Step 4b` are not `Stage 4`", "SKILL step/stage separation");
   mustContain(skill, "Pencil/design tools only at Stage 2 and Step 5b", "SKILL pencil boundary");

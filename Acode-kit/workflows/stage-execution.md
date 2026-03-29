@@ -15,8 +15,9 @@
 1. Execute stages in order.
 2. Do not skip stages whose outputs are required downstream.
 3. If an upstream artifact is wrong, backtrack, revise, re-approve, then continue.
-4. `Step 4` during startup is different from `Stage 4` during execution.
+4. `Step 4a` and `Step 4b` during startup are different from `Stage 4` during execution.
 5. Stage 5 repeats per module using the approved module priority order.
+6. For browser-accessible UI scope, Stage 6 must execute Chrome DevTools MCP real-browser verification before the delivery is returned to the user for final review.
 
 ## Stage review outputs
 
@@ -25,5 +26,5 @@
 - Stage 3: ER/API framework outline
 - Stage 4: app scaffold and runtime foundation
 - Stage 5: approved per-module outputs for 5a-5e
-- Stage 6: integration results and cross-module findings
+- Stage 6: integration results, cross-module findings, and Chrome DevTools real-browser verification summary
 - Stage 7: go-live status and rollback readiness
