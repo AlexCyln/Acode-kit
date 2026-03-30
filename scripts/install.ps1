@@ -339,7 +339,8 @@ try {
   }
 
   Write-Host ""
-  Write-Host "Restart your target AI agent after installation."
+  Write-Host "Install complete."
+  Write-Host "Restart your AI tool after installation."
   if ($SCOPE -eq "user") {
     Write-Host "A CLI launcher was installed to $commandBinDir and added to your user PATH."
     Write-Host "Open a new CMD or PowerShell window if 'acode-kit' is not recognized immediately."
@@ -348,19 +349,23 @@ try {
     Write-Host "Run it directly or add that directory to PATH for this project."
   }
   Write-Host ""
-  Write-Host "Quick CLI flags after install:"
+  Write-Host "Next commands:"
   Write-Host "  acode-kit -status"
+  Write-Host "  acode-kit -help"
   Write-Host "  acode-kit -add <path>"
   Write-Host "  acode-kit -scan <path>"
   Write-Host "  acode-kit -remove <name>"
-  Write-Host "  acode-kit -help"
+  Write-Host ""
+  Write-Host "Recommended order:"
+  Write-Host "  1. Check status"
+  Write-Host "  2. Start your AI in the project directory"
+  Write-Host "  3. Tell it to use Acode-kit"
   Write-Host ""
   if ($SKIP_INIT -eq "true") {
-    Write-Host "To complete first-time setup and populate the global cache, run:"
+    Write-Host "Initialization was skipped. Run this to finish setup:"
     Write-Host "  node $LAST_BUNDLE_DIR\scripts\acode-kit-init.mjs"
   } else {
     Write-Host "Initialization finished."
-    Write-Host "The user-level global cache now stores MCP status and NotebookLM auth."
   }
   Write-Progress -Activity "Installing Acode-kit" -Completed
 } finally {

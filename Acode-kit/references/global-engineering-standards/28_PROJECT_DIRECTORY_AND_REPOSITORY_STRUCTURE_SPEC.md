@@ -155,6 +155,7 @@ project-root/
 7. 将 `.acode-kit-startup/` 中已冻结的启动产物移动到 `docs/project/` 正式位置，不得重新编写简化版文档。
 8. 创建 `docs/dev/DEVELOPMENT_DOCUMENTATION_INDEX.md`、`docs/dev/current/` 与 `docs/archive/reviews/`，作为当前文件和历史审阅的固定落点。
 9. 若已有部分目录，仅补齐缺失部分，不破坏已有结构。
+10. 对存量项目接入，默认策略是补治理目录和正式文档落点，不默认重构应用源码目录。
 
 ## 7. 与 Acode-kit 工作流的集成
 1. SKILL.md 启动流程第 8 步要求创建项目根结构和 `AGENTS.md`，执行时参照本文件。

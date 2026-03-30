@@ -87,12 +87,17 @@ WAIT: Stop here and wait for the user's explicit reply before continuing.
 
 ## Mandatory next-step mapping
 
-1. Gate 1 -> Step 2 only
-2. Gate 2 -> Step 3 only
-3. Gate 3 -> Gate 3.5 only
-4. Gate 3.5 -> Step 4a only
-5. Gate 4a -> Step 4b only
-6. Gate 4b -> Stage 1 only
+1. Gate 1 -> Step 2 only for greenfield mode
+2. Gate 1 -> O1 only for existing-project onboarding mode
+3. Gate 2 -> Step 3 only
+4. Gate 3 -> Gate 3.5 only
+5. Gate 3.5 -> Step 4a only
+6. Gate 4a -> Step 4b only
+7. Gate 4b -> Stage 1 only
+8. Gate O1 -> O2 only
+9. Gate O2 -> O3 only
+10. Gate O3 -> O4 only
+11. Gate O4 -> Stage 1 only
 
 Never map a gate directly to design or implementation unless the shared workflow graph allows it.
 
@@ -104,6 +109,14 @@ For Step 2 and Step 3 in Codex:
 2. do not paste the full skeleton, PRD, progress plan, or stack input package into the reply
 3. tell the user which files were written and where they are
 4. summarize execution status, deltas, unresolved questions, and review focus only
+5. ask the user to review those files and reply with approval or revisions
+
+For O1, O2, and O3 in existing-project onboarding mode:
+
+1. write or update the required onboarding-staged files under `.acode-kit-onboarding/` before asking for user review
+2. do not paste the full inventory, user addendum, onboarding PRD, or gap assessment into the reply
+3. tell the user which files were written and where they are
+4. summarize execution status, confidence limits, unresolved questions, and review focus only
 5. ask the user to review those files and reply with approval or revisions
 
 ## Refusal behavior
@@ -170,6 +183,18 @@ The setup lane is split into two reviewable nodes:
 3. `Step 4a` must not regenerate project documents from memory or install engineering dependencies
 4. `Step 4b` runs only after Gate 4a approval and is responsible for dependency installation, environment setup, and engineering scaffold creation directly inside the Step 4a directory tree
 5. do not collapse `Step 4a` and `Step 4b` into one reply
+
+## Existing-project onboarding branch
+
+If Step 1 confirms the workspace is an existing project and the user approves onboarding:
+
+1. do not enter greenfield Step 2 or Step 3
+2. load `workflows/existing-project-onboarding.md`
+3. if project-local continuity docs such as `AGENTS.md`, `SESSION_HANDOFF.md`, `TASK_LOG.md`, or `NEXT_STEPS.md` exist, read them with high priority during O1 before broader module analysis
+4. determine the real project platform early; do not assume browser/web scope for native or non-web projects
+5. execute O1 -> Gate O1 -> O2 -> Gate O2 -> O3 -> Gate O3 -> O4 -> Gate O4 in order
+6. keep O1-O3 file-first under `.acode-kit-onboarding/`
+7. only after Gate O4 approval may the project enter Stage 1
 
 ## Browser verification boundary
 

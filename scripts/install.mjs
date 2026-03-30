@@ -291,24 +291,30 @@ function main() {
   }
 
   console.log("");
-  console.log("Restart your target AI agent after installation.");
+  console.log("Install complete.");
+  console.log("Restart your AI tool after installation.");
   console.log("");
-  console.log("Quick CLI flags after install:");
+  console.log("Next commands:");
   console.log("  acode-kit -status");
+  console.log("  acode-kit -help");
   console.log("  acode-kit -add <path>");
   console.log("  acode-kit -scan <path>");
   console.log("  acode-kit -remove <name>");
-  console.log("  acode-kit -help");
+  console.log("");
+  console.log("Recommended order:");
+  console.log("  1. Check status");
+  console.log("  2. Start your AI in the project directory");
+  console.log("  3. Tell it to use Acode-kit");
 
   if (skipInit || !lastBundleDir || scope === "project" || scope === "user") {
     if (skipInit || !lastBundleDir) {
       console.log("");
-      console.log("To complete first-time setup, run this in your terminal:");
+      console.log("Initialization was skipped. Run this to finish setup:");
       console.log(`  node ${lastBundleDir}/scripts/acode-kit-init.mjs`);
     }
   } else {
     console.log("");
-    console.log("To complete first-time setup, run this in your terminal:");
+    console.log("Run this to finish setup:");
     console.log(`  node ${lastBundleDir}/scripts/acode-kit-init.mjs`);
   }
 }

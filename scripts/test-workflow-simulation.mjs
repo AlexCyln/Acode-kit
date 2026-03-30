@@ -167,8 +167,10 @@ function main() {
   mustContain(skill, "references/load-rules/AGENT_DELEGATION_RULES.md", "SKILL delegation rules reference");
 
   mustContain(core, "Step 1: Workspace Status Report", "workflow core startup");
+  mustContain(core, "Entry bifurcation", "workflow core entry bifurcation");
   mustContain(core, "Gate 4a: user approval required", "workflow core gate 4a");
   mustContain(core, "Gate 4b: user approval required", "workflow core gate 4b");
+  mustContain(core, "Gate O4: user approval required", "workflow core gate o4");
   mustContain(core, "Stage 1: Requirements structuring + module decomposition", "workflow core stage 1");
   mustContain(core, "Stage 7: Deployment and go-live", "workflow core stage 7");
   mustContain(core, "global MCP cache exists", "workflow core global cache fallback");
@@ -188,6 +190,7 @@ function main() {
   mustContain(core, "project core, current working files, or history-review artifacts", "workflow core doc classification");
   mustContain(core, "Step 5e review includes browser-accessible pages or interactions", "workflow core step 5e browser verification");
   mustContain(core, "Stage 6 review includes browser-accessible integrated scope", "workflow core stage 6 browser verification");
+  mustContain(core, ".acode-kit-onboarding/", "workflow core onboarding staging");
 
   mustContain(startup, "Gate 3.5: LMS tier analysis and confirmation", "startup gate 3.5");
   mustContain(startup, ".acode-kit-startup/PROJECT_SKELETON.approved.md", "startup staged skeleton");
@@ -210,6 +213,7 @@ function main() {
   mustContain(moduleIteration, "`PROJECT_ACCESS_INFO.md`", "module iteration access info rule");
   mustContain(moduleIteration, "Step 5e must call Chrome DevTools MCP for real-browser verification", "module iteration step 5e browser verification");
   mustContain(loadingRules, "Do not bulk-read all workflows or all standards on entry.", "loading rules no bulk read");
+  mustContain(loadingRules, "EXISTING_PROJECT_ONBOARDING_RULES.md", "loading rules onboarding hook");
   mustContain(taskMap, "startup / project skeleton", "task map startup mapping");
   mustContain(delegation, "final gate decisions", "delegation final gate restriction");
 
@@ -227,12 +231,16 @@ function main() {
   mustContain(claude, "Ask them to review the files directly.", "claude file review prompt");
   mustContain(claude, "Step 5e must call Chrome DevTools MCP for real-browser verification", "claude step 5e browser verification");
   mustContain(claude, "Stage 6 must call Chrome DevTools MCP for real-browser verification", "claude stage 6 browser verification");
+  mustContain(claude, "EXISTING-PROJECT ONBOARDING MODE", "claude onboarding mode");
+  mustContain(claude, "Step 2 (greenfield) or O1 (existing-project onboarding)", "claude gate 1 bifurcation");
 
-  mustContain(codex, "Gate 1 -> Step 2 only", "codex gate 1 mapping");
+  mustContain(codex, "Gate 1 -> Step 2 only for greenfield mode", "codex gate 1 mapping");
+  mustContain(codex, "Gate 1 -> O1 only for existing-project onboarding mode", "codex gate 1 onboarding mapping");
   mustContain(codex, "Gate 3 -> Gate 3.5 only", "codex gate 3 mapping");
   mustContain(codex, "Gate 3.5 -> Step 4a only", "codex gate 3.5 mapping");
   mustContain(codex, "Gate 4a -> Step 4b only", "codex gate 4a mapping");
   mustContain(codex, "Gate 4b -> Stage 1 only", "codex gate 4b mapping");
+  mustContain(codex, "Gate O4 -> Stage 1 only", "codex gate o4 mapping");
   mustContain(codex, "There is no external `CALLER:` layer.", "codex direct interaction");
   mustContain(codex, "wait for the next user message", "codex wait behavior");
   mustContain(codex, "global MCP cache", "codex global cache fallback");
@@ -242,6 +250,7 @@ function main() {
   mustContain(codex, "do not paste the full skeleton, PRD, progress plan, or stack input package into the reply", "codex startup path-only review");
   mustContain(codex, "Step 5e must call Chrome DevTools MCP for real-browser verification", "codex step 5e browser verification");
   mustContain(codex, "Stage 6 must call Chrome DevTools MCP for real-browser verification", "codex stage 6 browser verification");
+  mustContain(codex, "load `workflows/existing-project-onboarding.md`", "codex onboarding workflow reference");
 
   mustContain(codexRun, "`acode-run` is internal and not user-facing.", "codex run contract");
   mustContain(codexRun, "Fallback order stays `error -> timeout -> quality_low -> budget_exceeded`.", "codex run fallback");
@@ -324,6 +333,7 @@ function main() {
   mustContain(read(path.join(repoRoot, "Acode-kit", "references", "global-engineering-standards", "30_DEVELOPMENT_DOCUMENTATION_GOVERNANCE_SPEC.md")), "每次 gate、stage、模块 step", "doc governance update cadence");
   mustContain(read(path.join(repoRoot, "Acode-kit", "references", "global-engineering-standards", "30_DEVELOPMENT_DOCUMENTATION_GOVERNANCE_SPEC.md")), "项目核心", "doc governance project core");
   mustContain(read(path.join(repoRoot, "Acode-kit", "references", "global-engineering-standards", "30_DEVELOPMENT_DOCUMENTATION_GOVERNANCE_SPEC.md")), "历史审阅", "doc governance review history");
+  mustContain(read(path.join(repoRoot, "Acode-kit", "references", "global-engineering-standards", "30_DEVELOPMENT_DOCUMENTATION_GOVERNANCE_SPEC.md")), ".acode-kit-onboarding/", "doc governance onboarding staging");
 
   simulateWorkflow();
   console.log("workflow simulation passed");

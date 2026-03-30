@@ -45,12 +45,14 @@ function assertSequential(numbers, expectedStart, expectedEnd, label) {
 function validateClaudeRules(claude) {
   const section = extractNumberedSection(claude, "## CRITICAL EXECUTION RULES");
   const numbers = extractNumberedItems(section);
-  assertSequential(numbers, 0, 9, "Claude critical execution rules numbering");
+  assertSequential(numbers, 0, 10, "Claude critical execution rules numbering");
 }
 
 function validateMandatoryMcpAndVersionLock(core, claude, skill, loadingRules, extensionLoadingRules, overridesTemplate, projectOverviewTemplate, prdTemplate, traceabilityTemplate, decisionLogTemplate, agentsTemplate, stackInputsTemplate, directoryPlanTemplate, directorySynthesisRules, executionFlowSpec) {
   mustContain(core, "Gate 3.5: LMS tier analysis and confirmation", "workflow core gate 3.5");
   mustContain(core, "NotebookLM authentication exception at Gate 1", "workflow core notebook auth exception");
+  mustContain(core, "Entry bifurcation", "workflow core entry bifurcation");
+  mustContain(core, "existing-project onboarding lane", "workflow core onboarding lane");
   mustContain(core, "Do not use Pencil or other design tooling outside Stage 2 and Step 5b", "workflow core pencil boundary");
   mustContain(core, "Step 4a / Step 4b / Stage 4 separation", "workflow core step/stage separation");
   mustContain(core, "Step 4a must materialize the approved Step 2 and Step 3 artifacts into formal project docs", "workflow core step 4a materialization");
@@ -64,6 +66,8 @@ function validateMandatoryMcpAndVersionLock(core, claude, skill, loadingRules, e
   mustContain(core, "project core, current working files, or history-review artifacts", "workflow core doc classification");
   mustContain(core, "Step 5e review includes browser-accessible pages or interactions", "workflow core step 5e browser verification");
   mustContain(core, "Stage 6 review includes browser-accessible integrated scope", "workflow core stage 6 browser verification");
+  mustContain(core, ".acode-kit-onboarding/", "workflow core onboarding staging");
+  mustContain(core, "Do not route existing projects through greenfield Step 2", "workflow core onboarding protection");
 
   mustContain(claude, "After Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4a (directory materialization, NOT environment setup) → Gate 4a → Step 4b (environment setup, NOT design).", "claude gate 3.5 boundary");
   mustContain(claude, "Design tools are ONLY used at Stage 2 (overall UI architecture) and Step 5b (module UI detail design)", "claude pencil boundary");
@@ -74,6 +78,8 @@ function validateMandatoryMcpAndVersionLock(core, claude, skill, loadingRules, e
   mustContain(claude, "Ask them to review the files directly.", "claude startup file review prompt");
   mustContain(claude, "Step 5e must call Chrome DevTools MCP for real-browser verification", "claude step 5e browser verification");
   mustContain(claude, "Stage 6 must call Chrome DevTools MCP for real-browser verification", "claude stage 6 browser verification");
+  mustContain(claude, "existing-project onboarding", "claude onboarding branch");
+  mustContain(claude, ".acode-kit-onboarding/", "claude onboarding staging");
 
   mustContain(skill, "`Step 4a` and `Step 4b` are not `Stage 4`", "SKILL step/stage separation");
   mustContain(skill, "Pencil/design tools only at Stage 2 and Step 5b", "SKILL pencil boundary");
@@ -84,6 +90,7 @@ function validateMandatoryMcpAndVersionLock(core, claude, skill, loadingRules, e
 
   mustContain(loadingRules, "do not let LMS tier downshift remove required document materialization or node review outputs", "loading rules lms floor");
   mustContain(loadingRules, "DIRECTORY_BLUEPRINT_SYNTHESIS_RULES.md", "loading rules directory synthesis hook");
+  mustContain(loadingRules, "EXISTING_PROJECT_ONBOARDING_RULES.md", "loading rules onboarding rule hook");
   mustContain(extensionLoadingRules, "tell the user which extension was used, what it contributed, and why it matters at this node", "extension loading disclosure");
 
   mustContain(overridesTemplate, "MCP 使用约束", "overrides template mcp field");

@@ -136,6 +136,7 @@
    - `STACK_AND_DIRECTORY_INPUTS.approved.md`
 4. Gate 审批通过后，应更新对应启动期文件的状态与版本，而不是另起一份无关联文件。
 5. `Step 4a` 创建正式目录时，只允许移动、重命名、补元信息、建立索引引用；不得凭记忆重写正文。
+6. 存量项目接入时，所有 onboarding 产物必须先写入 `.acode-kit-onboarding/`，再由 `O4` 归位为正式项目文档。
 
 ## 3.1 文档分层与归档规则
 1. 项目级文档应至少分为：
@@ -193,6 +194,7 @@
 6. 在 `Step 4a`，AI 必须先确认已批准技术栈，再输出 `DIRECTORY_PLAN.md`，完成目录分析、目录创建和启动文件归位。
 7. 在 `Step 4a`，AI 还必须创建本节点拥有的治理文件与分类目录，例如 `AGENTS.md`、`DEVELOPMENT_DOCUMENTATION_INDEX.md`、`docs/dev/current/`、`docs/archive/reviews/`。
 8. 在 `Step 4b`，AI 才能在当前目录中开始初始化依赖、环境与工程骨架；不得回头重写已归位的项目级控制文档。
+9. 在 existing-project onboarding lane 中，O1-O3 只能更新 `.acode-kit-onboarding/` 下的文件；只有 O4 才能将其归位为正式项目文档。
 
 ## 7. 验收标准
 当项目进入联调、提测、上线准备阶段时，应满足：

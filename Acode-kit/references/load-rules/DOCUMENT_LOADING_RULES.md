@@ -14,6 +14,16 @@ Main agent reads in this order only:
 8. current project control docs
 9. startup-staged `.acode-kit-startup/*.md` artifacts when the workflow is still before or inside `Step 4a`
 10. `references/load-rules/DIRECTORY_BLUEPRINT_SYNTHESIS_RULES.md` only when entering `Step 4a` directory planning
+11. onboarding-staged `.acode-kit-onboarding/*.md` artifacts when the workflow is inside `O1` to `O4`
+12. `references/load-rules/EXISTING_PROJECT_ONBOARDING_RULES.md` only when the project has been identified as an existing-project onboarding case
+
+For existing-project onboarding O1 specifically, prioritize these project-local continuity docs before broad module scans when they exist:
+
+1. `AGENTS.md`
+2. `SESSION_HANDOFF.md`
+3. `TASK_LOG.md`
+4. `NEXT_STEPS.md`
+5. existing architecture / overview / review summary docs
 
 ## Extension loading
 
@@ -46,6 +56,11 @@ When an extension is loaded:
 11. do not improvise project directory structure when active stack/scenario fragments already cover the current project
 12. do not use fallback project blueprints as the primary source when active stack or scenario fragments are available
 13. do not let `Step 4b` start before `Step 4a` directory plan synthesis and file relocation are approved
+14. do not let existing-project onboarding enter Stage 1 before Gate O4 is approved
+15. do not bulk-read multiple major modules during O1 if the project can still be understood through repository-shell analysis
+16. do not skip prior continuity-doc reading in O1 when `AGENTS.md`, `SESSION_HANDOFF.md`, `TASK_LOG.md`, `NEXT_STEPS.md`, or equivalent review-summary docs already exist
+17. do not assume browser/web validation scope before the real project platform is identified
+18. do not silently promote detail pages, profile entries, or other subpages into top-level core modules without explicit confirmation
 
 ## Stability criteria
 
@@ -57,3 +72,5 @@ When an extension is loaded:
 6. startup nodes must know the stable staged filename or formal destination filename for every artifact they create or update
 7. `Step 4a` must know which active stack or scenario fragments supplied each major directory branch
 8. `Step 4b` must know which approved stack inputs and declared standards govern dependency and scaffold setup
+9. onboarding nodes must know which onboarding-staged files are authoritative before they ask for user review
+10. onboarding nodes must know whether prior continuity docs were consumed and whether any page-to-module ownership still needs user confirmation

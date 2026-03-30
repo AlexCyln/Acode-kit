@@ -313,7 +313,8 @@ else
 fi
 
 echo ""
-echo "Restart your target AI agent after installation."
+echo "Install complete."
+echo "Restart your AI tool after installation."
 if [[ "$SCOPE" == "user" ]]; then
   echo "A CLI launcher was installed to $COMMAND_BIN_DIR."
   if [[ -n "$PATH_CONFIG_FILE" ]]; then
@@ -329,16 +330,21 @@ else
   echo "Run it directly or add that directory to PATH for this project."
 fi
 echo ""
-echo "Quick CLI flags after install:"
+echo "Next commands:"
 echo "  acode-kit -status"
+echo "  acode-kit -help"
 echo "  acode-kit -add <path>"
 echo "  acode-kit -scan <path>"
 echo "  acode-kit -remove <name>"
-echo "  acode-kit -help"
+echo ""
+echo "Recommended order:"
+echo "  1. Check status"
+echo "  2. Start your AI in the project directory"
+echo "  3. Tell it to use Acode-kit"
 echo ""
 if [[ "$SKIP_INIT" == "true" ]]; then
-  echo "To complete first-time setup and populate the global cache, run this in your terminal:"
+  echo "Initialization was skipped. Run this to finish setup:"
   echo "  node $LAST_BUNDLE_DIR/scripts/acode-kit-init.mjs"
 else
-  echo "Initialization finished and the global cache was synced for the user environment."
+  echo "Initialization finished."
 fi

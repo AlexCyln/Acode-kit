@@ -1,6 +1,6 @@
 ---
 name: acode-kit
-description: "FIRST ACTION: Read .acode-kit-initialized.json — do NOT call Pencil, design tools, or get_editor_state() first. Gate-driven workflow: Steps 1→2→3→3.5→4a→4b, each a SEPARATE invocation with user approval gate. After Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4a (directory materialization, NOT environment setup) → Gate 4a → Step 4b (environment setup, NOT design). After Gate 4b → Stages 1→2→...→7. CALLER: present gate output to user, WAIT for reply, resume with NEXT step only. Do NOT combine steps, skip to design, or send 'design and build' after Gate 3."
+description: "FIRST ACTION: Read .acode-kit-initialized.json — do NOT call Pencil, design tools, or get_editor_state() first. Gate-driven workflow supports two protected entry lanes: greenfield Steps 1→2→3→3.5→4a→4b, and existing-project onboarding O1→O2→O3→O4 after Gate 1 confirms the project type. After Gate 4b or Gate O4 → Stages 1→2→...→7. CALLER: present gate output to user, WAIT for reply, resume with NEXT step only."
 ---
 
 ## ⚠️ YOUR FIRST TOOL CALL — READ THIS BEFORE DOING ANYTHING
@@ -32,7 +32,8 @@ You run as a sub-agent. Each STEP is a **separate invocation**:
 2. Output the gate result.
 3. End your output with the `⛔ USER DECISION REQUIRED` block (template below).
 4. **TERMINATE** — stop all tool calls, stop generating text. Your invocation is done.
-5. **DO NOT combine steps.** Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4a (directory materialization ONLY) → Gate 4a → Step 4b (environment setup ONLY). Gate 4b → Stage 1 (requirements structuring). Design (Stage 2) is never the immediate next step after any gate.
+5. **DO NOT combine steps.** Greenfield lane: Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4a (directory materialization ONLY) → Gate 4a → Step 4b (environment setup ONLY). Existing-project lane: Gate O1 → O2 → Gate O2 → O3 → Gate O3 → O4. Gate 4b or Gate O4 → Stage 1 (requirements structuring). Design (Stage 2) is never the immediate next step after any gate.
+   For greenfield compatibility, keep this invariant sequence unchanged: After Gate 3 → Gate 3.5 (LMS tier confirmation) → Step 4a (directory materialization, NOT environment setup) → Gate 4a → Step 4b (environment setup, NOT design).
 
 The parent agent will show your output to the user, collect their reply, and **resume** you for the NEXT step only — not multiple steps combined.
 
@@ -64,6 +65,7 @@ CALLER: Present the FULL content above to the user. WAIT for their explicit repl
    - Requests changes → incorporate changes, re-present the current gate's output, and ask for approval again.
    - Requests to skip a gate or jump ahead (e.g., "skip PRD", "just code", "go to Pencil", "跳过", "直接设计", "直接写代码", "直接开始设计") → **REFUSE**. Explain that all 4 gates are mandatory and cannot be skipped. Re-ask for approval of the current gate.
    - Requests conflicting changes (e.g., "use React" when skeleton said Vue) → revise the current deliverable to reflect the change, re-present for approval. Do NOT proceed with unresolved conflicts.
+10. **EXISTING PROJECT BRANCH PROTECTION.** If Step 1 confirms the workspace is an existing project and the user agrees to onboarding, do NOT enter greenfield Step 2, Step 3, Step 4a, or Step 4b. Load `workflows/existing-project-onboarding.md` and execute O1→O4 instead.
 
 ## BROWSER VERIFICATION BOUNDARY
 
@@ -91,23 +93,48 @@ After Gate 4b, for browser-accessible UI scope:
    - Acode-kit bundle path
    - If NotebookLM is installed but unauthenticated: tell the user they can authenticate now by entering the exact text `Log me in to NotebookLM`
 
-6. End your output with:
+6. In the status report, explicitly state whether the workspace appears to be:
+   - a greenfield project, or
+   - an existing-project onboarding candidate
+
+7. End your output with:
 ```
 ---
 ⛔ USER DECISION REQUIRED
 1. Is the workspace status correct?
 2. Are all MCP tools properly configured?
 3. Is NotebookLM authenticated? (required for requirements deepening)
-4. Any adjustments needed before I proceed to requirements analysis?
+4. Is this a greenfield project or an existing project that should enter onboarding?
+5. Any adjustments needed before I proceed?
 
 If the user chooses NotebookLM authentication and their reply is exactly `Log me in to NotebookLM`, do NOT reinterpret it as gate approval. CALLER must pass that exact input through to the top-level agent unchanged so the agent can handle NotebookLM login directly. After login handling, resume from the workspace status step.
 
 CALLER: Present the FULL status report above to the user. WAIT for their explicit reply. Do NOT auto-approve, summarize-and-continue, or resume without the user's actual response.
-NEXT STEP: Step 2 (Requirements Analysis + Project Skeleton). Resume with Step 2 ONLY.
+NEXT STEP: Step 2 (greenfield) or O1 (existing-project onboarding), depending on the confirmed project type. Resume with one lane only.
 ---
 ```
 
 **>>> GATE 1: After outputting the status report and the ⛔ block, TERMINATE. Do NOT call any more tools. Do NOT generate any more text. Your invocation is COMPLETE. <<<**
+
+---
+
+## EXISTING-PROJECT ONBOARDING MODE
+
+If Gate 1 confirms the workspace is an existing project and the user wants Acode-kit takeover:
+
+1. load `workflows/existing-project-onboarding.md`
+2. if project-local continuity docs such as `AGENTS.md`, `SESSION_HANDOFF.md`, `TASK_LOG.md`, or `NEXT_STEPS.md` exist, read them with high priority during O1 before broader module analysis
+3. determine the real project platform early; do not assume browser/web scope for native or non-web projects
+4. execute O1 -> Gate O1 -> O2 -> Gate O2 -> O3 -> Gate O3 -> O4 -> Gate O4
+5. keep O1-O3 file-first under `.acode-kit-onboarding/`
+6. do not enter greenfield Step 2, Step 3, Step 4a, or Step 4b
+7. only after Gate O4 approval may the project enter Stage 1
+
+For existing-project onboarding responses:
+
+1. do not paste the full inventory, addendum, onboarding PRD, or gap assessment into the conversation
+2. report execution status, exact file paths, confidence limits, unresolved questions, and review focus only
+3. ask the user to review the files directly before approving the next onboarding gate
 
 ---
 

@@ -55,16 +55,15 @@ const FLAG_COMMANDS = {
 };
 
 function printUsage() {
-  console.log("Acode-kit — AI project delivery framework\n");
+  console.log("Acode-kit — structured project delivery for AI agents\n");
   console.log("Usage: acode-kit <command> [options]\n");
   console.log("Commands:");
   for (const [name, cmd] of Object.entries(COMMANDS)) {
     console.log(`  ${name.padEnd(10)} ${cmd.description}`);
   }
   console.log("\nExamples:");
-  console.log("  acode-kit init                          # First-time setup");
-  console.log("  acode-kit init --provider codex --yes    # Auto-approve installs");
-  console.log("  acode-kit bootstrap                     # One-command user-level install");
+  console.log("  acode-kit init                          # Initialize the current environment");
+  console.log("  acode-kit bootstrap                     # Install and initialize");
   console.log("  acode-kit scan --json                   # Check MCP tool status");
   console.log("  acode-kit run --project-id my-proj      # Route a task");
   console.log("  acode-kit extension-scan --manifest Acode-kit/extensions/packs/foo/manifest.json");
@@ -73,10 +72,10 @@ function printUsage() {
   console.log("  acode-kit extension-uninstall --id foo --project-extensions docs/project/PROJECT_EXTENSIONS.md --active-standards docs/project/ACTIVE_STANDARDS.md");
   console.log("");
   console.log("Quick flags:");
-  console.log("  acode-kit -status                       # Show agent basis, active projects, extensions, MCP status");
-  console.log("  acode-kit -add ./path/to/ext            # Detect, scan, and install a third-party extension");
-  console.log("  acode-kit -enable ext-name              # Activate an installed extension for the current project");
-  console.log("  acode-kit -disable ext-name             # Deactivate an installed extension for the current project");
+  console.log("  acode-kit -status                       # Show version, install basis, project scan, extensions, MCP status");
+  console.log("  acode-kit -add ./path/to/ext            # Scan and install a third-party extension");
+  console.log("  acode-kit -enable ext-name              # Enable an installed extension in the current project");
+  console.log("  acode-kit -disable ext-name             # Disable an installed extension in the current project");
   console.log("  acode-kit -scan ./path/to/ext           # Scan a third-party extension");
   console.log("  acode-kit -remove ext-name              # Remove an installed third-party extension");
   console.log("  acode-kit -help                         # Show help");

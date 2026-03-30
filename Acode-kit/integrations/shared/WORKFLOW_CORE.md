@@ -11,6 +11,16 @@ It exists to keep the workflow logic identical across providers. Claude and Code
 
 ## Invariant workflow graph
 
+### Entry bifurcation
+
+1. Step 1: Workspace Status Report + Project Type Identification
+2. Gate 1: user approval required
+
+After Gate 1, the runtime may enter exactly one of these lanes:
+
+1. greenfield startup lane
+2. existing-project onboarding lane
+
 ### Startup sequence
 
 1. Step 1: Workspace Status Report
@@ -24,6 +34,19 @@ It exists to keep the workflow logic identical across providers. Claude and Code
 9. Gate 4a: user approval required
 10. Step 4b: Environment + Engineering Scaffold Setup
 11. Gate 4b: user approval required
+
+### Existing-project onboarding sequence
+
+1. O1: Existing Project Inventory
+2. Gate O1: user approval required
+3. O2: User-Guided Business Completion
+4. Gate O2: user approval required
+5. O3: Onboarding Baseline Freeze
+6. Gate O3: user approval required
+7. O4: Framework Onboarding Materialization
+8. Gate O4: user approval required
+
+After Gate O4 is approved, the project may enter the shared stage-driven execution workflow at Stage 1.
 
 If the workspace status file is missing but the user-level global MCP cache exists, the runtime may use the global cache as the environment baseline so MCP tools and NotebookLM auth do not need to be reinstalled or re-authorized in every new session.
 
@@ -56,6 +79,8 @@ Within Stage 5, the module sequence is fixed:
 7. Do not continue past any gate or stage review without explicit user approval.
 8. Do not invoke `acode-run` during startup Steps 1-4b or Gates 1-4b.
 9. Do not use `acode-run` as a replacement for the public `Acode-kit` entry.
+10. Do not route existing projects through greenfield Step 2, Step 3, Step 4a, or Step 4b once the onboarding lane has been selected.
+11. Do not let an existing project enter Stage 1 before Gate O4 is approved.
 
 ## Draft artifact contract
 
@@ -72,6 +97,17 @@ Within Stage 5, the module sequence is fixed:
 11. Templates may add structure and metadata, but approved startup content remains the source of truth.
 12. If NotebookLM is installed and authenticated, Step 2 requirements analysis must use it as a strengthening input before the project skeleton is frozen.
 13. If NotebookLM is unavailable, unauthenticated, or fails, the runtime may fall back to direct analysis only after explicitly disclosing that degraded path.
+
+### Existing-project onboarding artifact contract
+
+1. O1, O2, and O3 must write their onboarding-staged files under `.acode-kit-onboarding/` before asking for approval.
+2. O4 is the only onboarding node allowed to materialize approved onboarding artifacts into formal project governance docs.
+3. Existing-project onboarding must analyze from easy to hard and from macro structure to focused detail.
+4. If prior continuity docs such as `AGENTS.md`, `SESSION_HANDOFF.md`, `TASK_LOG.md`, or `NEXT_STEPS.md` exist, O1 must read them with high priority before broad module scans and before asking the user to restate known project history.
+5. Existing-project onboarding must identify the real project platform before choosing downstream validation or implementation expectations.
+6. Existing-project onboarding must mark key conclusions as `confirmed`, `inferred`, or `pending-user-confirmation`.
+7. Existing-project onboarding must not silently turn inferred business conclusions into formal truth.
+8. Existing-project onboarding must not silently promote subpages, entries, dialogs, or route destinations into independent core modules without explicit user confirmation.
 
 ## User approval contract
 
@@ -90,6 +126,12 @@ Startup gate exception:
 3. Instead, report execution status, exact file paths, NotebookLM usage status, and the review focus so the user can inspect the files directly.
 
 The same approval rule applies to stage reviews and every Step 5a-5e review inside module iteration.
+
+Existing-project onboarding exception:
+
+1. For O1, O2, and O3, the review surface is the onboarding-staged files written under `.acode-kit-onboarding/`.
+2. For those gates, do not inline the full inventory, user addendum, onboarding PRD, or gap assessment into the conversation.
+3. Instead, report execution status, exact file paths, confidence limits, unresolved questions, and review focus so the user can inspect the files directly.
 
 ## Document update contract
 

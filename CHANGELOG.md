@@ -2,6 +2,13 @@
 
 只记录当前核心更新内容，按版本增量追加。
 
+## v3.0
+
+- 新增独立的 existing-project onboarding 路径：`O1 -> O2 -> O3 -> O4`，与 greenfield startup 分离，完成接管后再汇入 `Stage 1 -> 7`。
+- existing-project onboarding 强化了三项关键规则：优先读取已有 `AGENTS.md` / `SESSION_HANDOFF.md` / `TASK_LOG.md` / `NEXT_STEPS.md` 等连续性文档；先识别真实项目平台；未经确认不得把子页面、入口或详情页升格为独立核心模块。
+- README 重写为面向用户的精简版，对外统一说明双路径能力、安装方式、初始化流程、常用命令与扩展使用方式，删除历史内部调试和冗长实现说明。
+- 安装说明重新梳理，统一为“安装 -> 初始化 -> 状态检查 -> 常用命令”顺序；安装器与 CLI 帮助文案同步压缩并对齐。
+
 ## v2.3
 
 - 启动期文档治理进一步收紧：明确区分 `docs/project/` 项目核心、`docs/dev/current/` 当前文件、`docs/archive/reviews/` 历史审阅，并要求审阅完成后及时归档。
